@@ -84,22 +84,41 @@ full content glob (`pages`, `components`, `app`, `layouts`, `lib`, `src`):
 - **3 files trigger it**, all in `lib/`: `lib/diagnostics/store.ts`, `lib/reports/store.ts`, `lib/server/diagnostics/store.ts`
 - None are component/page files, so there is no known *live* class-truncation incident today — but the mechanism has no build-time warning, so any future file containing that exact substring silently loses Tailwind class extraction. Full empirical extractor investigation (§11: emission diff, sentinel-class comparison) is **Phase 3 scope**, deferred.
 
-## 6. Contrast baseline — this is the headline finding
+## 6. Contrast — full reference-surface audit + representative cross-route sample
 
-Full data: `contrast-baseline.csv`. Measured via real computed styles in a
+**Scope, stated precisely (do not read this section as an exhaustive
+8-route contrast audit — it is not one):**
+- **`/enterprise-decision-scan` got a full audit**: all 3 captured
+  viewports, every text/label/placeholder/input node on the page measured
+  via computed styles.
+- **The other 7 reference routes got a representative sample only**: one
+  viewport (desktop), the 5 worst-contrast nodes per route via automated
+  scan, confirmed against a screenshot. This is sufficient to establish
+  that the defect pattern is systemic (brief's own framing — not
+  page-specific), but it is **not** a claim that every node on those 7
+  routes has been measured. A full per-route audit matching the reference
+  surface's depth is Phase 2 (`test:visual-contrast`) scope.
+
+Full data: `contrast-baseline.csv` (labelled per-row with which routes got
+the full pass vs the representative sample). Algorithm: `lib/visual/contrast.ts`,
+proven correct by 16 known-answer control tests in `lib/visual/contrast.test.ts`
+(see item 6 of the closure review) — measured via real computed styles in a
 running browser (not source-string estimation), with proper alpha
-compositing against the actual resolved background — see methodology note
-below, since the first pass of this measurement had a bug worth recording.
+compositing against the actual resolved background.
 
 **Methodology correction made during this pass:** the first contrast script
 computed luminance from `rgba(r,g,b,a)` while discarding `a` — i.e. treating
 `rgba(255,255,255,0.3)` as opaque white. That silently overstates every
 alpha-based colour's contrast and would have produced a false-clean
 baseline. Fixed to properly composite (`fg×a + bg×(1−a)`) before computing
-the WCAG ratio. **This bug is itself evidence for brief §6 Rule 2**: contrast
+the WCAG ratio, and now locked in by a regression test using this exact
+case. **This bug is itself evidence for brief §6 Rule 2**: contrast
 cannot be inferred from a source colour string; it must be measured post-composition.
 
-Sampled all 8 reference routes. Every one shows the same defect family:
+All 8 reference routes were visited and screenshotted (full inventory in
+`screenshot-baseline-index.md`); the defect pattern below is consistent
+across all 8 on visual inspection, even where only the reference surface
+got node-level measurement:
 
 - **`/enterprise-decision-scan` (full 3-viewport + node-level pass, the reference surface):**
   - Placeholder text: `rgba(255,255,255,0.2)` → composited `rgb(53,53,55)` on `rgb(3,3,5)` → **1.69:1** (needs 4.5:1) — the "nearly invisible placeholders" defect named explicitly in brief §16, now measured precisely.
@@ -133,6 +152,123 @@ Phase 0, and are intentionally not produced yet:
 steps 3–6), `tailwind-emission-diff.json` (same), `router-parity-report.json`
 (needs the actual fixture-mount comparison, §13.5), `surface-migration-register.json`
 (populated as migration proceeds, starting after the reference surface).
+
+## 9a. Phase 0 durability closure addendum
+
+An owner review of the first Phase 0 pass required a second pass before
+Phase 0 is considered final. This section records what that closure pass
+added, on top of (not replacing) sections 1-8 above.
+
+### Contrast engine — now tested
+
+```
+CONTRAST ENGINE:              lib/visual/contrast.ts (extracted, reusable)
+KNOWN-ANSWER TESTS:           16/16 passing
+ALPHA COMPOSITING REGRESSION: covered (locks in the exact bug found in the
+                               first pass — rgba(255,255,255,0.3) on
+                               rgb(3,3,5) must measure ~2.5:1, not ~20.6:1)
+PARENT x CHILD OPACITY CASE:  covered indirectly — the diagnostics hotfix
+                               (separate branch, fix/diagnostics-invisible-heading)
+                               is the real-world instance of this exact
+                               defect class; the contrast module's
+                               compositing function is what makes that
+                               measurement trustworthy
+BLACK/WHITE REFERENCE CONTROLS: covered (21:1 both directions, 1:1 identical
+                               colours, known mid-grey WCAG reference value)
+```
+
+The future visual contrast gate (Phase 2) will import this tested module
+rather than reimplementing the maths ad hoc, as the first Phase 0 pass's
+in-browser script did (and got wrong).
+
+### Token conflict matrix — third value source found
+
+The closure pass discovered a previously-missed **third** independent
+value source: `tailwind.config.cjs`'s `colors.aol.*` namespace hardcodes
+its own literal RGB values (e.g. `aol.void: rgb(3 3 5)`), matching neither
+`styles/globals.css` nor `app/globals.css`. It has **zero verified
+class-usage consumers** (`bg-aol-*`/`text-aol-*`/`border-aol-*` all return
+0 hits) — real, but dead. **Dead conflicts were catalogued, not removed,**
+in Phase 0 — removal is Phase 3 scope, gated on the alias-migration
+discipline (brief §10.1). See `token-conflict-matrix-full.md` for the
+complete 18-token matrix with Pages/App/Tailwind-literal/DS-relation/
+consumer-count/canonical-target columns.
+
+### Governance categorisation — two dimensions now, not one
+
+The first pass classified every file by directory location alone, which
+can't correctly categorise a shared component (`components/Button.tsx`
+might be reachable from a `PUBLIC_CUSTOMER` route, an `ADMIN` route, and a
+`CONTROLLED_CUSTOMER` route simultaneously). Two dimensions now exist:
+
+- **FILE OWNERSHIP CLASS** — for `pages/`/`app/` route files, the existing
+  route taxonomy (`ADMIN`, `INTERNAL_OPERATOR`, `PUBLIC_ACCOUNTABILITY`,
+  `CONTROLLED_CUSTOMER`, `PUBLIC_CUSTOMER`), reused verbatim from
+  `authority-boundary-gate.mjs`.
+- **REACHABILITY CLASS** — for `components/` files, computed by walking the
+  real transitive import graph from every route entrypoint (same
+  resolution logic as the authority gate): `SHARED_PUBLIC_REACHABLE`,
+  `SHARED_CONTROLLED_REACHABLE`, `ADMIN_ONLY`, `INTERNAL_ONLY`,
+  `UNREACHABLE`. See `component-reachability-register.json` (939 component
+  files walked from 462 route entrypoints: 170 `SHARED_PUBLIC_REACHABLE`,
+  81 `SHARED_CONTROLLED_REACHABLE`, 98 `ADMIN_ONLY`, 590 `UNREACHABLE` —
+  spot-checked a sample of the "unreachable" set via direct grep to rule
+  out an import-resolution bug; confirmed genuine orphaned code, consistent
+  with several other "built but never adopted" components found elsewhere
+  in this repo across the session).
+
+Combined baseline: `raw-colour-baseline-two-dimensional.json`,
+`type-floor-baseline-two-dimensional.json`. The actionable priority signal
+for Phase 2's `gate:visual-raw-colour`/`gate:visual-type-floor`: the truly
+public-facing surface is `PUBLIC_CUSTOMER` (route files) +
+`SHARED_PUBLIC_REACHABLE` (components) combined — 1,728 + 389 = 2,117 tiny-type
+violations across 152 files is the number that should drive strictest
+enforcement priority, separated cleanly from the `CONTROLLED_CUSTOMER`/
+`SHARED_CONTROLLED_REACHABLE` (behind-auth) and `ADMIN`/`ADMIN_ONLY`
+(internal-only) totals.
+
+### Screenshot corpus — now durable, disk-persisted
+
+See `screenshot-baseline-index.md` for the full stats (32 PNGs, 17.17 MB,
+single consistent SHA `b60bf4cbc...`, zero failed captures, storage policy
+established). The Playwright infrastructure used to capture it is **newly
+established this pass** — `playwright.config.ts` and all of `tests/e2e/*.ts`
+were found to be genuinely 0-byte files (a ~7-month-old scaffolding gap,
+confirmed via `git log --follow`, not a recent regression) — this is
+correctly described as new infrastructure, not "existing Playwright suite
+extended." That framing distinction matters and is preserved here
+deliberately.
+
+### Determinism — reconfirmed across the full, larger report set
+
+All 11 report-generating scripts (the original 3 plus the 3 new ones added
+this pass) proven deterministic via SHA256 hash comparison across two
+clean consecutive runs, timestamp fields excluded. See
+`determinism-report.md`. Screenshots are explicitly exempted from this
+standard (browser rendering isn't guaranteed byte-identical across
+captures even with animation/font controls) — the *generators* are held to
+the strict standard, the *captures* are not.
+
+### What does NOT count as "audits complete"
+
+`tailwind-extractor-audit.md`, `tailwind-emission-diff.json`, and
+`router-parity-report.json` remain genuinely deferred (NO DATA beyond a
+single confirmed sub-step each — see each file's own unmistakable status
+banner). **These three do not count toward any "audits complete" tally in
+this or any future summary of Phase 0.** They exist as placeholders
+because brief §19 names them as required programme deliverables, not
+because the underlying work has been done.
+
+### Full-project typecheck — now run, and required going forward
+
+The first pass's rationale ("no application code changed, typecheck not
+needed") stopped applying once this pass added real, non-test TypeScript
+(`lib/visual/contrast.ts`, `playwright.config.ts`,
+`tests/e2e/visual-authority-baseline.spec.ts`) to the branch. `pnpm typecheck`
+now run: **0 errors**. A full production build was evaluated and found
+optional — confirmed via `grep` that no `pages/`/`app/`/`components/` file
+imports `lib/visual/contrast.ts` (only its own test file does), so no
+application build path is affected by its existence yet.
 
 ## 9. Rollback
 

@@ -1,0 +1,48 @@
+{
+  "generatedAt": "2026-07-10T16:44:44.003Z",
+  "dimensions": "pages/app files: FILE OWNERSHIP CLASS (route taxonomy). components/ files: REACHABILITY CLASS (import-graph analysis, not directory location).",
+  "floorPx": 11,
+  "filesScanned": 2143,
+  "byCategory": {
+    "PUBLIC_CUSTOMER": {
+      "violations": 1728,
+      "files": 95
+    },
+    "CONTROLLED_CUSTOMER": {
+      "violations": 1573,
+      "files": 64
+    },
+    "ADMIN": {
+      "violations": 394,
+      "files": 34
+    },
+    "PAGES_NON_ROUTE": {
+      "violations": 5,
+      "files": 1
+    },
+    "PUBLIC_ACCOUNTABILITY": {
+      "violations": 2,
+      "files": 1
+    },
+    "APP_NON_ROUTE": {
+      "violations": 94,
+      "files": 4
+    },
+    "UNREACHABLE": {
+      "violations": 836,
+      "files": 99
+    },
+    "SHARED_PUBLIC_REACHABLE": {
+      "violations": 389,
+      "files": 57
+    },
+    "SHARED_CONTROLLED_REACHABLE": {
+      "violations": 627,
+      "files": 70
+    },
+    "ADMIN_ONLY": {
+      "violations": 37,
+      "files": 6
+    }
+  }
+}

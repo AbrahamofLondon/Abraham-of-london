@@ -1,0 +1,329 @@
+{
+  "generatedAt": "2026-07-10T16:06:52.612Z",
+  "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+  "routeCount": 8,
+  "viewportCount": 4,
+  "totalShots": 32,
+  "shots": [
+    {
+      "route": "/enterprise-decision-scan",
+      "viewport": "1440x900",
+      "file": "reports/visual/screenshots/enterprise-decision-scan__1440x900.png",
+      "capturedAt": "2026-07-10T16:05:12.173Z",
+      "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "fontsReady": true,
+      "animationsDisabled": true
+    },
+    {
+      "route": "/enterprise-decision-scan",
+      "viewport": "1024x768",
+      "file": "reports/visual/screenshots/enterprise-decision-scan__1024x768.png",
+      "capturedAt": "2026-07-10T16:05:15.344Z",
+      "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "fontsReady": true,
+      "animationsDisabled": true
+    },
+    {
+      "route": "/enterprise-decision-scan",
+      "viewport": "768x1024",
+      "file": "reports/visual/screenshots/enterprise-decision-scan__768x1024.png",
+      "capturedAt": "2026-07-10T16:05:18.084Z",
+      "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "fontsReady": true,
+      "animationsDisabled": true
+    },
+    {
+      "route": "/enterprise-decision-scan",
+      "viewport": "390x844",
+      "file": "reports/visual/screenshots/enterprise-decision-scan__390x844.png",
+      "capturedAt": "2026-07-10T16:05:20.741Z",
+      "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "fontsReady": true,
+      "animationsDisabled": true
+    },
+    {
+      "route": "/decision-centre",
+      "viewport": "1440x900",
+      "file": "reports/visual/screenshots/decision-centre__1440x900.png",
+      "capturedAt": "2026-07-10T16:05:26.511Z",
+      "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "fontsReady": true,
+      "animationsDisabled": true
+    },
+    {
+      "route": "/decision-centre",
+      "viewport": "1024x768",
+      "file": "reports/visual/screenshots/decision-centre__1024x768.png",
+      "capturedAt": "2026-07-10T16:05:30.605Z",
+      "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "fontsReady": true,
+      "animationsDisabled": true
+    },
+    {
+      "route": "/decision-centre",
+      "viewport": "768x1024",
+      "file": "reports/visual/screenshots/decision-centre__768x1024.png",
+      "capturedAt": "2026-07-10T16:05:33.526Z",
+      "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "fontsReady": true,
+      "animationsDisabled": true
+    },
+    {
+      "route": "/decision-centre",
+      "viewport": "390x844",
+      "file": "reports/visual/screenshots/decision-centre__390x844.png",
+      "capturedAt": "2026-07-10T16:05:36.092Z",
+      "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "fontsReady": true,
+      "animationsDisabled": true
+    },
+    {
+      "route": "/diagnostics",
+      "viewport": "1440x900",
+      "file": "reports/visual/screenshots/diagnostics__1440x900.png",
+      "capturedAt": "2026-07-10T16:05:39.442Z",
+      "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "fontsReady": true,
+      "animationsDisabled": true
+    },
+    {
+      "route": "/diagnostics",
+      "viewport": "1024x768",
+      "file": "reports/visual/screenshots/diagnostics__1024x768.png",
+      "capturedAt": "2026-07-10T16:05:42.242Z",
+      "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "fontsReady": true,
+      "animationsDisabled": true
+    },
+    {
+      "route": "/diagnostics",
+      "viewport": "768x1024",
+      "file": "reports/visual/screenshots/diagnostics__768x1024.png",
+      "capturedAt": "2026-07-10T16:05:44.749Z",
+      "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "fontsReady": true,
+      "animationsDisabled": true
+    },
+    {
+      "route": "/diagnostics",
+      "viewport": "390x844",
+      "file": "reports/visual/screenshots/diagnostics__390x844.png",
+      "capturedAt": "2026-07-10T16:05:47.109Z",
+      "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "fontsReady": true,
+      "animationsDisabled": true
+    },
+    {
+      "route": "/intelligence",
+      "viewport": "1440x900",
+      "file": "reports/visual/screenshots/intelligence__1440x900.png",
+      "capturedAt": "2026-07-10T16:05:51.058Z",
+      "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "fontsReady": true,
+      "animationsDisabled": true
+    },
+    {
+      "route": "/intelligence",
+      "viewport": "1024x768",
+      "file": "reports/visual/screenshots/intelligence__1024x768.png",
+      "capturedAt": "2026-07-10T16:05:54.625Z",
+      "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "fontsReady": true,
+      "animationsDisabled": true
+    },
+    {
+      "route": "/intelligence",
+      "viewport": "768x1024",
+      "file": "reports/visual/screenshots/intelligence__768x1024.png",
+      "capturedAt": "2026-07-10T16:05:57.817Z",
+      "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "fontsReady": true,
+      "animationsDisabled": true
+    },
+    {
+      "route": "/intelligence",
+      "viewport": "390x844",
+      "file": "reports/visual/screenshots/intelligence__390x844.png",
+      "capturedAt": "2026-07-10T16:06:00.649Z",
+      "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "fontsReady": true,
+      "animationsDisabled": true
+    },
+    {
+      "route": "/intelligence/gmi/q2-2026",
+      "viewport": "1440x900",
+      "file": "reports/visual/screenshots/intelligence_gmi_q2-2026__1440x900.png",
+      "capturedAt": "2026-07-10T16:06:04.848Z",
+      "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "fontsReady": true,
+      "animationsDisabled": true
+    },
+    {
+      "route": "/intelligence/gmi/q2-2026",
+      "viewport": "1024x768",
+      "file": "reports/visual/screenshots/intelligence_gmi_q2-2026__1024x768.png",
+      "capturedAt": "2026-07-10T16:06:07.580Z",
+      "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "fontsReady": true,
+      "animationsDisabled": true
+    },
+    {
+      "route": "/intelligence/gmi/q2-2026",
+      "viewport": "768x1024",
+      "file": "reports/visual/screenshots/intelligence_gmi_q2-2026__768x1024.png",
+      "capturedAt": "2026-07-10T16:06:10.208Z",
+      "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "fontsReady": true,
+      "animationsDisabled": true
+    },
+    {
+      "route": "/intelligence/gmi/q2-2026",
+      "viewport": "390x844",
+      "file": "reports/visual/screenshots/intelligence_gmi_q2-2026__390x844.png",
+      "capturedAt": "2026-07-10T16:06:12.582Z",
+      "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "fontsReady": true,
+      "animationsDisabled": true
+    },
+    {
+      "route": "/foundry/decision-test",
+      "viewport": "1440x900",
+      "file": "reports/visual/screenshots/foundry_decision-test__1440x900.png",
+      "capturedAt": "2026-07-10T16:06:16.952Z",
+      "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "fontsReady": true,
+      "animationsDisabled": true
+    },
+    {
+      "route": "/foundry/decision-test",
+      "viewport": "1024x768",
+      "file": "reports/visual/screenshots/foundry_decision-test__1024x768.png",
+      "capturedAt": "2026-07-10T16:06:20.495Z",
+      "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "fontsReady": true,
+      "animationsDisabled": true
+    },
+    {
+      "route": "/foundry/decision-test",
+      "viewport": "768x1024",
+      "file": "reports/visual/screenshots/foundry_decision-test__768x1024.png",
+      "capturedAt": "2026-07-10T16:06:23.737Z",
+      "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "fontsReady": true,
+      "animationsDisabled": true
+    },
+    {
+      "route": "/foundry/decision-test",
+      "viewport": "390x844",
+      "file": "reports/visual/screenshots/foundry_decision-test__390x844.png",
+      "capturedAt": "2026-07-10T16:06:26.505Z",
+      "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "fontsReady": true,
+      "animationsDisabled": true
+    },
+    {
+      "route": "/boardroom-brief",
+      "viewport": "1440x900",
+      "file": "reports/visual/screenshots/boardroom-brief__1440x900.png",
+      "capturedAt": "2026-07-10T16:06:31.876Z",
+      "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "fontsReady": true,
+      "animationsDisabled": true
+    },
+    {
+      "route": "/boardroom-brief",
+      "viewport": "1024x768",
+      "file": "reports/visual/screenshots/boardroom-brief__1024x768.png",
+      "capturedAt": "2026-07-10T16:06:35.060Z",
+      "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "fontsReady": true,
+      "animationsDisabled": true
+    },
+    {
+      "route": "/boardroom-brief",
+      "viewport": "768x1024",
+      "file": "reports/visual/screenshots/boardroom-brief__768x1024.png",
+      "capturedAt": "2026-07-10T16:06:37.754Z",
+      "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "fontsReady": true,
+      "animationsDisabled": true
+    },
+    {
+      "route": "/boardroom-brief",
+      "viewport": "390x844",
+      "file": "reports/visual/screenshots/boardroom-brief__390x844.png",
+      "capturedAt": "2026-07-10T16:06:40.553Z",
+      "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "fontsReady": true,
+      "animationsDisabled": true
+    },
+    {
+      "route": "/checkout/personal-decision-audit",
+      "viewport": "1440x900",
+      "file": "reports/visual/screenshots/checkout_personal-decision-audit__1440x900.png",
+      "capturedAt": "2026-07-10T16:06:44.433Z",
+      "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "fontsReady": true,
+      "animationsDisabled": true
+    },
+    {
+      "route": "/checkout/personal-decision-audit",
+      "viewport": "1024x768",
+      "file": "reports/visual/screenshots/checkout_personal-decision-audit__1024x768.png",
+      "capturedAt": "2026-07-10T16:06:47.118Z",
+      "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "fontsReady": true,
+      "animationsDisabled": true
+    },
+    {
+      "route": "/checkout/personal-decision-audit",
+      "viewport": "768x1024",
+      "file": "reports/visual/screenshots/checkout_personal-decision-audit__768x1024.png",
+      "capturedAt": "2026-07-10T16:06:50.011Z",
+      "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "fontsReady": true,
+      "animationsDisabled": true
+    },
+    {
+      "route": "/checkout/personal-decision-audit",
+      "viewport": "390x844",
+      "file": "reports/visual/screenshots/checkout_personal-decision-audit__390x844.png",
+      "capturedAt": "2026-07-10T16:06:52.485Z",
+      "sha": "b60bf4cbce2f0ba36c92f7793b33a6259e773907",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "fontsReady": true,
+      "animationsDisabled": true
+    }
+  ]
+}

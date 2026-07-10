@@ -1,0 +1,4543 @@
+{
+  "generatedAt": "2026-07-10T16:44:40.869Z",
+  "routeFilesWalked": 462,
+  "componentFilesTotal": 939,
+  "countsByReachabilityClass": {
+    "SHARED_PUBLIC_REACHABLE": 170,
+    "ADMIN_ONLY": 98,
+    "UNREACHABLE": 590,
+    "SHARED_CONTROLLED_REACHABLE": 81
+  },
+  "register": {
+    "components/AccessGate.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/admin/ActivityFeed.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/AdminActionButton.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/AdminActionCard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/AdminEmptyState.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/AdminErrorState.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/AdminFilterTabs.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/AdminLayout.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/AdminMetricCard.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/AdminNoticePanel.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/AdminPageHeader.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/AdminQueueCard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/AdminSearchInput.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/AdminStatusBadge.test.ts": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/AdminStatusBadge.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/AppAdminShell.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/AuditDashboard.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/BackToOperatorCommandCentre.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/campaigns/audit-invite.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/campaigns/campaign-actions.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/campaigns/participant-table.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/DeadLetterPanel.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/decision/ConditionalEfficacyPanel.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/decision/ContextualContextCard.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/decision/ContextualRankingPanel.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/decision/DecisionEfficacyPanel.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/decision/DecisionPerformanceTable.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/decision/GovernanceAlertsPanel.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/decision/KnowledgeGraph.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/decision/RankedAssetTable.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/decision/RebuildEfficacyButton.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/decision/RebuildPerformanceButton.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/decision/SecurityDashboard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/decision/SignalRegistryTable.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/DenylistManager.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/DiagnosticTelemetryPanel.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/EventPriceManager.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/GlobalLockStatus.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/GlobalLockToggle.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/governance/briefing-trigger.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/governance/correction-registry.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/governance/decision-filter.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/governance/sovereign-key-auth.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/IntakeFeed.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/KeyManagement.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/LiveTrafficMonitor.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/LockdownHistoryTable.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/NudgeButton.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/outbound/index.ts": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/outbound/OutboundAssetSelector.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/outbound/OutboundAttemptHistory.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/outbound/OutboundConnectionStatus.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/outbound/OutboundDraftPreview.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/outbound/OutboundFinalGate.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/outbound/OutboundLedgerTable.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/outbound/OutboundPermissionPanel.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/outbound/OutboundSyncTargets.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/ParticipantLiveView.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/PdfSyncDashboard.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/ProvenanceChainTimeline.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/reporting/briefing-pdf-template.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/reporting/ConstitutionalRecommendationPanel.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/reporting/contagion-map.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/reporting/DecisionAssetCard.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/reporting/dissonance-matrix.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/reporting/drill-down-matrix.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/reporting/fragility-heatmap.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/reporting/governance-history.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/reporting/institutional-library.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/reporting/intervention-copilot.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/reporting/intervention-proposal.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/reporting/intervention-scheduler.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/reporting/manager-drill-down.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/reporting/quality-audit-card.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/reporting/report-engine-client.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/reporting/ReportRecommendationsPanel.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/reporting/success-tracker-view.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/reporting/telemetry-switcher.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/reporting/value-recovery-audit.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/reporting/value-recovery-report.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/reports/ReportBuilderForm.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/reports/ReportQueueTable.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/SecurityDashboard.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/SecurityEventFeed.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/SecuritySummary.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/admin/ShortsAnalytics.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/admin/UpgradeTerminal.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/AdminLayout.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/AdminRevokeButton.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/alignment/AlignmentCTA.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/alignment/AsymmetricScaleForecast.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/alignment/DemographicContextCapture.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/alignment/DissonanceInterpretationGuide.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/alignment/DomainDeepDiveModule.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/alignment/EnterpriseAdvisoryCTA.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/alignment/EnterpriseDashboardContainer.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/alignment/EnterpriseDashboardController.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/alignment/EnterpriseIntelligenceDashboard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/alignment/ExecutiveSynthesisDashboard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/alignment/InterventionBlueprint.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/alignment/MarketCaptureDashboard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/alignment/OGRAuthorizationAccord.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/alignment/OGRCoherenceLock.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/alignment/OGRFutureHorizon.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/alignment/OGRHandoverDocument.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/alignment/OGRReadinessChecklist.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/alignment/OGRStrategicRoadmap.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/alignment/OGRWelcomeMemo.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/alignment/PastContractInterrupt.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/alignment/PatternBreakerContract.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/alignment/PatternObservatory.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/alignment/PurposeAlignmentAssessment.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/alignment/PurposeAlignmentFreeResultSurface.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/alignment/PurposeAlignmentPaidResultSurface.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/alignment/PurposeAlignmentRadarChart.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/alignment/PurposeAlignmentTrendChart.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/alignment/ResonanceFilter.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/alignment/SovereignDecisionEngine.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/alignment/SovereignPortfolioIndex.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/alignment/StatisticalConfidenceOverlay.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/alignment/VelocityVectorSimulation.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/analysis/ComparisonDelta.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/analysis/StrategicStressWorkbench.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/analytics/AnalyticsDashboard.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/analytics/ConversionIntelligenceTracker.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/analytics/distribution-chart.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/analytics/predicted-impact-dashboard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/analytics/volatility-heatmap.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/AnimatedCounter.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/AppShell.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Article.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ArticleHero.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/artifacts/GmiInstitutionalArtifactRecord.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/assessments/AssessmentSuiteLadder.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/assessments/ConstitutionalDiagnosticSuite.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/assessments/EnterpriseAssessmentSuite.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/assessments/TeamAssessmentSuite.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/audit/audit-form.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/AuditDashboard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/auth/login-view.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/auth/with-sovereign-auth.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/AuthorBio.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/authority/AuthorityBlock.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/authority/CanonicalEssayLayout.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Badge.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/blog/BlogCard.migrated.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/blog/BlogCard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/blog/BlogContent.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/blog/BlogFeatured.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/blog/BlogFooter.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/blog/BlogHeader.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/blog/BlogPostPreview.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/blog/BlogSafeWrapper.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/blog/BlogSidebar.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/blog/ClassicBlogReader.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/blog/HeroEyebrow.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/blog/RelatedPosts.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/blog/ResourceGrid.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/BlogPostCard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/BookCard.migrated.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/BookCard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/BookHero.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/books/BookCard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/books/BookContent.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/books/BookDetails.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/books/BookHero.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/books/BookListCard.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/books/BookReviews.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/books/PurchaseOptions.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/books/RelatedBooks.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/BrandFrame.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/branding/LogoTile.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/branding/LogoWall.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Breadcrumb.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/BriefAccessGuard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/BriefAlert.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/BriefContent.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/briefing/FragilityRadar.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/BriefRenderer.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/BriefsGrid.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Button.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Callout.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/canon/CanonCard.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/canon/CanonContent.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/canon/CanonHero.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/canon/CanonNavigation.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/canon/CanonReader.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/canon/CanonResourceCard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/canon/CanonStudyGuide.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/CanonCard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/CanonInvocation.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/CanonReference.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Cards/ArticleHero.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Cards/BaseCard.migrated.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Cards/BaseCard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Cards/BlogPostCard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Cards/BookCard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Cards/CanonPrimaryCard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Cards/CanonResourceCard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Cards/getCardPropsForDocument.ts": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Cards/index.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Cards/partials/index.ts": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Cards/partials/LinkItemWithBadge.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Cards/partials/LinkItemWithIcon.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Cards/StrategyCard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Cards/types.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Cards/utils.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Comments.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/CommentsSection.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/commercial/CheckoutButton.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER",
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/commercial/EvidenceBoundaryNotice.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/commercial/EvidenceLimitedOfferPage.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/commercial/ProductRecommendationCard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/common/OptimizedImage.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/constitution/ConstitutionalHealthStrip.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ContactForm.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/content/ArticleCoverImage.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/content/CardDisplay.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/content/ClientUnlockRenderer.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/content/ContentLayout.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/content/DirectorateOversight.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/content/DownloadCTA.client.jsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/content/DownloadCTA.jsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/content/DownloadCTA.no-scss.jsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/content/DownloadCTA.types.ts": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/content/FeatureGrid.jsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/content/index.js": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/content/NextStepCTA.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/content/ProTip.jsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ContentCard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ContentlayerDocPage.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ContentPageTemplate.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ContentPortal.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/contexts/ThemeContext.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ContextualSearch.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/counsel/CounselCaseTimeline.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/counsel/CounselMemorySummary.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/CTA.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/CtaArt.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/dashboard/admin/AdminJobsPanel.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/dashboard/admin/BillingEntitlementsPanel.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/dashboard/admin/BriefSearch.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/dashboard/admin/MyReportsPanel.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/dashboard/admin/SessionDebugger.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/dashboard/archive/ConnectionStatus.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/dashboard/archive/PdfAnalyticsWidget.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/dashboard/archive/StockPriceCard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/dashboard/archive/VaultAudit.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/dashboard/ChartContent.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/dashboard/DashboardDrilldownPanel.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/dashboard/DiagnosticLineagePanel.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/dashboard/GrowthChart.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/dashboard/index.ts": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/dashboard/LiveDataDashboard.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/dashboard/PDFDataDashboard.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/dashboard/PortfolioSummary.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/dashboard/types.ts": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/DashboardHeader.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/DashboardStats.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/DateFormatter.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/debug/FormulaInspector.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/debug/RouteChecker.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/decision/ConstitutionalNarrativeBlock.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/decision/UnifiedRecommendationCard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/decision/UnifiedRecommendationList.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/decision-centre/DecisionCentreLivingLayerPanel.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/decision-centre/DecisionCentreOrientation.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/decision-centre/LadderPathwayPanel.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/decision-centre/RetainerMemoryPreview.test.ts": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/decision-centre/RetainerMemoryPreview.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/decision-centre/RetainerOversightPreview.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/decision-centre/TwinSnapshotPanel.test.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/decision-centre/TwinSnapshotPanel.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/AnonymisedCaseProof.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/AssessmentResultSurface.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER",
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/diagnostics/BoardSummaryPreview.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/diagnostics/BuyerCTACluster.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/CommercialExposurePanel.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER",
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/diagnostics/ConstitutionalDiagnostic.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/diagnostics/CostOfDelaySection.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/diagnostics/DecisionChallengeCard.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER",
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/diagnostics/DiagnosticStatusPill.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/DiagnosticSummaryCard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/DualAxisInput.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/diagnostics/DualAxisPromptCard.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/diagnostics/ERPreview.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/ERUpgradePanel.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/ExecutiveBuyerFitSection.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/ExecutiveBuyerVariants.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/ExecutiveDemoScenarios.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/ExecutiveOfferLadder.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/ExecutivePricingGrid.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/ExecutiveReportingPaywall.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/diagnostics/ExecutiveReportSampleDownload.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/ExecutiveReportSamplePreview.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/GovernanceEvidenceBridge.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/diagnostics/InheritedSignalBanner.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/PricingLanguageStrip.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/ProgressIndicator.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/diagnostics/report/ReportHeader.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/report/ReportRecommendations.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/report/ReportSectionScores.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/report/ReportShell.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/report/ReportSummaryBlock.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/report/ReportVersionHistory.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/ResultEmailCapture.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER",
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/diagnostics/results/AITerrainExposure.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/diagnostics/results/BoardSnapshot.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/diagnostics/results/CompetitivePosition.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/diagnostics/results/DecisionGradeBlocks.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/results/DecisionTerrainStatus.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/diagnostics/results/DiagnosticFeedback.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/results/EngagementReadinessPanel.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/diagnostics/results/EvidenceChainSurface.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/results/ExecutiveDecisionAuthorityBlock.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/results/FreeLayerBoundary.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/diagnostics/results/InheritedThreadContext.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/diagnostics/results/LadderProgressionGate.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/diagnostics/results/LongitudinalIntelligence.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/diagnostics/results/MultiStakeholderDivergence.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/diagnostics/results/OutcomeVerification.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/diagnostics/results/PredictiveConsequence.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/diagnostics/results/ProductAdvantageBlocks.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/results/RecommendedPlaybooks.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/diagnostics/results/ResultAction.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/results/ResultCondition.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/results/ResultContradiction.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/results/ResultCost.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/results/ResultDecision.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/results/ResultDiagnostics.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/results/ResultEscalation.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/results/ResultInterruption.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/results/ResultTrajectory.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/results/SystemMemoryBlock.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/results/ThresholdProximityLine.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/diagnostics/results/TrajectoryLine.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/diagnostics/SalesObjectionGrid.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/SeriousBuyerGate.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/TrustFAQ.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagnostics/unified/CaseActiveBanner.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/diagnostics/unified/ConsequenceTimeline.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/diagnostics/unified/DirectiveCTA.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/diagnostics/unified/FeedbackLoop.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/diagnostics/unified/LimitationsBlock.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/diagnostics/unified/UnifiedResultSurface.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/diagrams/LegacyDiagram.jsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Divider.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/DownloadCard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/downloads/DownloadCard.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/downloads/DownloadContent.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/downloads/DownloadForm.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/downloads/DownloadHero.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/downloads/DownloadsGrid.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/downloads/DownloadTemplate.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/downloads/LegacyCanvasInteractive.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/downloads/RelatedDownloads.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/downloads/SurrenderAssetsLanding.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/downloads/TEMPLATE_FILENAME.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/downloads/THE-FILE-SLUG.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/editorial/PublicationCard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/editorial/SeriesBand.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/emails/TeaserEmail.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/EmailSignup.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/EmbossedBrandMark.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/EngagementLanes.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/enhanced/AnimatedGradientBackground.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/enhanced/AnimatedStatsBar.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/enhanced/BackToTop.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/enhanced/enhancedLayout.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/enhanced/ParticleBackground.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/enhanced/ReadingProgress.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/enhanced/ReadTime.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/enhanced/TableOfContents.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/enhanced/VenturesSection.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/EnhancedFooter.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/error/ErrorBoundary.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ErrorBoundary.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/essays/EssayCard.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/essays/EssaysHero.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/EventCard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/events/AddToCalendar.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/events/ChathamBadge.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/events/ChathamCallout.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/events/EventCard.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/events/EventContent.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/events/EventDetails.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/events/EventHero.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/events/EventMeta.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/events/EventPageHeader.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/events/EventRegistration.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/events/EventResources.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/events/EventSchedule.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/events/EventSpeakers.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/events/mdx-components.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/events/RelatedEvents.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/events/SafeComponentWrapper.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/events/ShareButtons.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/ExampleComponent.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/executive/ExecutiveSnapshotBlock.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/FeaturedBook.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/FeatureGrid.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/feedback/FeedbackWidget.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER",
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/FloatingTeaserCTA.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/FontErrorBoundary.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/FontLoader.js": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Footer.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/forms/DiagnosticConsultation.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/foundry/InterestForm.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/Frameworks/AuditLog.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Frameworks/DecisionMemo.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Frameworks/DossierAnnotation.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Frameworks/PreMortemWorkspace.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Frameworks/PrivateFrameworkView.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Frameworks/ProtectedFrameworkShell.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Frameworks/RiskMatrix.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Frameworks/TacticalTimeline.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/GeneratePDFButton.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/GlobalFootprint.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/GlossaryTerm.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/gmi/public/GmiEditionLandingPage.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/Grid.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Header.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/HeroEyebrow.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/HighQImage.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/AboutSection.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/BodyOfWorkBehindSystem.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/CanonInstitutionalIntro.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/CategoryFrontDoor.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/homepage/CinematicHero.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/ContentShowcase.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/CredibilityQuotes.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/CredibilityStrip.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/DecisionDelayExposureCTASection.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/DoctrineShowcase.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/EarnedProgressionBlock.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/EditorialIntelligenceBand.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/homepage/EngagementLanes.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/EventsSection.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/ExecutiveIntelligenceStrip.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/ExecutiveReportingFlagship.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/ExecutiveReportingSection.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/homepage/FoundryEntrySection.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/homepage/HeroBanner.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/HeroSection.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/HomepageFinalCTA.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/homepage/HomepageHero.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/homepage/homepagePrimitives.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/homepage/index.ts": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/InstitutionalClose.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/InstitutionalHero.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/InstitutionalSections.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/InstitutionalTrailer.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/MarketDefectBlock.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/homepage/MarketIntelligenceFeature.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/MemoryContinuityPreview.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/MilestonesTimeline.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/OGRFlagshipSection.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/OperatorBriefing.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/OperatorPilotBlock.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/homepage/OutputArtifactPreview.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/PlaybooksSection.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/ProfessionalContinuitySection.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/homepage/ProtocolInitiation.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/ProvenanceThesisSection.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/homepage/RefusalDemo.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/homepage/RetainedOversightSection.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/SectionCTAStrip.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/homepage/SectionDivider.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/ServiceLines.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/StartHereStrip.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/homepage/StatsBar.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/StrategicFunnelStrip.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/homepage/StrategyRoomSection.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/homepage/TestimonialsSection.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/TrustArchitectureBlock.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/homepage/TrustSignals.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/VaultTeaserRail.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/VenturesSection.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/VerificationSpineBlock.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/homepage/WhatYouCanUseTodaySection.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/icons/BrandLogo.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/icons/LockClosedIcon.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/icons/SocialIcons/BrandLogo.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/InlineCTA.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/inner-circle/ContentGrid.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/inner-circle/DashboardHeader.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/inner-circle/EmptyState.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/inner-circle/IntelligenceBriefsClient.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/inner-circle/QuickActions.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/inner-circle/StatsOverview.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/inner-circle/WorkspaceNav.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/InnerCircleBadge.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/institutional/index.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/instruments/BoardBriefBuilderRunner.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/instruments/DecisionExposureRunner.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/instruments/EscalationReadinessRunner.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/instruments/ExecutionRiskIndexRunner.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/instruments/GovernanceDriftDetectorRunner.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/instruments/InstrumentShell.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/instruments/InterventionPathRunner.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/instruments/MandateClarityRunner.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/instruments/StrategicPriorityStackRunner.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/instruments/StructuralFailureCanvasRunner.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/instruments/TeamAlignmentGapMapRunner.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/Intelligence/GmiEvidenceRoom.test.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Intelligence/GmiEvidenceRoom.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/Intelligence/GmiPriorCallScorecard.test.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Intelligence/GmiPriorCallScorecard.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/Intelligence/internal/DecisionTracePanel.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Intelligence/internal/DeterminismProof.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Intelligence/internal/index.ts": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Intelligence/internal/SpineRenderer.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Intelligence/MarketIntelligenceCatalogue.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Intelligence/MarketIntelligenceChronology.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Intelligence/operator/DiscoveryOverlay.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/Intelligence/operator/index.ts": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Intelligence/operator/KnowledgeGraph.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/Intelligence/public/ContradictionMapPreview.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/Intelligence/public/CrossAssessmentInsight.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/Intelligence/public/DecisionVelocityCard.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/Intelligence/public/index.ts": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Intelligence/public/WhatChangedPanel.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/Intelligence/user/ClientIntelligenceStack.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER",
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/Intelligence/user/index.ts": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/IntelligenceBrief.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/IntelligenceChain.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/InteractionErrorBoundary.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/InteractionPanel.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/InteractiveElements.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/IQPDF.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/JsonLd.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/kernel/FreeSignalResult.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/kernel/GovernedRefusalBlock.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/kernel/WhatSystemNoticedBlock.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/LaunchSubscribe.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/layout/BriefingReader.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/layout/CommandNavigation.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/layout/Footer.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/layout/Header.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/layout/Layout.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/layout/ProtocolFooter.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/layout/RegistryLayout.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/layout/Sidebar.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/layout/SurfaceLayout.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Layout.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/LegalStrip.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/lexicon/LexiconCard.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/lexicon/LexiconEntry.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/lexicon/LexiconGrid.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/library/LibraryGrid.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/living/DecisionAdvantageSummary.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/living/EvidenceStrengthMeter.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/living/GovernedActionPanel.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/living/HumanReviewPrompt.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/living/IntelligenceGainPanel.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/living/LivingLayerShell.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/living/LivingSpineProgress.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/living/LivingStateBlockerList.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/living/LivingStateEvidencePanel.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/living/LivingStateMemoryPanel.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/living/LivingStateNextActions.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/living/LivingStatePanel.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/living/NextLayerUnlockedPanel.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/living/OutcomeMemoryPreview.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/living/WhatChangedPanel.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/living/WhatTheSystemHeard.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/Loader.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/LoadingFallback.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/LoadingSpinner.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/LockScreen.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/logos.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/LogoTile.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/LogoWall.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/LuxuryAnimations.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/LuxuryNavbar.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/makeContentPage.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/MandateStatement.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/mdx/Badge.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/BadgeRow.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/Blockquote.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/mdx/BrandFrame.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/BriefAlert.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/BriefingHeader.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/mdx/BriefSummaryCard.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/Callout.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/Caption.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/ClientMDXRenderer.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/mdx/ClientOnlyMDXRenderer.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/CompiledMDXRenderer.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/component-resolver.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/mdx/cta-presets.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/CTA.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/CTAGroup.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/mdx/CTAPreset.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/CtaPresetComponent.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/ctas.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/DataGrid.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/mdx/DataTable.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/mdx/Diagram.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/mdx/Divider.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/DocumentFooter.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/mdx/DocumentHeader.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/mdx/DownloadCard.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/EmbossedBrandMark.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/FallbackComponent.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/mdx/Grid.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/HeroEyebrow.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/index.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/mdx/JsonLd.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/LexiconLink.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/Matrix.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/mdx/MDXComponents.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/MDXContentWrapper.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/mdx/MDXLayoutRenderer.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/mdx/MinimalMdxComponents.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/mdx/MissingComponent.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/Note.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/ProcessSteps.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/PullLine.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/PullQuote.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/Quote.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/registry.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/ResourcesCTA.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/Responsibility.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/ResponsibilityGrid.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/Rule.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/SafeMDXRenderer.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/SectionBreak.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/mdx/ServerMDXRenderer.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/mdx/ShareRow.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/shortcodes.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/mdx/Step.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx/TableOfContents.test.ts": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/mdx/TableOfContents.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/mdx/Verse.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/mdx-components.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/MdxComponents.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/MDXProviderWrapper.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/MDXRenderer.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/media/CoverFrame.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/MemberClearanceBanner.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/MembershipGate.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Navbar.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/navigation/SovereignHeader.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/navigation/SurfaceAwareNav.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Navigation.app.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Navigation.jsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/NewsletterForm.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/Note.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/NotFound.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ogr/ContagionMap.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ogr/live-terminal-client.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ogr/TerminalConstitutionSurface.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/onboarding/DecisionCentreChecklist.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/outcomes/OutcomeVerificationPanel.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/oversight/CrossScopePatternSummary.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/oversight/GovernedAutomationPosture.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/oversight/PortfolioMemorySummary.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/oversight/RetainedMemoryLossPanel.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/pdf/PdfForensics.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/pdf/PDFGeneratorUI.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/pdf/TelemetryReport.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/PDFActionsBar.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/PDFDashboard/Header.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/PDFDashboard/index.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/PDFDashboard/PDFActionsBar.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/PDFDashboard/PDFAnnotations.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/PDFDashboard/PDFComparisonView.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/PDFDashboard/PDFExportPanel.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/PDFDashboard/PDFQuickActions.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/PDFDashboard/PDFRecentActivity.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/PDFDashboard/PDFShareModal.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/PDFDashboard/PDFViewer.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/PDFDashboard/Sidebar.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/PDFDashboard/StatusMessage.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/PDFDashboard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/PDFFilters.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/PDFListPanel.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/PDFQuickActions.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/PDFViewerPanel.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/playbooks/PlaybookCard.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/playbooks/PlaybookContinuationPanel.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/playbooks/VaultGate.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/PolicyFooter.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER",
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/PortfolioGrowthChart.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/PortfolioTracker.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/PostHero.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/PostProse.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/premium/DownloadButton.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/premium/PremiumAssetCard.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/premium/PremiumAssetLaunchButton.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/primitives/CardShell.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/primitives/ContentMeta.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/primitives/EnhancedCardShell.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/primitives/ProgressBar.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/primitives/SmartCover.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/primitives/UnifiedCard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/print/BrandFrame.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/print/BriefCoverPage.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/print/BriefFooterBar.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/print/BriefHeaderBar.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/print/EmbossedBrandMark.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/print/EmbossedSign.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/print/ExecutiveSummaryPanel.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/print/ForensicMarkLayer.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/print/InstitutionalBriefDocument.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/print/KeyJudgementsPanel.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/print/renderBriefBody.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/print/SignatureBlock.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/product/AccessPostureBadge.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/product/AdmissionNotice.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/product/BenchmarkCaseBadge.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/product/BenchmarkContextPanel.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER",
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/product/BenchmarkMovementSignal.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/product/BenchmarkNarrativeBlock.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/product/BenchmarkTeamAlignmentPanel.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/product/CaseSharePanel.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/product/ChainOfCustodyTimeline.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/product/ConsequencePath.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/product/ContextualUpgradePrompt.test.ts": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/product/ContextualUpgradePrompt.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER",
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/product/ContinuityStatement.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/product/DataRightsPanel.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/product/DecisionOutcomeCapture.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/product/DeliveryFormatPanel.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/product/EfficacyCommandBlock.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/product/FirstEncounterProof.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/product/FreeTierUpgradeModal.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/product/NextAdmissibleMovePanel.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/product/OutcomeContributionPanel.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/product/ProductAuthorityBadge.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/product/ProductAuthorityNotice.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/product/ProductAuthorityPanel.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/product/ProductAuthorityWrapper.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/product/ProductEvidenceStatus.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/product/ProvenanceBadge.test.ts": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/product/ProvenanceBadge.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/product/ProvenanceSummaryPanel.test.ts": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/product/ProvenanceSummaryPanel.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/product/ResultPathwayPanel.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/product/RetainerCycleMemoryPanel.test.ts": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/product/RetainerCycleMemoryPanel.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/product/SaveCaseConversionPanel.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/product/SaveSessionCasePanel.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/product/StaleCaseAlert.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/product/SurfaceBoundaryPanel.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/product/TrialExpiredCaseSelection.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/product/UpgradePrompt.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/product/ValueProtectedSummary.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/product/ValueReceipt.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER",
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/product/VisibilityRetainedPanel.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/proof/ProofCapturePrompt.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/proof/PublicProofBlocks.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/providers/ThemeProvider.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/providers/Toaster.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/PullLine.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/pulse/pulse-terminal.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/QuickActionBar.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Quote.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/reader/ReaderBody.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/reader/ReaderFrame.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/reader/ReaderHeader.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/readers/CanonReader.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/readers/index.ts": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/readers/VaultReader.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ReadingProgress.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/registry/RegistryView.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/registry/SectorGrid.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/RegistrySearch.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/RegistrySidebar.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/RelatedContent.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/report/arrival/ArrivalScreen.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/reporting/boardroom/BoardroomModeSurface.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/reporting/boardroom/BriefingPDFTemplate.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/reporting/cards/DecisionAssetCard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/reporting/charts/ContagionMap.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/reporting/charts/DissonanceMatrix.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/reporting/charts/DrillDownMatrix.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/reporting/charts/FragilityHeatmap.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/reporting/charts/GovernanceHistory.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/reporting/panels/ReportRecommendationsPanel.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/reporting/pdf/ExecutiveBriefingPdfDocument.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/reporting/ReportEvidenceBoundaryNotice.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/reporting/sections/InterventionCopilot.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/reporting/sections/InterventionProposal.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/reporting/sections/ValueRecoveryAudit.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/reporting/sections/ValueRecoveryReport.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/reports/ClientReportList.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/reports/ClientReportRequestPanel.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/reports/SovereignReport.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/research/ActionBriefPreview.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/research/ComparisonDelta.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/research/DemoDisclaimer.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/research/EngineStatusCard.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/research/FindingsList.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/research/FormulaInspector.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/research/FoundryHealthPanel.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/research/FoundryModuleGrid.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/research/HumanReviewFlag.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/research/ModuleStatusBadge.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/research/ResearchRunCard.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/research/ResearchRunDetail.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/research/ResearchRunVault.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/research/RunStatusBadge.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/research/SeverityBadge.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/research/SimulationShell.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/research/TrashDayQueue.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/resources/RelatedResources.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/resources/ResourceActions.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/resources/ResourceCard.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/resources/ResourceContent.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/resources/ResourceDownload.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/resources/ResourceGrid.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/resources/ResourceHero.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/resources/ResourceMetadata.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ResourcesCTA.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/RouteHero.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/RouteProtection.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Rule.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/SafeBlock.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/SafeMDXRemote.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ScrollProgress.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/search/CommandPalette.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/SearchDiscovery.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/SearchPalette.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Section.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/sections/TeaserHero.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/seo/BookJsonLd.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/seo/EventJsonLd.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/SEOHead.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/SeoMeta.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ShareButtons.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ShareRow.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ShortCard.backup.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ShortCard.migrated.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ShortCard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/shorts/homepage-signals.ts": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/shorts/RelatedShorts.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/shorts/ShortActions.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/shorts/ShortComments.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/shorts/ShortContent.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/shorts/ShortHero.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/shorts/ShortMetadata.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/shorts/ShortNavigation.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/shorts/ShortsCard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/shorts/ShortShare.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/shorts/ShortsList.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/shorts/ShortsSignalRail.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/shorts/TodaysShort.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/site/InstitutionalNav.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/SiteLayout.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/SocialFollowStrip.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/SocialLinks.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/SomeComponent.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/sovereign/BenchmarkStrip.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/sovereign/BoardroomSignalExposure.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/sovereign/CohortIntelligencePanel.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/sovereign/ForensicAccountPanel.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/sovereign/InstitutionalMemoryPanel.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/sovereign/IntelligenceSignalCard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/sovereign/IntelligenceSignalPanel.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/sovereign/SovereignPositionSummary.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/StatusMessage.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/StickyCTA.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/strategy/BriefViewer.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/strategy-room/AdvantagePathBlock.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/strategy-room/AIInterventionSuggestions.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/strategy-room/ArtifactGrid.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/strategy-room/AvoidancePatternNotice.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/strategy-room/ConstitutionalFollowupPanel.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/strategy-room/ConstitutionalResultSurface.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/strategy-room/CounselStatusPanel.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/strategy-room/DecisionAssetCard.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/strategy-room/DecisionAssetLink.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/strategy-room/DecisionGuidancePanel.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/strategy-room/DecisionStateBanner.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/strategy-room/DecisionTimeline.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/strategy-room/DynamicConsequencePanel.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/strategy-room/EscalationTriggerPanel.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/strategy-room/ExecutionFlow.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/strategy-room/Form.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/strategy-room/GovernanceEvidenceCarryForward.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER",
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/strategy-room/RetainerEntryGate.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/strategy-room/ReturnBriefInterruptionBar.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/strategy-room/SignalPressurePanel.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/strategy-room/StrategyRoomConversionBridge.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/system/Block.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/system/Composition.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/system/Divider.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/system/Frame.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/TableOfContents.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Tabs.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/TeaserRequest.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/test-tailwind.jsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ThemeToggle.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/tools/SendToSelfForm.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER",
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/trust/ArbiterBadge.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/trust/DiagnosticStandardPanel.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/trust/EvidenceTierBadge.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/trust/FinancialExposureDisclosure.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/trust/GovernanceDisclosure.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER",
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/trust/LegalIdentityBlock.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/trust/PlainEnglishDecisionLayer.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/trust/SecurityAssuranceStatusStrip.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/trust/TrustInfoRow.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/trust/WorkedDecisionExample.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/ui/badge.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ui/Box.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ui/BrandAssets.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/ui/Button.tsx": {
+      "reachabilityClass": "SHARED_CONTROLLED_REACHABLE",
+      "reachedByRouteClasses": [
+        "CONTROLLED_CUSTOMER"
+      ]
+    },
+    "components/ui/card.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ui/ErrorBoundary.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/ui/InteractionPanel.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ui/InteractiveElement.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ui/LoadingOverlay.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ui/LoadingSpinner.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ui/LoadingState.tsx": {
+      "reachabilityClass": "ADMIN_ONLY",
+      "reachedByRouteClasses": [
+        "ADMIN"
+      ]
+    },
+    "components/ui/ogr-toast.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ui/progress.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ui/SectionHeading.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ui/SilentSurface.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ui/skeleton.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ui/toaster.jsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/ui/tooltip.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/vault/BriefDetail.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/vault/BriefsGrid.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/vault/VaultAccessGate.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/vault/VaultEntryCTA.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/vault/VaultItemCard.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/vault/VaultTierCard.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/vault/VaultValueStack.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/VaultActivityFeed.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/VaultGuard.tsx": {
+      "reachabilityClass": "SHARED_PUBLIC_REACHABLE",
+      "reachedByRouteClasses": [
+        "PUBLIC_CUSTOMER"
+      ]
+    },
+    "components/VaultSearchOverlay.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/VaultStats.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/Verse.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/WhoIWorkWith.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/_motion/MotionHeader.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    },
+    "components/_motion/MotionNav.tsx": {
+      "reachabilityClass": "UNREACHABLE",
+      "reachedByRouteClasses": []
+    }
+  }
+}

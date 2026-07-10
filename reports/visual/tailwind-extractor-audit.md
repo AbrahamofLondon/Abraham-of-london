@@ -1,4 +1,9 @@
-# Tailwind Extractor Audit — DEFERRED TO PHASE 3
+# Tailwind Extractor Audit
+
+> **STATUS: DEFERRED — NO DATA BEYOND STEP 1.**
+> This file is a placeholder, not a completed audit. Do not treat its
+> presence in `reports/visual/` as evidence the extractor investigation is
+> done. Steps 2-7 below are genuinely not started. Scheduled: Phase 3.
 
 Per brief §11, this file requires the full empirical investigation:
 1. Identify every file triggering the extractor exception — **done**, see `tailwind-extractor-trigger-inventory.json` (3 files, all `lib/` store modules, 0 component/page files).
