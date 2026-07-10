@@ -145,7 +145,7 @@ const result = {
   implementationReadyRecommendations: [
     "Put the pain, the decision action, and the evidence state in the first viewport of every product entry route.",
     "Replace abstract authority language on customer surfaces with visible evidence state, limitation, next evidence action, and blocked-claim state.",
-    "Wire the ProductAuthorityContract and evidence ledger into public product pages, result pages, checkout, and admin authority centre.",
+    "Project bounded customer-safe authority meaning onto public product surfaces via projectPublicProductAuthority. Keep the raw ProductAuthorityContract, evidence-ledger state, validation internals, and blocking reasons inside admin/internal boundaries only.",
     "Turn static market and boardroom surfaces into decision outputs with consequence, falsification trigger, and reuse value.",
     "Give every route a single next action that follows from the judgement state: test evidence, assign owner, escalate, reduce scope, or buy/submit.",
   ],

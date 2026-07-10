@@ -91,9 +91,9 @@ const result = {
     .filter((row) => row.flags.length > 0)
     .map((row) => `${row.journey}: ${row.flags.join(", ")}`),
   recommendations: [
-    "Make ProductAuthorityContract visible in route output for every product with a commercial or diagnostic claim.",
+    "Project bounded customer-safe authority meaning (via projectPublicProductAuthority) in route output for every product with a commercial or diagnostic claim. The raw ProductAuthorityContract stays admin/internal-operator only.",
     "Attach route-output capture to live journeys, not only benchmark scripts.",
-    "Connect public product pages to evidence-supported status so buyers see what is proven, blocked, or pending.",
+    "Give public product pages a bounded customer-safe posture (cleared, controlled, evidence-limited, reference, none) — never raw evidence-ledger state or validation internals.",
     "Ensure checkout success routes land in fulfilled artifacts or persisted case state with authority/evidence status.",
   ],
 };

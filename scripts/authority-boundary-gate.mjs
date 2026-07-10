@@ -146,6 +146,12 @@ function extractSpecifiers(src) {
   const staticRe = /import\s+[\s\S]*?\bfrom\s+["']([^"']+)["']/g;
   let m;
   while ((m = staticRe.exec(src)) !== null) specs.push(m[1]);
+  // Side-effect imports: import "./module";  (no `from` clause)
+  const sideEffectRe = /import\s*["']([^"']+)["']\s*;/g;
+  while ((m = sideEffectRe.exec(src)) !== null) specs.push(m[1]);
+  // Re-exports: export { x } from "./module";  and  export * from "./module";
+  const exportFromRe = /export\s+(?:\{[^}]*\}|\*(?:\s+as\s+[\w$]+)?)\s+from\s+["']([^"']+)["']/g;
+  while ((m = exportFromRe.exec(src)) !== null) specs.push(m[1]);
   const dynamicRe = /import\s*\(\s*["']([^"']+)["']\s*\)/g;
   while ((m = dynamicRe.exec(src)) !== null) specs.push(m[1]);
   const requireRe = /require\s*\(\s*["']([^"']+)["']\s*\)/g;
@@ -210,6 +216,20 @@ for (const rel of routeFiles) {
 
   const queue = [rel];
   const localVisited = new Set();
+  // predecessor[child] = parent — lets a violation report the actual graph
+  // path from the route entrypoint to the file that imports the forbidden
+  // module, instead of every node visited so far in BFS order.
+  const predecessor = new Map([[rel, null]]);
+
+  function reconstructChain(node) {
+    const path = [];
+    let cur = node;
+    while (cur) {
+      path.unshift(cur);
+      cur = predecessor.get(cur) ?? null;
+    }
+    return path;
+  }
 
   while (queue.length > 0) {
     const current = queue.shift();
@@ -236,7 +256,7 @@ for (const rel of routeFiles) {
       if (isForbidden) {
         violations.push({
           route: rel,
-          chain: [...localVisited].slice(1),
+          chain: reconstructChain(current).slice(1),
           importSpec: spec,
           matchedPattern: matchedPattern.source,
         });
@@ -244,7 +264,8 @@ for (const rel of routeFiles) {
       }
 
       const resolved = resolveSpec(spec, current);
-      if (resolved && !localVisited.has(resolved)) {
+      if (resolved && !predecessor.has(resolved)) {
+        predecessor.set(resolved, current);
         queue.push(resolved);
         totalImportsResolved++;
       }
