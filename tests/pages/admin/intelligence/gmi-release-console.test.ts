@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it } from "vitest";
 
 import { ADMIN_NAVIGATION } from "@/lib/admin/admin-navigation";
-import { buildGmiReleaseConsoleViewModel } from "@/pages/admin/intelligence/gmi-release-console";
+import { buildGmiReleaseConsoleViewModel } from "@/lib/intelligence/gmi-release-console-view-model.server";
 
 describe("GMI release console view model", () => {
   let model!: Awaited<ReturnType<typeof buildGmiReleaseConsoleViewModel>>;
