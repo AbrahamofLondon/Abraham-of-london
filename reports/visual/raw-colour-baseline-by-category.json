@@ -1,0 +1,46 @@
+{
+  "generatedAt": "2026-07-10T16:44:12.878Z",
+  "filesScanned": 2143,
+  "byCategory": {
+    "PUBLIC_CUSTOMER": {
+      "hex": 456,
+      "rgb": 2723,
+      "files": 145
+    },
+    "CONTROLLED_CUSTOMER": {
+      "hex": 231,
+      "rgb": 2424,
+      "files": 77
+    },
+    "ADMIN": {
+      "hex": 294,
+      "rgb": 516,
+      "files": 46
+    },
+    "PAGES_NON_ROUTE": {
+      "hex": 40,
+      "rgb": 34,
+      "files": 10
+    },
+    "PUBLIC_ACCOUNTABILITY": {
+      "hex": 5,
+      "rgb": 1,
+      "files": 1
+    },
+    "APP_NON_ROUTE": {
+      "hex": 141,
+      "rgb": 154,
+      "files": 33
+    },
+    "COMPONENT_SHARED": {
+      "hex": 1870,
+      "rgb": 3289,
+      "files": 411
+    },
+    "COMPONENT_CHART_DATAVIZ_CANDIDATE": {
+      "hex": 41,
+      "rgb": 36,
+      "files": 10
+    }
+  }
+}

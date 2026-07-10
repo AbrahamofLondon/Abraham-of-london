@@ -1,7 +1,8 @@
 {
-  "status": "PARTIAL — token-level conflicts known, fixture-mount comparison DEFERRED_TO_PHASE_2",
+  "STATUS": "PARTIAL",
+  "warning": "The fixtureMountComparison section below is NOT DATA — it is a plan. Only knownTokenConflicts is real, verified evidence. Do not treat this file's existence as proof router parity has been measured at the rendered-value level.",
   "knownTokenConflicts": {
-    "source": "token-conflict-register.json",
+    "source": "token-conflict-register.json + token-conflict-matrix-full.md (full analysed matrix with proposed canonical targets, added in Phase 0 closure review)",
     "crossFileConflictCount": 18,
     "note": "18 --aol-*/--font-* variables resolve to different values between styles/globals.css (Pages Router) and app/globals.css (App Router). This is necessary-but-not-sufficient evidence of parity failure — it proves the token SOURCE diverges; it does not yet prove which rendered semantic roles (background/foreground/panel/border/gold accent/focus ring/success/warning/danger) actually differ in practice under both routers, which is what gate:visual-router-parity (brief §13.5) must formally measure by mounting equivalent fixtures under both routers and comparing resolved computed values."
   },
