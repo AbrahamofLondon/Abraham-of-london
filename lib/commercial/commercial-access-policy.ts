@@ -131,9 +131,15 @@ function fulfilmentFromAccessType(accessType: string): FulfilmentMode {
   return "INTERACTIVE_ACCESS";
 }
 
+const TERMINAL_STATUSES: ReadonlySet<CommercialStatus> = new Set([
+  "dormant",
+  "inactive",
+  "retired",
+  "internal_only",
+]);
+
 function deriveFromCatalog(product: CatalogProduct): CommercialAccessPolicy {
   const a = acquisitionFromStatus(product.commercialStatus, product.accessType);
-  const override = EXPLICIT_OVERRIDES[product.code];
 
   const base: CommercialAccessPolicy = {
     productCode: product.code,
@@ -151,6 +157,14 @@ function deriveFromCatalog(product: CatalogProduct): CommercialAccessPolicy {
     source: "CATALOG_DERIVED",
   };
 
+  // ISSUE 1 — terminal commercial states DOMINATE explicit overrides. An inactive,
+  // retired, dormant or internal-only product must remain ARCHIVE_ONLY regardless
+  // of any override. Overrides may only refine still-live products.
+  if (product.commercialStatus && TERMINAL_STATUSES.has(product.commercialStatus)) {
+    return base;
+  }
+
+  const override = EXPLICIT_OVERRIDES[product.code];
   if (override) {
     return { ...base, ...override, productCode: product.code, source: "EXPLICIT_OVERRIDE" };
   }
@@ -241,26 +255,78 @@ export function resolveAllPolicies(): CommercialAccessPolicy[] {
 }
 
 /**
- * Validate that every sellable catalog/GMI product resolves a consistent policy.
+ * Validate that every catalog/GMI identity resolves a consistent policy.
+ * Enforces (issue 7): terminal-state precedence, acquisition/payment consistency,
+ * prerequisite requirements, and registry membership.
  */
 export function validatePolicies(): Array<{ productCode: string; error: string }> {
   const errors: Array<{ productCode: string; error: string }> = [];
-  const codes = new Set<string>([
-    ...Object.keys(CATALOG),
-    ...GMI_EDITION_REGISTRY.map((e) => e.productCode),
-  ]);
+  const push = (productCode: string, error: string) => errors.push({ productCode, error });
+
+  const catalogCodes = Object.keys(CATALOG);
+  const codes = new Set<string>([...catalogCodes, ...GMI_EDITION_REGISTRY.map((e) => e.productCode)]);
+
+  const SELF_SERVE = new Set(["FREE", "SELF_SERVE_CHECKOUT", "EVIDENCE_GATED_CHECKOUT", "ADMISSION_GATED_CHECKOUT"]);
 
   for (const code of codes) {
     const policy = resolveCommercialAccessPolicy(code);
     if (!policy) {
-      errors.push({ productCode: code, error: "No policy resolved (coverage gap)" });
+      push(code, "No policy resolved (coverage gap)");
       continue;
     }
-    if (policy.acquisitionMode === "FREE" && policy.paymentRequired) {
-      errors.push({ productCode: code, error: "FREE mode must not require payment" });
+
+    // (a) Terminal-state precedence: terminal catalog status ⇒ ARCHIVE_ONLY.
+    const product = CATALOG[code];
+    if (product?.commercialStatus && TERMINAL_STATUSES.has(product.commercialStatus)
+        && policy.source !== "GMI_EDITION"
+        && policy.acquisitionMode !== "ARCHIVE_ONLY") {
+      push(code, `terminal status ${product.commercialStatus} must resolve ARCHIVE_ONLY, got ${policy.acquisitionMode}`);
     }
+
+    // (b) Acquisition/payment consistency.
+    if (policy.acquisitionMode === "FREE" && policy.paymentRequired) {
+      push(code, "FREE must not require payment");
+    }
+    if ((policy.acquisitionMode === "SELF_SERVE_CHECKOUT" || policy.acquisitionMode === "EVIDENCE_GATED_CHECKOUT"
+         || policy.acquisitionMode === "ADMISSION_GATED_CHECKOUT") && !policy.paymentRequired) {
+      push(code, `${policy.acquisitionMode} must require payment`);
+    }
+    if ((policy.acquisitionMode === "CONTRACT" || policy.acquisitionMode === "MANUAL_BILLING"
+         || policy.acquisitionMode === "ARCHIVE_ONLY") && policy.paymentRequired) {
+      push(code, `${policy.acquisitionMode} must not require self-serve payment`);
+    }
+    if (policy.paymentRequired && !policy.entitlementRequired) {
+      push(code, "payment-required products must track entitlement");
+    }
+
+    // (c) Prerequisite requirements.
+    if (policy.prerequisitePolicy === "RELEASE_RECEIPT" && !policy.releaseProofRequired) {
+      push(code, "RELEASE_RECEIPT policy must set releaseProofRequired");
+    }
+    if (policy.acquisitionMode === "ADMISSION_GATED_CHECKOUT"
+        && policy.prerequisitePolicy !== "EXECUTIVE_REPORTING_ADMISSION") {
+      push(code, "ADMISSION_GATED_CHECKOUT must use EXECUTIVE_REPORTING_ADMISSION prerequisite");
+    }
+    if (policy.acquisitionMode === "EVIDENCE_GATED_CHECKOUT" && policy.prerequisitePolicy === "NONE") {
+      push(code, "EVIDENCE_GATED_CHECKOUT must carry a real prerequisite, not NONE");
+    }
+    if (SELF_SERVE.has(policy.acquisitionMode)
+        && (policy.prerequisitePolicy === "RELEASE_RECEIPT" || policy.prerequisitePolicy === "EXECUTIVE_REPORTING_ADMISSION")
+        && !policy.publicSurfaceAllowed) {
+      push(code, "gated self-serve product must be publicly surfaced to be reachable");
+    }
+
+    // (d) Surfacing.
     if (policy.acquisitionMode === "ARCHIVE_ONLY" && policy.publicSurfaceAllowed) {
-      errors.push({ productCode: code, error: "ARCHIVE_ONLY must not be publicly surfaced" });
+      push(code, "ARCHIVE_ONLY must not be publicly surfaced");
+    }
+  }
+
+  // (e) Registry membership: every GMI registry code must resolve via GMI_EDITION.
+  for (const entry of GMI_EDITION_REGISTRY) {
+    const policy = resolveCommercialAccessPolicy(entry.productCode);
+    if (!policy || policy.source !== "GMI_EDITION") {
+      push(entry.productCode, "GMI edition must resolve via the GMI registry (source=GMI_EDITION)");
     }
   }
 

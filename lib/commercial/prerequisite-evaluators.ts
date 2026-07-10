@@ -1,19 +1,22 @@
 /**
  * lib/commercial/prerequisite-evaluators.ts
  *
- * Policy-specific prerequisite evaluators.
- * Each evaluator returns {allowed, reason?, recoveryPath?}.
+ * Policy-specific prerequisite evaluators. Each returns {allowed, reason?, recoveryPath?}.
  *
- * Pre-release: logic stays here. Post-release: evaluators are route-specific,
- * not universal gates.
+ * All evaluators that touch persistence accept an injectable `deps` object so they
+ * can be unit-tested without a live database. Defaults are the real server-backed
+ * implementations. No evaluator is a permanent unconditional allow/deny stub.
  */
 
 import { getDurableReceipt } from "@/lib/intelligence/gmi-release-store.server";
+import { GMI_EDITION_REGISTRY } from "@/lib/commercial/gmi/gmi-edition-registry";
 
 export interface EvaluationContext {
   email: string;
   userId?: string;
   productCode: string;
+  /** Optional inner-circle handoff token (Boardroom). */
+  handoffId?: string;
 }
 
 export interface EvaluationResult {
@@ -22,134 +25,144 @@ export interface EvaluationResult {
   recoveryPath?: string;
 }
 
+/** Injectable dependencies (defaults are real, DB-backed). */
+export interface EvaluatorDeps {
+  getReceiptForEdition?: (editionId: string) => Promise<unknown | null>;
+  hasQualifyingEvidence?: (email: string) => Promise<boolean>;
+  isHandoffValid?: (handoffId: string) => Promise<boolean>;
+}
+
+// ── Default server-backed lookups ───────────────────────────────────────────
+
+async function defaultHasQualifyingEvidence(email: string): Promise<boolean> {
+  const { prisma } = await import("@/lib/prisma.server");
+  const journey = await prisma.diagnosticJourney.findFirst({
+    where: { email, diagnosticType: "intelligence_spine" },
+    orderBy: { updatedAt: "desc" },
+  });
+  return Boolean(journey);
+}
+
+async function defaultIsHandoffValid(handoffId: string): Promise<boolean> {
+  if (!/^bh_[a-f0-9]{32}$/i.test(handoffId)) return false;
+  const { prisma } = await import("@/lib/prisma.server");
+  const rows = await prisma.$queryRaw<Array<{ recommended_route: string; expires_at: Date; used_at: Date | null }>>`
+    SELECT recommended_route, expires_at, used_at
+    FROM boardroom_bridge_handoffs
+    WHERE id = ${handoffId}
+    LIMIT 1
+  `;
+  const row = rows[0];
+  return Boolean(row && row.recommended_route === "boardroom-brief" && !row.used_at && row.expires_at > new Date());
+}
+
+/** Registry-derived productCode → editionId (issue 5: no hard-coded Q2). */
+function resolveEditionForProduct(productCode: string): { editionId: string; slug: string } | null {
+  const entry = GMI_EDITION_REGISTRY.find((e) => e.productCode === productCode);
+  return entry ? { editionId: entry.editionId, slug: entry.slug } : null;
+}
+
+// ── Evaluators ──────────────────────────────────────────────────────────────
+
 /**
- * RELEASE_RECEIPT: Check that a durable release receipt exists.
- * Used by: GMI Q2 2026
+ * RELEASE_RECEIPT: a durable release receipt must exist for the edition that maps
+ * to this product code — resolved dynamically from the GMI registry, so future
+ * edition rollover (Q3, Q4, …) works with no code edits.
  */
 export async function evaluateReleaseReceiptPrerequisite(
   context: EvaluationContext,
+  deps: EvaluatorDeps = {},
 ): Promise<EvaluationResult> {
-  const { productCode } = context;
-
-  // Map product code to edition ID
-  let editionId: string | null = null;
-  if (productCode === "gmi_q2_2026") editionId = "GMI-Q2-2026";
-  // Add other mappings as needed
-
-  if (!editionId) {
-    return {
-      allowed: false,
-      reason: "NO_EDITION_MAPPING",
-      recoveryPath: undefined,
-    };
+  const edition = resolveEditionForProduct(context.productCode);
+  if (!edition) {
+    return { allowed: false, reason: "NO_EDITION_MAPPING" };
   }
-
-  const receipt = await getDurableReceipt(editionId);
+  const getReceipt = deps.getReceiptForEdition ?? ((id: string) => getDurableReceipt(id));
+  const receipt = await getReceipt(edition.editionId);
   if (!receipt) {
     return {
       allowed: false,
       reason: "RELEASE_PROOF_MISSING",
-      recoveryPath: "/intelligence/gmi/q2-2026",  // Link to public record
+      recoveryPath: `/intelligence/gmi/${edition.slug}`,
     };
   }
-
   return { allowed: true };
 }
 
 /**
- * INTELLIGENCE_SPINE: Require completed diagnostic journey.
- * NOT USED for decision instruments or GMI.
- * Kept as reference; only applies if explicitly policy-specified.
+ * INTELLIGENCE_SPINE: qualifying diagnostic/evidence must exist (issue 4: real
+ * lookup, not a permanent-denial stub).
  */
 export async function evaluateIntelligenceSpinePrerequisite(
   context: EvaluationContext,
+  deps: EvaluatorDeps = {},
 ): Promise<EvaluationResult> {
-  const { email, userId } = context;
-
-  // Check if user/email has completed a qualifying diagnostic
-  // (This would query the database for completed assessments)
-  // For now: return not allowed (this prerequisite is intentionally rare)
-
-  return {
-    allowed: false,
-    reason: "PREREQUISITE_REQUIRED",
-    recoveryPath: "/diagnostics",
-  };
-}
-
-/**
- * EXECUTIVE_REPORTING_ADMISSION: Custom evaluator for Executive Reporting.
- * The policy-routed prerequisite just validates the product is configurable.
- * Detailed admission logic happens in the checkout endpoint (pages/api/billing/checkout.ts),
- * which calls evaluateERAdmission() with full diagnostic context.
- * This prerequisite returns allowed: true to let the detailed validation proceed.
- */
-export async function evaluateExecutiveReportingAdmission(
-  context: EvaluationContext,
-): Promise<EvaluationResult> {
-  // Executive Reporting has detailed validation in the checkout endpoint.
-  // This policy-routed check just confirms the product exists and is purchasable.
-  // (Detailed admission logic will validate diagnostic journey, evidence, etc.)
+  const lookup = deps.hasQualifyingEvidence ?? defaultHasQualifyingEvidence;
+  const hasEvidence = await lookup(context.email);
+  if (!hasEvidence) {
+    return {
+      allowed: false,
+      reason: "DIAGNOSTIC_JOURNEY_INCOMPLETE",
+      recoveryPath: "/diagnostics",
+    };
+  }
   return { allowed: true };
 }
 
 /**
- * BOARDROOM_HANDOFF: Custom evaluator for Boardroom Brief.
- * Currently: always allow (the hardcoded bypass, now made explicit).
- * Owner can introduce specific rules here.
+ * EXECUTIVE_REPORTING_ADMISSION: policy-routed gate is a pass-through; the
+ * detailed, evidence-cross-validating admission runs in the checkout endpoint,
+ * invoked for ANY product whose policy prerequisite is EXECUTIVE_REPORTING_ADMISSION
+ * (issue 3 — not hard-coded to a single product code).
+ */
+export async function evaluateExecutiveReportingAdmission(
+  _context: EvaluationContext,
+): Promise<EvaluationResult> {
+  return { allowed: true };
+}
+
+/**
+ * BOARDROOM_HANDOFF: a valid inner-circle handoff token must be present
+ * (issue 2: real validation, not an unconditional allow).
  */
 export async function evaluateBoardroomHandoff(
   context: EvaluationContext,
+  deps: EvaluatorDeps = {},
 ): Promise<EvaluationResult> {
-  // Currently: allow all (no prerequisite)
-  // Owner can add specific rules: licensing, engagement status, etc.
+  if (!context.handoffId) {
+    return { allowed: false, reason: "BOARDROOM_HANDOFF_MISSING", recoveryPath: "/inner-circle" };
+  }
+  const validate = deps.isHandoffValid ?? defaultIsHandoffValid;
+  const valid = await validate(context.handoffId);
+  if (!valid) {
+    return { allowed: false, reason: "BOARDROOM_HANDOFF_MISSING", recoveryPath: "/inner-circle" };
+  }
   return { allowed: true };
 }
 
-/**
- * Generic "no prerequisite" evaluator — always allows.
- * Used by: Decision Instruments, Professional, etc.
- */
-export function evaluateNonePrerequisite(
-  context: EvaluationContext,
-): EvaluationResult {
+/** NONE — no prerequisite. Used by self-serve decision instruments, professional, etc. */
+export function evaluateNonePrerequisite(_context: EvaluationContext): EvaluationResult {
   return { allowed: true };
 }
 
-/**
- * Route to the correct evaluator based on prerequisite policy.
- */
+/** Route to the correct evaluator based on prerequisite policy. */
 export async function evaluateCommercialPrerequisite(
   prerequisitePolicy: string,
   context: EvaluationContext,
+  deps: EvaluatorDeps = {},
 ): Promise<EvaluationResult> {
   switch (prerequisitePolicy) {
     case "NONE":
       return evaluateNonePrerequisite(context);
-
     case "RELEASE_RECEIPT":
-      return evaluateReleaseReceiptPrerequisite(context);
-
+      return evaluateReleaseReceiptPrerequisite(context, deps);
     case "INTELLIGENCE_SPINE":
-      return evaluateIntelligenceSpinePrerequisite(context);
-
+      return evaluateIntelligenceSpinePrerequisite(context, deps);
     case "EXECUTIVE_REPORTING_ADMISSION":
       return evaluateExecutiveReportingAdmission(context);
-
     case "BOARDROOM_HANDOFF":
-      return evaluateBoardroomHandoff(context);
-
-    case "CUSTOM":
-      // Should not reach here; custom evaluators are called directly
-      return {
-        allowed: false,
-        reason: "CUSTOM_EVALUATOR_NOT_FOUND",
-      };
-
+      return evaluateBoardroomHandoff(context, deps);
     default:
-      return {
-        allowed: false,
-        reason: "UNKNOWN_PREREQUISITE_POLICY",
-      };
+      return { allowed: false, reason: "UNKNOWN_PREREQUISITE_POLICY" };
   }
 }

@@ -33,11 +33,21 @@ describe("Proof matrix — prerequisite evaluators", () => {
     }
   });
 
-  it("[+] BOARDROOM_HANDOFF allows (explicit governed policy, not universal gate)", async () => {
+  it("[-] BOARDROOM_HANDOFF denies when no handoff token is present (real gate, not unconditional allow)", async () => {
     const r = await evaluateCommercialPrerequisite("BOARDROOM_HANDOFF", {
       email: "b@example.com",
       productCode: "boardroom_brief",
     });
+    expect(r.allowed).toBe(false);
+    expect(r.reason).toBe("BOARDROOM_HANDOFF_MISSING");
+  });
+
+  it("[+] BOARDROOM_HANDOFF allows with a valid handoff token (injected)", async () => {
+    const r = await evaluateCommercialPrerequisite(
+      "BOARDROOM_HANDOFF",
+      { email: "b@example.com", productCode: "boardroom_brief", handoffId: "bh_ok" },
+      { isHandoffValid: async () => true },
+    );
     expect(r.allowed).toBe(true);
   });
 

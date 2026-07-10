@@ -159,6 +159,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     {
       email: emailStr,
       productCode: code,
+      handoffId: typeof handoffId === "string" ? handoffId.trim() : undefined,
     }
   );
 
@@ -177,10 +178,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   }
 
-  // ── Server-side admission enforcement for Executive Reporting ──
-  // Cross-validates client evidence against server-side diagnostic journey.
-  // Payment must not override evidence requirements.
-  if (code === "executive_reporting") {
+  // ── Server-side admission enforcement (issue 3: policy-driven, not hard-coded) ──
+  // Runs for ANY product whose commercial policy prerequisite is
+  // EXECUTIVE_REPORTING_ADMISSION, so priority/future variants cannot bypass it.
+  // Cross-validates client evidence against the server-side diagnostic journey.
+  if (commercialPolicy.prerequisitePolicy === "EXECUTIVE_REPORTING_ADMISSION") {
     const erAdmission = await evaluateERAdmission({
       email: emailStr,
       intakeMode: (req.body.intakeMode as string) || "ladder",
@@ -192,35 +194,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     if (erAdmission.status === "RESTRICTED") {
+      // Internal detail stays server-side only (issue 6).
+      console.warn("[BILLING_CHECKOUT_ADMISSION_RESTRICTED]", { code, reasons: erAdmission.reasons, missingEvidence: erAdmission.missingEvidence });
+      const failure = buildCheckoutFailureResponse("ADMISSION_RESTRICTED", code);
       return res.status(403).json({
         ok: false,
-        reason: "ADMISSION_RESTRICTED",
-        admission: {
-          status: erAdmission.status,
-          reasons: erAdmission.reasons,
-          missingEvidence: erAdmission.missingEvidence,
-          repairActions: erAdmission.repairActions,
-          returnPath: erAdmission.returnPath,
-        },
+        code: failure.code,
+        message: failure.publicMessage,
+        recoveryPath: erAdmission.returnPath || failure.recoveryPath,
+        supportEmail: failure.helpEmail,
       });
     }
   }
 
-  // ── Governance gate (authoritative): checkout-ready data is not permission ──
-  // A product may carry valid Stripe IDs and still be governance-blocked. The
-  // commercial action resolver is the single authority — only `purchasable`
-  // (state === "checkout") may proceed to a Stripe session.
+  // ── Governance gate (authoritative, independent second authority) ──
+  // Only `purchasable` (state === "checkout") may proceed to a Stripe session.
   {
     const govProduct = getProduct(code);
     if (govProduct) {
       const action = resolveCommercialAction(govProduct, getGovernanceState(code));
       if (!action.purchasable) {
+        // Internal state/reason stays server-side only (issue 6).
+        console.warn("[BILLING_CHECKOUT_GOVERNANCE_BLOCK]", { code, state: action.state, detail: action.reason });
+        const failure = buildCheckoutFailureResponse("CHECKOUT_BLOCKED_BY_GOVERNANCE", code);
         return res.status(403).json({
           ok: false,
-          reason: "CHECKOUT_BLOCKED_BY_GOVERNANCE",
-          state: action.state,
-          detail: action.reason,
-          code,
+          code: failure.code,
+          message: failure.publicMessage,
+          recoveryPath: failure.recoveryPath,
+          supportEmail: failure.helpEmail,
         });
       }
     }
@@ -228,7 +230,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const eligibility = checkCheckoutEligibility(code);
   if (!eligibility.eligible) {
-    return res.status(400).json({ ok: false, reason: eligibility.reason, code });
+    // Raw eligibility reason stays server-side only (issue 6).
+    console.warn("[BILLING_CHECKOUT_INELIGIBLE]", { code, reason: eligibility.reason });
+    const failure = buildCheckoutFailureResponse("CHECKOUT_INELIGIBLE", code);
+    return res.status(400).json({
+      ok: false,
+      code: failure.code,
+      message: failure.publicMessage,
+      recoveryPath: failure.recoveryPath,
+      supportEmail: failure.helpEmail,
+    });
   }
 
   const product = eligibility.product;
@@ -239,7 +250,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .catch(() => null)
     : null;
   if (gmiEdition && !gmiReceipt) {
-    return res.status(409).json({ ok: false, reason: "GMI_RELEASE_RECEIPT_MISSING", editionId: gmiEdition.editionId });
+    // Internal edition identifier stays server-side only (issue 6).
+    console.warn("[BILLING_CHECKOUT_GMI_RECEIPT_MISSING]", { code, editionId: gmiEdition.editionId });
+    const failure = buildCheckoutFailureResponse("RELEASE_PROOF_MISSING", code);
+    return res.status(409).json({
+      ok: false,
+      code: failure.code,
+      message: failure.publicMessage,
+      recoveryPath: failure.recoveryPath,
+      supportEmail: failure.helpEmail,
+    });
   }
 
   // ── Paths ──
