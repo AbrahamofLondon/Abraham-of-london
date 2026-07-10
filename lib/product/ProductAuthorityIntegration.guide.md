@@ -1,259 +1,153 @@
-# ProductAuthorityContract Surface Integration Guide
+# Product Authority Surface Integration Guide
 
 ## Overview
 
-This guide shows how to wire ProductAuthorityContract and related components into product routes so that users see evidence-governed authority in the live experience.
+This guide shows how product authority truth reaches a route. The internal
+`ProductAuthorityContract` (blocking reasons, validation results, evidence
+source paths, authority backbone) is a **governance record**, not a display
+object. It exists to let the estate reason about a product's evidence state.
+It is never the thing a customer sees.
 
-## Core Pattern
+Every route belongs to exactly one of two worlds:
 
-Every route that displays a product needs to:
+```
+PUBLIC_CUSTOMER
+CONTROLLED_CUSTOMER
+ENTITLED_CUSTOMER
 
-1. **Resolve** the product's authority contract
-2. **Display** the authority state
-3. **Show** evidence status
-4. **Explain** limitations
-5. **Indicate** next action
+MAY CONSUME:
+  - a bounded public/customer-safe projection (projectPublicProductAuthority)
+  - SurfaceBoundaryPanel, with hand-authored safe strings
+  - composed public product truth (copy you write, not contract fields you render)
 
-## Integration Pattern
+MAY NOT CONSUME:
+  - ProductAuthorityContract
+  - resolveProductAuthority / getDefaultProductConfigurations
+  - blockingReasons
+  - validation internals (antiToyPassed, redTeamPassed, evidenceLedgerV2Present, ...)
+  - evidence file locations (evidenceSource.canonicalLocation, authorityBackbone)
+  - ProductAuthorityPanel / ProductAuthorityNotice / ProductAuthorityBadge / ProductAuthorityWrapper
+  - ProductEvidenceStatus
 
-### Step 1: Import Components and Resolver
+ADMIN / INTERNAL_OPERATOR
 
-```typescript
-import { ProductAuthorityBadge } from "@/components/product/ProductAuthorityBadge";
-import { ProductAuthorityPanel } from "@/components/product/ProductAuthorityPanel";
-import { ProductEvidenceStatus } from "@/components/product/ProductEvidenceStatus";
-import { ProductAuthorityNotice } from "@/components/product/ProductAuthorityNotice";
-import { resolveProductAuthority } from "@/lib/product/resolve-product-authority";
+MAY CONSUME:
+  - the full ProductAuthorityContract
+  - resolveProductAuthority / getDefaultProductConfigurations, unrestricted
+  - ProductAuthorityPanel / ProductAuthorityNotice / ProductAuthorityBadge
+  - ProductEvidenceStatus
+  - full evidence status, validation detail, blocking reasons
 ```
 
-### Step 2: Resolve Product Authority
+There is no third category. A route that is "public but the buyer is
+sophisticated" is still `PUBLIC_CUSTOMER`. A route behind a login is
+`CONTROLLED_CUSTOMER`, not `ADMIN` — see route classification below.
 
-At the top of your component or page:
+## Route classification
+
+Classification is mechanical, not a judgment call — it's the same taxonomy
+`scripts/authority-boundary-gate.mjs` enforces:
+
+- **ADMIN** — any path under `/admin/**`.
+- **INTERNAL_OPERATOR** — `/inner-circle/admin/**`, `/api/admin/**`, `/api/internal/**`.
+- **PUBLIC_ACCOUNTABILITY** — a fixed, explicit allowlist (currently only
+  `/intelligence/gmi/red-team`) for routes that publish governed accountability
+  records by design. Adding a route here requires a deliberate decision, never
+  a default.
+- **CONTROLLED_CUSTOMER** — routes matching a documented prefix list (strategy
+  room, counsel, oversight, boardroom, client, portal, case/report views,
+  checkout, decision-instruments, private/premium areas — see the gate script
+  for the exact list) where access requires auth or entitlement.
+- **PUBLIC_CUSTOMER** — everything else. This is the default, not an opt-in.
+  If a route isn't explicitly ADMIN, INTERNAL_OPERATOR, PUBLIC_ACCOUNTABILITY,
+  or on the controlled-customer prefix list, it is public, and the boundary
+  above applies in full.
+
+## The public path: `projectPublicProductAuthority`
+
+`lib/product/public-product-authority-projection.ts` is the only supported
+way to bring authority meaning onto a customer surface. It reads only
+`productCode` and `currentAuthorityState` from the internal contract and
+constructs a **fresh object** — it never spreads the contract, so internal
+fields cannot leak by accident.
 
 ```typescript
-// Resolve authority for a specific product
-const productContract = resolveProductAuthority({
-  productCode: "fast_diagnostic",
-  hasValidV2Evidence: true,
-  v2EvidencePath: "reports/product-value-evidence-ledger-v2.json",
-  validationResults: {
-    antiToyPassed: true,
-    redTeamPassed: true,
-    genericAiComparisonPassed: true,
-    marketComparisonPassed: true,
-    releaseFirewallPassed: true,
-    constitutionPassed: true,
-    noMockAuthorityPassed: true,
-    antiGamingPassed: true,
-    adversarialValidationPassed: true,
-  },
-  boundary: {
-    productChangedThisPass: false,
-    scorerChangedThisPass: false,
-    scenarioChangedThisPass: false,
-    benchmarkChangedThisPass: false,
-    validationInfrastructureChangedThisPass: false,
-    gateLogicChangedThisPass: false,
-    mockAuthorityUsed: false,
-  },
-});
+// Server-side only (getStaticProps / getServerSideProps / a Server Component).
+// Never call resolveProductAuthority in a client component.
+import { resolveProductAuthority, getDefaultProductConfigurations } from "@/lib/product/resolve-product-authority";
+import { projectPublicProductAuthority } from "@/lib/product/public-product-authority-projection";
+
+const configs = getDefaultProductConfigurations();
+const config = configs.find((c) => c.productCode === "team_assessment");
+const contract = config ? resolveProductAuthority(config) : null;
+
+const publicAuthority = contract
+  ? projectPublicProductAuthority(contract, {
+      nextPublicAction: { label: "Learn how this is evidenced", href: "/canon/evidence-standard" },
+    })
+  : null;
+
+// publicAuthority is now safe to pass as a prop into a client component.
 ```
 
-### Step 3: Display Authority Status
+`publicAuthority` exposes exactly four fields: `posture` (one of
+`PUBLIC_AUTHORITY_CLEARED`, `CONTROLLED_AUTHORITY`, `EVIDENCE_LIMITED`,
+`REFERENCE_AUTHORITY`, `NO_PUBLIC_AUTHORITY`), `publicClaimLanguage`,
+`customerMeaning`, and an optional `nextPublicAction`. See
+`PUBLIC_PROJECTION_ALLOWED_KEYS` in that file for the authoritative list —
+if a field isn't in that array, it cannot appear on a public route.
 
-In your JSX, display the authority badge:
+Render it with your own presentation component (a badge, a line of copy) —
+there is currently no shared public-facing display component for this
+projection. Build one under `components/product/` if a route needs it, and
+give it a name that does not start with `ProductAuthority` (that prefix is
+reserved for the internal-contract-consuming components below, which the
+transitive authority gate treats as forbidden on every public and
+controlled-customer route by pattern match).
+
+### `SurfaceBoundaryPanel` — hand-authored safe strings
+
+For routes that need to say what a surface does and does not do (what gets
+recorded, what the system reads, what happens next), use
+`components/product/SurfaceBoundaryPanel.tsx`. It takes only
+pre-sanitized, hand-authored strings (`recordCreated: string`,
+`systemReads: string[]`, `nextAction: { label, href }`) — it never touches
+`ProductAuthorityContract` and is already deployed correctly across several
+public routes (`pages/provenance/sample-export.tsx`,
+`pages/tools/decision-delay-exposure.tsx`, `pages/diagnostics/board-summary.tsx`,
+among others). It is safe on `PUBLIC_CUSTOMER` and `CONTROLLED_CUSTOMER`
+routes precisely because every string it renders is authored by a person,
+not derived from the contract at render time.
 
 ```typescript
-<ProductAuthorityBadge 
-  productCode={productContract.productCode}
-  currentAuthorityState={productContract.currentAuthorityState}
-  size="medium"
+<SurfaceBoundaryPanel
+  surfaceType="diagnostic"
+  recordCreated="No governed case or retained decision record is created by this estimate."
+  systemReads={["Stated financial exposure", "Decision state"]}
+  nextAction={{ label: "Start a governed case", href: "/decision-centre" }}
 />
 ```
 
-### Step 4: Show Full Authority Details (Optional but Recommended)
+## The admin path: full contract, unrestricted
 
-For public-facing product pages:
-
-```typescript
-<ProductAuthorityPanel contract={productContract} />
-```
-
-For admin/control pages:
+Only under `/admin/**` (or `/inner-circle/admin/**`, `/api/admin/**`,
+`/api/internal/**`) may a route resolve and render the full contract:
 
 ```typescript
-<div>
-  <ProductAuthorityPanel contract={productContract} expanded={true} />
-  <ProductEvidenceStatus contract={productContract} />
-</div>
-```
-
-### Step 5: Show Limitations and Next Action
-
-Always include if authority is limited:
-
-```typescript
-{productContract.blockingReasons.length > 0 && (
-  <ProductAuthorityNotice contract={productContract} />
-)}
-```
-
-## Product-Specific Guidance
-
-### fast_diagnostic (externally_proven_gold_product)
-
-**Location:** `/foundry/decision-test`, `/diagnostics/fast`
-
-**What to show:**
-- Authority Badge: Green, "Externally Proven"
-- Authority Panel: Full details with evidence source
-- Evidence Status: All tests passed
-- Public Claim: "Externally proven under v2 evidence validation"
-- No blocking notice needed (no blocking reasons)
-
-**Integration points:**
-1. Entry page (`/foundry/start`) — Show v2 authority upfront
-2. Form page (`/foundry/decision-test`) — Show "This uses externally proven fast diagnostic"
-3. Results page (`/foundry/decision-test` result) — Full authority panel
-
-### team_assessment (legacy_validated_pending_v2_revalidation)
-
-**Location:** `/team-assessment`, any team assessment route
-
-**What to show:**
-- Authority Badge: Orange, "Legacy Pending v2"
-- Authority Panel: With blocking reason
-- Public Claim: "Legacy validated; pending v2 revalidation"
-- Blocking Notice: Shows pending v2 requirement
-- Next Action: "Run v2 revalidation to upgrade from legacy status"
-
-**Integration points:**
-1. Product page — Show legacy status clearly
-2. Entry page — Explain pending status
-3. Results (if available) — Show why full authority not granted
-
-### enterprise_assessment (legacy_validated_pending_v2_revalidation)
-
-**Same pattern as team_assessment**
-
-**Location:** `/enterprise-assessment`, any enterprise assessment route
-
-### personal_decision_audit (blocked_until_claim_evidenced)
-
-**Location:** Any personal_decision_audit route
-
-**What to show:**
-- Authority Badge: Red, "Blocked"
-- Authority Panel: With blocking reasons
-- Public Claim: "Under validation; not currently released as an evidenced diagnostic product"
-- Blocking Notice: Mandatory, shows blocking reasons
-- Next Action: "Generate Evidence Ledger v2 with frozen scenarios and validation tests"
-
-**Integration points:**
-1. Entry page — Show blocked status, explain why
-2. Any result surface — Show blocked status, don't claim authority
-3. Admin surfaces — Show full blocking detail
-
-## Code Examples
-
-### Example 1: Fast Diagnostic Entry Page Enhancement
-
-```typescript
-// pages/foundry/start.tsx or equivalent
-
-import React from 'react'
-import { ProductAuthorityBadge } from "@/components/product/ProductAuthorityBadge";
-import { resolveProductAuthority } from "@/lib/product/resolve-product-authority";
-import { getDefaultProductConfigurations } from "@/lib/product/resolve-product-authority";
-
-export default function FastDiagnosticEntryPage() {
-  // Get fast_diagnostic configuration from defaults
-  const configs = getDefaultProductConfigurations();
-  const fastDiagConfig = configs.find(c => c.productCode === "fast_diagnostic");
-  
-  const contract = resolveProductAuthority(fastDiagConfig);
-
-  return (
-    <div>
-      <div style={{ marginBottom: "20px" }}>
-        <h1>Fast Diagnostic</h1>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "8px" }}>
-          <ProductAuthorityBadge 
-            productCode="fast_diagnostic"
-            currentAuthorityState={contract.currentAuthorityState}
-          />
-          <p style={{ color: "#6b7280", fontSize: "14px" }}>
-            {contract.publicClaimLanguage}
-          </p>
-        </div>
-      </div>
-
-      {/* Rest of page content */}
-    </div>
-  );
-}
-```
-
-### Example 2: Legacy Product Page
-
-```typescript
-// pages/team-assessment.tsx or equivalent
-
-import React from 'react'
-import { ProductAuthorityBadge } from "@/components/product/ProductAuthorityBadge";
-import { ProductAuthorityPanel } from "@/components/product/ProductAuthorityPanel";
-import { ProductAuthorityNotice } from "@/components/product/ProductAuthorityNotice";
-import { resolveProductAuthority } from "@/lib/product/resolve-product-authority";
-import { getDefaultProductConfigurations } from "@/lib/product/resolve-product-authority";
-
-export default function TeamAssessmentPage() {
-  const configs = getDefaultProductConfigurations();
-  const config = configs.find(c => c.productCode === "team_assessment");
-  
-  const contract = resolveProductAuthority(config);
-
-  return (
-    <div>
-      <div style={{ marginBottom: "20px" }}>
-        <h1>Team Assessment</h1>
-        <ProductAuthorityBadge 
-          productCode="team_assessment"
-          currentAuthorityState={contract.currentAuthorityState}
-          size="medium"
-        />
-      </div>
-
-      <ProductAuthorityPanel contract={contract} />
-      <ProductAuthorityNotice contract={contract} />
-
-      {/* Rest of page content */}
-    </div>
-  );
-}
-```
-
-### Example 3: Admin Control Room
-
-```typescript
-// pages/admin/control-room.tsx or equivalent
-
-import React from 'react'
+// pages/admin/products/authority-control-room.tsx
 import { ProductAuthorityPanel } from "@/components/product/ProductAuthorityPanel";
 import { ProductEvidenceStatus } from "@/components/product/ProductEvidenceStatus";
-import { resolveProductAuthority } from "@/lib/product/resolve-product-authority";
-import { getDefaultProductConfigurations } from "@/lib/product/resolve-product-authority";
+import { resolveProductAuthority, getDefaultProductConfigurations } from "@/lib/product/resolve-product-authority";
 
-export default function AdminControlRoom() {
+export default function AdminAuthorityControlRoom() {
   const configs = getDefaultProductConfigurations();
-  
   return (
     <div>
       <h1>Product Authority Control Room</h1>
-      
-      {configs.map(config => {
+      {configs.map((config) => {
         const contract = resolveProductAuthority(config);
         return (
-          <div key={config.productCode} style={{ marginBottom: "32px", paddingBottom: "24px", borderBottom: "1px solid #e5e7eb" }}>
+          <div key={config.productCode}>
             <h2>{config.productCode}</h2>
             <ProductAuthorityPanel contract={contract} expanded={true} />
             <ProductEvidenceStatus contract={contract} />
@@ -265,96 +159,97 @@ export default function AdminControlRoom() {
 }
 ```
 
-## Integration Checklist
+`ProductAuthorityBadge`, `ProductAuthorityNotice`, and `ProductAuthorityWrapper`
+follow the same rule: admin/internal-operator only, full contract, no
+restriction on which fields render.
 
-For each route being integrated:
+## Common mistakes to avoid
 
-- [ ] Import ProductAuthorityContract components
-- [ ] Import resolveProductAuthority
-- [ ] Call resolveProductAuthority with product configuration
-- [ ] Display ProductAuthorityBadge in main heading area
-- [ ] Display ProductAuthorityPanel (or summary) on page
-- [ ] Display ProductAuthorityNotice if blockingReasons exist
-- [ ] Use contract.publicClaimLanguage, not hardcoded strings
-- [ ] Verify no unsupported authority language
-- [ ] Test that components render correctly
-- [ ] Run TypeScript compiler to check for errors
+❌ **Don't** render `ProductAuthorityPanel`, `ProductAuthorityNotice`,
+`ProductAuthorityBadge`, or `ProductEvidenceStatus` on a public or
+controlled-customer route, even "just the badge" or "just to be transparent":
 
-## Common Mistakes to Avoid
-
-❌ **Don't:** Hardcode authority state
 ```typescript
-// WRONG
-const authorityState = "externally_proven_gold_product";
-```
-
-✅ **Do:** Resolve from contract
-```typescript
-// CORRECT
-const contract = resolveProductAuthority(productConfig);
-const authorityState = contract.currentAuthorityState;
-```
-
----
-
-❌ **Don't:** Use unsupported authority language
-```typescript
-// WRONG
-"Fast Diagnostic is a proven tool for decision authority."
-```
-
-✅ **Do:** Use contract-derived language
-```typescript
-// CORRECT
-contract.publicClaimLanguage // "fast_diagnostic is externally proven under v2 evidence validation."
-```
-
----
-
-❌ **Don't:** Hide blocking reasons
-```typescript
-// WRONG
-if (contract.blockingReasons.length > 0) {
-  return null; // Hide the product
-}
-```
-
-✅ **Do:** Show blocking reasons visibly
-```typescript
-// CORRECT
+// WRONG — pages/team-assessment.tsx is PUBLIC_CUSTOMER
+<ProductAuthorityPanel contract={contract} />
 <ProductAuthorityNotice contract={contract} />
 ```
 
----
+✅ **Do** project first, then render only the projection:
 
-## Testing Your Integration
-
-After wiring a route:
-
-1. **Visual Check:** Does the authority badge render?
-2. **Language Check:** Is the public claim language from the contract, not hardcoded?
-3. **Limitation Check:** Are blocking reasons visible (if any exist)?
-4. **Link Check:** Do evidence location links work (if present)?
-5. **TypeScript Check:** `pnpm exec tsc --noEmit` — does it pass?
-
-## Running the Route Proof Audit
-
-After integration, run:
-
-```bash
-node scripts/capture-category-route-proof.mjs
+```typescript
+// CORRECT — pages/team-assessment.tsx
+<AuthorityMeaningLine projection={publicAuthority} />
 ```
 
-**Expected results after integration:**
-- Routes demonstrating: ≥3
-- Authority visible: ≥3
-- Evidence visible: ≥3
-- Limitations clear: ≥2
-- Overclaims: 0
+---
+
+❌ **Don't** call `resolveProductAuthority` / `getDefaultProductConfigurations`
+inside a client component or in browser-executed code on a public route —
+the whole contract object would be serialized into the page bundle even if
+you only render one field from it:
+
+```typescript
+// WRONG — resolves and holds the full contract client-side
+export default function EnterpriseDecisionScanPage() {
+  const configs = getDefaultProductConfigurations();
+  const contract = resolveProductAuthority(configs.find(c => c.productCode === "enterprise_assessment"));
+  // contract.blockingReasons, contract.validation.* now exist in the client bundle
+}
+```
+
+✅ **Do** resolve and project server-side, pass only the projection down:
+
+```typescript
+// CORRECT — getStaticProps resolves + projects; client only ever sees publicAuthority
+export const getStaticProps: GetStaticProps<Props> = async () => {
+  const contract = resolveProductAuthority(config);
+  const publicAuthority = contract ? projectPublicProductAuthority(contract) : null;
+  return { props: { publicAuthority } };
+};
+```
+
+---
+
+❌ **Don't** hide a limited posture instead of stating it plainly:
+
+```typescript
+// WRONG
+if (publicAuthority.posture === "EVIDENCE_LIMITED") return null;
+```
+
+✅ **Do** show the bounded customer meaning — `EVIDENCE_LIMITED` has its own
+honest, pre-written `customerMeaning` string; use it:
+
+```typescript
+// CORRECT
+<p>{publicAuthority.customerMeaning}</p>
+```
+
+## Testing your integration
+
+1. **Boundary check:** `pnpm gate:authority-imports` — does the transitive
+   import gate pass for your route (no path to a forbidden internal module at
+   any depth)?
+2. **Vocabulary check:** `pnpm gate:authority-vocabulary` — does the rendered
+   page contain any forbidden internal phrase (`blockingReasons` text,
+   `anti_toy_validation`, canonical file paths, `Legacy Authority`, etc.)?
+3. **Doctrine check:** `pnpm gate:authority-doctrine` — if you had to update
+   this guide or another governance document, does it still teach the
+   boundary correctly?
+4. **Projection check:** `pnpm vitest run tests/product/public-authority-projection.test.ts`
+   — does the projection serialize to exactly the allowed keys with no
+   internal value present?
+5. **TypeScript check:** `pnpm typecheck`
+
+Run all authority gates together with `pnpm gate:authority`.
 
 ## Questions?
 
-Refer to:
-- Component implementations: `components/product/ProductAuthority*.tsx`
-- Resolver logic: `lib/product/resolve-product-authority.ts`
-- Validation: `scripts/capture-category-route-proof.mjs`
+- Public projection: `lib/product/public-product-authority-projection.ts`
+- Public-safe hand-authored panel: `components/product/SurfaceBoundaryPanel.tsx`
+- Internal contract (admin-only): `lib/product/product-authority-contract.ts`
+- Resolver (admin-only): `lib/product/resolve-product-authority.ts`
+- Route classification / transitive gate: `scripts/authority-boundary-gate.mjs`
+- Rendered-vocabulary gate: `scripts/authority-dom-vocabulary-scan.mjs`
+- Doctrine-regression gate: `scripts/authority-doctrine-regression-check.mjs`

@@ -5,16 +5,11 @@ import TeamAlignmentGapMapRunner from "@/components/instruments/TeamAlignmentGap
 import { track } from "@/lib/analytics/track";
 import type { AlignmentResult } from "@/lib/instruments/team-alignment-gap-map/engine";
 import { buildInstrumentSignalAuthority } from "@/lib/product/instrument-signal-authority";
-import { ProductAuthorityPanel } from "@/components/product/ProductAuthorityPanel";
-import { ProductAuthorityNotice } from "@/components/product/ProductAuthorityNotice";
-import { resolveProductAuthority, PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS } from "@/lib/product/resolve-product-authority";
 
 const TeamAlignmentRun: NextPage = () => {
   const [result, setResult] = React.useState<AlignmentResult | null>(null);
   const [resultKey, setResultKey] = React.useState<string | null>(null);
 
-  const config = PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS.find(c => c.productCode === 'team_alignment_gap_map');
-  const contract = config ? resolveProductAuthority(config) : null;
 
   React.useEffect(() => { track("instrument_started", { instrumentSlug: "team-alignment-gap-map" }); }, []);
 
@@ -53,14 +48,6 @@ const TeamAlignmentRun: NextPage = () => {
         { label: "Dossier", value: "PDF dossier available" },
       ] : undefined}
     >
-      {!result && contract && (
-        <div style={{ backgroundColor: 'rgba(255,255,255,0.04)', padding: '1rem', marginBottom: '1.5rem', borderRadius: '0.5rem' }}>
-          <ProductAuthorityPanel contract={contract} />
-          <div style={{ marginTop: '0.75rem' }}>
-            <ProductAuthorityNotice contract={contract} />
-          </div>
-        </div>
-      )}
       {!result ? (
         <TeamAlignmentGapMapRunner onComplete={handleComplete} />
       ) : (
