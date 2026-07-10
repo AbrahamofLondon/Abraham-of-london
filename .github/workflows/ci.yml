@@ -69,6 +69,10 @@ jobs:
       - name: Build Contentlayer
         run: pnpm run content:build
 
+      - name: Authority boundary gate
+        # Blocking security/governance gate
+        run: pnpm gate:authority
+
       - name: MDX route manifest
         run: node scripts/build-mdx-route-manifest.mjs
 
