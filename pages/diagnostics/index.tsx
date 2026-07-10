@@ -104,10 +104,10 @@ const DiagnosticsIndexPage: NextPage = () => {
             <p className="font-sans text-[12px] font-medium uppercase tracking-[0.20em]" style={{ color: brassLight }}>Choose your entry</p>
             <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {diagnostics.map((d) => (
-                <Link key={d.id} href={d.href} className={`border p-5 transition hover:opacity-80 ${d.state === 'GATED' ? 'opacity-60' : ''}`} style={{ borderColor: d.state === 'GATED' ? 'rgba(255,255,255,0.06)' : brass + '20', backgroundColor: d.state === 'GATED' ? 'rgba(255,255,255,0.01)' : brass + '06' }}>
+                <Link key={d.id} href={d.href} className="border p-5 transition hover:opacity-80" style={{ borderColor: d.state === 'GATED' ? 'rgba(255,255,255,0.06)' : brass + '20', backgroundColor: d.state === 'GATED' ? 'rgba(255,255,255,0.01)' : brass + '06' }}>
                   <p className="font-sans text-[11px] font-bold uppercase tracking-[0.16em]" style={{ color: d.state === 'GATED' ? evidenceGrey : brassLight }}>{d.title}</p>
                   <p className="mt-3 font-serif text-lg" style={{ color: d.state === 'GATED' ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.85)' }}>{d.question}</p>
-                  <p className="mt-2 text-sm leading-6" style={{ color: d.state === 'GATED' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.55)' }}>{d.returns}</p>
+                  <p className="mt-2 text-sm leading-6" style={{ color: d.state === 'GATED' ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.55)' }}>{d.returns}</p>
                   <div className="mt-4 flex flex-wrap gap-3">
                     <span className="font-mono text-[11px]" style={{ color: evidenceGrey }}>{d.time}</span>
                     <span className="font-mono text-[11px]" style={{ color: evidenceGrey }}>{d.access}</span>
