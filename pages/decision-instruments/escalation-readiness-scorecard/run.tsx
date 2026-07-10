@@ -5,18 +5,9 @@ import EscalationReadinessRunner from "@/components/instruments/EscalationReadin
 import { track } from "@/lib/analytics/track";
 import type { EscalationResult } from "@/lib/instruments/escalation-readiness-scorecard/engine";
 import { buildInstrumentSignalAuthority } from "@/lib/product/instrument-signal-authority";
-import { ProductAuthorityPanel } from "@/components/product/ProductAuthorityPanel";
-import { ProductAuthorityNotice } from "@/components/product/ProductAuthorityNotice";
-import { resolveProductAuthority, PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS } from "@/lib/product/resolve-product-authority";
-
 const EscalationReadinessRun: NextPage = () => {
   const [result, setResult] = React.useState<EscalationResult | null>(null);
-  const [resultKey, setResultKey] = React.useState<string | null>(null);
-
-  const config = PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS.find(c => c.productCode === 'escalation_readiness_scorecard');
-  const contract = config ? resolveProductAuthority(config) : null;
-
-  React.useEffect(() => { track("instrument_started", { instrumentSlug: "escalation-readiness-scorecard" }); }, []);
+  const [resultKey, setResultKey] = React.useState<string | null>(null);React.useEffect(() => { track("instrument_started", { instrumentSlug: "escalation-readiness-scorecard" }); }, []);
 
   async function handleComplete(r: EscalationResult) {
     setResult(r);
@@ -53,14 +44,6 @@ const EscalationReadinessRun: NextPage = () => {
         { label: "Dossier", value: "PDF dossier available" },
       ] : undefined}
     >
-      {!result && contract && (
-        <div style={{ backgroundColor: 'rgba(255,255,255,0.04)', padding: '1rem', marginBottom: '1.5rem', borderRadius: '0.5rem' }}>
-          <ProductAuthorityPanel contract={contract} />
-          <div style={{ marginTop: '0.75rem' }}>
-            <ProductAuthorityNotice contract={contract} />
-          </div>
-        </div>
-      )}
       {!result ? (
         <EscalationReadinessRunner onComplete={handleComplete} />
       ) : (
