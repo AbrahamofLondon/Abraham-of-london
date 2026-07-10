@@ -6,9 +6,13 @@
  * not hardcoded. Keep Node built-ins out of the shared release evidence module
  * so Next client compilation paths never attempt to bundle filesystem or crypto.
  */
-import { createHash } from "node:crypto";
-import { existsSync, readFileSync, statSync } from "node:fs";
-import { join } from "node:path";
+// Bare specifiers (not "node:" scheme) so Next's server externals matcher and
+// client fallback both handle them. This module is server-only; the "node:"
+// scheme slips past webpack externalization inside dynamic-import chunks and
+// triggers UnhandledSchemeError. Logic is unchanged.
+import { createHash } from "crypto";
+import { existsSync, readFileSync, statSync } from "fs";
+import { join } from "path";
 
 import { getMarketIntelligenceRecord } from "./market-intelligence-lifecycle";
 import { getDurableReceipt } from "./gmi-release-store.server";

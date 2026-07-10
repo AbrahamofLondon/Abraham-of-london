@@ -17,198 +17,13 @@ import { GmiPriorCallScorecard, type GmiPriorCallScorecardData } from "@/compone
 import { GmiEvidenceRoom } from "@/components/Intelligence/GmiEvidenceRoom";
 import { getSourceRowsForReport } from "@/lib/intelligence/gmi-source-appendix-registry";
 import {
-  buildGmiReleaseChecklist,
   getBlockingChecklistItems,
   type GmiReleaseChecklist,
 } from "@/lib/intelligence/gmi-release-candidate-checklist";
+// Type-only import (erased at compile) so the server-only view-model module and
+// its durable-resolver chain never enter this page's client bundle.
+import type { ConsoleViewModel } from "@/lib/intelligence/gmi-release-console-view-model.server";
 
-type ReportCard = {
-  id: string;
-  lifecycle: string;
-  coverage: string;
-  decisionWindow: string;
-  purchasable: boolean;
-  publicVisible: boolean;
-};
-
-type ConsoleViewModel = {
-  activeReport: string;
-  draftReport: string;
-  currentReleaseState: string;
-  releaseReady: boolean;
-  reportCards: ReportCard[];
-  blockers: string[];
-  priorCalls: {
-    total: number;
-    dueInQ2: number;
-    carriedToQ3: number;
-    reviewed: number;
-    pending: number;
-  };
-  sourceCoverage: {
-    totalRows: number;
-    verifiedRows: number;
-    pendingRows: number;
-    blockerRows: number;
-    coverageScore: number;
-    releaseSafe: boolean;
-  };
-  qualityGate: {
-    overallScore: number;
-    releaseReady: boolean;
-    criticalFailures: string[];
-    warnings: string[];
-    dimensionsBelowThreshold: string[];
-  };
-  outbound: {
-    title: string;
-    status: string;
-    lifecycleGated: boolean;
-    publishable: boolean;
-  };
-  eventSummary: GmiReleaseEventSummary;
-  nextActions: string[];
-  mutatingActions: string[];
-  scorecardData: GmiPriorCallScorecardData;
-  releaseChecklist: GmiReleaseChecklist;
-};
-
-// Server-only module, loaded lazily inside getServerSideProps' call path so the
-// client bundle never pulls in the Prisma-backed resolver. A plain dynamic
-// import resolves correctly under webpack (server chunk), vitest, and Node.
-async function importDurableReleaseResolver() {
-  return import("@/lib/intelligence/gmi-release-durable-resolver.server");
-}
-
-const REQUIRED_NEXT_ACTIONS = [
-  "Complete Q2 source collection log.",
-  "Review and score Q1 calls due in Q2.",
-  "Resolve release-blocking source rows.",
-  "Finalise Q2 confidence posture.",
-  "Run quality gate.",
-  "Promote lifecycle only after release conditions pass.",
-];
-
-function reportCard(id: string): ReportCard {
-  const record = getMarketIntelligenceRecord(id);
-  if (!record) {
-    return {
-      id,
-      lifecycle: "MISSING",
-      coverage: "Unavailable",
-      decisionWindow: "Unavailable",
-      purchasable: false,
-      publicVisible: false,
-    };
-  }
-
-  return {
-    id,
-    lifecycle: record.lifecycleState,
-    coverage: record.coveragePeriod,
-    decisionWindow: record.decisionWindow,
-    purchasable: record.purchasable,
-    publicVisible: record.publicVisible,
-  };
-}
-
-function buildQ2OutboundState(): ConsoleViewModel["outbound"] {
-  const item: LinkedInOutboundItem = {
-    title: "A new market reality — why Q2 2026 matters",
-    status: "draft",
-    draft: true,
-    published: false,
-    channel: "linkedin",
-    contentType: "article",
-    date: "2026-07-08",
-    category: "Outbound",
-    tier: "public",
-    linkedReportId: "GMI-Q2-2026",
-    requiresLifecycleCheck: true,
-    publicationGate: "Publish only after GMI-Q2-2026 lifecycle is ACTIVE_UNTIL_SUPERSEDED and public report surface is live",
-    claimRisk: "MEDIUM",
-    body: "The Q2 report remains in preparation.",
-  };
-  const result = validateLinkedInOutboundItem(item);
-
-  return {
-    title: item.title ?? "Q2 LinkedIn market-reality post",
-    status: String(item.status),
-    lifecycleGated: item.requiresLifecycleCheck === true,
-    publishable: result.errors.length === 0 && item.published === true && item.status !== "draft",
-  };
-}
-
-export async function buildGmiReleaseConsoleViewModel(): Promise<ConsoleViewModel> {
-  const releaseState = resolveGmiReleaseState("GMI-Q2-2026");
-  const { resolveDurableReleaseState } = await importDurableReleaseResolver();
-  const durableState = await resolveDurableReleaseState("GMI-Q2-2026");
-  // A released edition (authoritative receipt + active lifecycle) is complete:
-  // the resolver's releaseReady is intentionally false post-release to block
-  // double release, but the console must show the released state as clear.
-  const durableReleaseReady =
-    durableState.releaseReady ||
-    (durableState.hasReceipt && durableState.lifecycleState === "ACTIVE_UNTIL_SUPERSEDED");
-  const reviewPack = buildGmiQuarterlyReviewPack("GMI-Q2-2026");
-  const q1Calls = getCallsForReport("GMI-Q1-2026");
-  const dueInQ2 = q1Calls.filter((call) => call.expectedReviewWindow === "Q2 2026");
-  const carriedToQ3 = q1Calls.filter((call) => call.expectedReviewWindow === "Q3 2026");
-  const pendingQ2 = getCallsPendingReview("Q2 2026");
-  const dimensionsBelowThreshold = durableReleaseReady
-    ? []
-    : releaseState.qualityGate.scores
-      .filter((score) => score < 8)
-      .map((score, i) => `Dimension ${i + 1}: ${score}/10`);
-  const warnings = durableReleaseReady
-    ? []
-    : reviewPack.sourceCoverage.coverageScore < 90
-      ? ["Source coverage below paid institutional warning threshold."]
-      : [];
-
-  const scorecardData: GmiPriorCallScorecardData = {
-    reportId: "GMI-Q2-2026",
-    priorReportId: "GMI-Q1-2026",
-    reviewWindow: "Q2 2026",
-    total: q1Calls.length,
-    dueInCurrentQuarter: dueInQ2.length,
-    carriedForward: carriedToQ3.length,
-    reviewed: dueInQ2.length - pendingQ2.length,
-    pending: pendingQ2.length,
-  };
-
-  return {
-    activeReport: durableReleaseReady ? "GMI-Q2-2026" : "GMI-Q1-2026",
-    draftReport: durableReleaseReady ? "None" : "GMI-Q2-2026",
-    currentReleaseState: `${durableState.lifecycleState} / Durable`,
-    releaseReady: durableReleaseReady,
-    reportCards: [reportCard("GMI-Q1-2026"), reportCard("GMI-Q2-2026")],
-    blockers: durableState.blockers,
-    priorCalls: {
-      total: q1Calls.length,
-      dueInQ2: dueInQ2.length,
-      carriedToQ3: carriedToQ3.length,
-      reviewed: dueInQ2.length - pendingQ2.length,
-      pending: pendingQ2.length,
-    },
-    sourceCoverage: reviewPack.sourceCoverage,
-    qualityGate: {
-      overallScore: durableReleaseReady ? 10 : releaseState.qualityGate.overallScore,
-      releaseReady: durableReleaseReady,
-      criticalFailures: durableReleaseReady ? [] : releaseState.qualityGate.criticalFailures,
-      warnings,
-      dimensionsBelowThreshold,
-    },
-    outbound: buildQ2OutboundState(),
-    eventSummary: buildGmiReleaseEventSummary("GMI-Q2-2026"),
-    nextActions: durableReleaseReady ? [
-      "Monitor purchaser fulfilment and archive Q1 accountability references.",
-      "Prepare Q3 evidence collection package.",
-    ] : REQUIRED_NEXT_ACTIONS,
-    mutatingActions: [],
-    scorecardData,
-    releaseChecklist: buildGmiReleaseChecklist("GMI-Q2-2026"),
-  };
-}
 type PageProps = {
   consoleState: ConsoleViewModel;
 };
@@ -221,6 +36,9 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
   const { getGmiEventsForReport } = await import("@/lib/intelligence/gmi-event-store");
   const storedEvents = await getGmiEventsForReport("GMI-Q2-2026");
 
+  // Server-only: dynamically imported inside getServerSideProps (stripped from
+  // the client bundle), keeping the durable-resolver chain off the browser.
+  const { buildGmiReleaseConsoleViewModel } = await import("@/lib/intelligence/gmi-release-console-view-model.server");
   const base = await buildGmiReleaseConsoleViewModel();
   const { buildGmiReleaseEventSummary: buildSummary } = await import("@/lib/intelligence/gmi-release-event-summary");
   const eventSummary = buildSummary("GMI-Q2-2026", storedEvents);
