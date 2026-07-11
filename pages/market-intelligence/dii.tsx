@@ -30,7 +30,7 @@ function ScoreBar({ value, max = 100 }: { value: number | null; max?: number }) 
 }
 
 export default function MarketDiiPage({ dii, methodology }: Props) {
-  const isPreview = dii.publicationStatus === "PREVIEW";
+  const isPreview = String(dii.publicationStatus) === "PREVIEW";
   const headlineAuthoritative = !isPreview && dii.headlineScore !== null && String(dii.publicationStatus) === "PUBLISHED";
   const coverageStatus = dii.coverage.scoredCalls >= methodology.coverage.minScoredForHeadline ? "PUBLISHABLE" : "INSUFFICIENT_COVERAGE";
 
