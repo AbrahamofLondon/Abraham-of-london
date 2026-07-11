@@ -437,6 +437,7 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.10.0",
     "@mdx-js/esbuild": "3",
     "@mdx-js/mdx": "^3.0.0",
     "@netlify/functions": "^5.1.3",
