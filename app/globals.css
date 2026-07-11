@@ -3,6 +3,11 @@
    Single dark-first system. No muddy brown cast. No theme confusion.
 */
 
+/* Phase 1A: shared visual foundation import. Must stay first (CSS @import
+   rule ordering requirement). Does not yet win the cascade — see
+   styles/foundation/index.css and aol-foundation.css for why. */
+@import "../styles/foundation/index.css";
+
 @plugin "tailwindcss-animate";
 @tailwind base;
 @tailwind components;
