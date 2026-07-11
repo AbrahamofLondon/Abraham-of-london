@@ -18,9 +18,10 @@ export type RGBA = [number, number, number, number];
 /** Parses "rgb(r,g,b)" or "rgba(r,g,b,a)" (with or without spaces). Defaults alpha to 1. */
 export function parseRgba(input: string): RGBA {
   const m = input.match(/rgba?\(([^)]+)\)/);
-  if (!m) return [0, 0, 0, 1];
-  const parts = m[1].split(",").map((x) => parseFloat(x.trim()));
-  return [parts[0] ?? 0, parts[1] ?? 0, parts[2] ?? 0, parts.length > 3 ? parts[3] : 1];
+  const captured = m?.[1];
+  if (!captured) return [0, 0, 0, 1];
+  const parts = captured.split(",").map((x) => parseFloat(x.trim()));
+  return [parts[0] ?? 0, parts[1] ?? 0, parts[2] ?? 0, parts[3] ?? 1];
 }
 
 /** Composites a translucent foreground over an opaque background (src-over blend). */

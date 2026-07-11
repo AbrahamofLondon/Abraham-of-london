@@ -36,7 +36,7 @@ const VIEWPORTS = [
   { name: "390x844", width: 390, height: 844 },
 ];
 
-const OUT_DIR = join(process.cwd(), "reports/visual/screenshots");
+const OUT_DIR = join(process.cwd(), "reports/visual/screenshots/baseline-v2");
 
 function gitSha(): string {
   try {

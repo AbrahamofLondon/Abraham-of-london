@@ -1,0 +1,50 @@
+/* styles/foundation/shadcn-adapter.css
+ *
+ * Shadcn colour-semantic adapter layer — Phase 1A/1B. Derives Shadcn's
+ * semantic variables (currently independently defined in OKLCH in
+ * app/globals.css) from aol-foundation.css, per brief section 5.3: Shadcn
+ * becomes an adapter, not a parallel visual authority.
+ *
+ * Only the semantics with a clear mapping to one of the 15 authorized
+ * tokens are adapted here: background/foreground, card, popover, primary,
+ * secondary, muted, accent, destructive (+ their -foreground pairs), and
+ * ring. --border, --input, and --radius are deliberately NOT touched —
+ * no border token was part of this authorization, and --radius isn't a
+ * colour. Introducing a border/radius decision here would exceed what
+ * was approved.
+ *
+ * Phase 1A/1B scope: this file defines the TARGET adapter mapping. It does
+ * NOT yet win the cascade — app/globals.css's own :root block still
+ * defines these same Shadcn variable names in OKLCH and, being later in
+ * import order, still wins today. Phase 1B's adapter verification
+ * measures this file's intended mapping against that current reality; it
+ * does not cut over rendering.
+ */
+
+:root {
+  --background: rgb(var(--aol-bg));
+  --foreground: rgb(var(--aol-ink));
+
+  --card: rgb(var(--aol-panel));
+  --card-foreground: rgb(var(--aol-ink));
+
+  --popover: rgb(var(--aol-panel-2));
+  --popover-foreground: rgb(var(--aol-ink));
+
+  --primary: rgb(var(--aol-gold));
+  --primary-foreground: rgb(var(--aol-bg));
+
+  --secondary: rgb(var(--aol-panel-2));
+  --secondary-foreground: rgb(var(--aol-ink));
+
+  --muted: rgb(var(--aol-panel));
+  --muted-foreground: rgb(var(--aol-ink-muted));
+
+  --accent: rgb(var(--aol-panel-3));
+  --accent-foreground: rgb(var(--aol-ink));
+
+  --destructive: rgb(var(--aol-danger));
+  --destructive-foreground: rgb(var(--aol-bg));
+
+  --ring: rgb(var(--aol-gold));
+}

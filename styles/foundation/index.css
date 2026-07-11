@@ -1,0 +1,21 @@
+/* styles/foundation/index.css
+ *
+ * Router-independent shared visual foundation entry point — Phase 1A.
+ * Both app/globals.css and styles/globals.css import this file. It must
+ * be imported BEFORE each router's own :root token declarations so that,
+ * once those duplicate declarations are eventually removed (a later,
+ * separately-gated step — not this pass), this foundation wins the
+ * cascade without requiring any other change.
+ *
+ * Phase 1A scope note: only aol-foundation.css (the 15 owner-authorized
+ * colour tokens) and the two colour-semantic adapter layers (DS, Shadcn)
+ * are included here. Non-colour DS-owned scales (spacing/radii/motion/
+ * shadow/z-index) and the shared-selector consolidation (surfaces.css)
+ * are deliberately out of scope for this pass — see
+ * reports/visual/visual-authority-baseline.md Phase 1 section for the
+ * full scoping rationale.
+ */
+
+@import "./aol-foundation.css";
+@import "./ds-foundation.css";
+@import "./shadcn-adapter.css";

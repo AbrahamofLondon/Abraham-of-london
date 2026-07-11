@@ -1,0 +1,1469 @@
+{
+  "generatedAt": "2026-07-10T18:03:23.136Z",
+  "tokens": {
+    "--aol-bg": {
+      "directVarUsage": {
+        "totalUsages": 3,
+        "fileCount": 1,
+        "consumers": [
+          {
+            "file": "components/Layout.tsx",
+            "count": 3
+          }
+        ]
+      },
+      "cssSourceDirectUsage": {
+        "totalUsages": 4,
+        "fileCount": 2,
+        "consumers": [
+          {
+            "file": "styles/globals.css",
+            "count": 3
+          },
+          {
+            "file": "app/globals.css",
+            "count": 1
+          }
+        ]
+      },
+      "tailwindClasses": [
+        {
+          "family": "top-level semantic",
+          "cls": "background",
+          "wired": true,
+          "totalUsages": 2,
+          "fileCount": 1,
+          "consumers": [
+            {
+              "file": "components/test-tailwind.jsx",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "family": "legacy surface-* (fallback)",
+          "cls": "surface-bg",
+          "wired": true,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        },
+        {
+          "family": "brand.* (correct)",
+          "cls": "brand-obsidian",
+          "wired": true,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        },
+        {
+          "family": "convenience alias",
+          "cls": "softBlack",
+          "wired": true,
+          "totalUsages": 1,
+          "fileCount": 1,
+          "consumers": [
+            {
+              "file": "pages/works-in-progress.tsx",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "family": "convenience alias",
+          "cls": "obsidian",
+          "wired": true,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        },
+        {
+          "family": "aol.* (DEAD literal, does not reference var)",
+          "cls": "aol-void",
+          "wired": false,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        },
+        {
+          "family": "aol.* (DEAD literal, does not reference var)",
+          "cls": "aol-base",
+          "wired": false,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        }
+      ],
+      "shadcnAdapterStatus": "NOT_WIRED — app/globals.css's Shadcn block (--background, --foreground, --primary, --destructive, etc.) is independently defined in OKLCH, not derived from this token. Establishing this derivation is Phase 1A/1B scope.",
+      "dsAdapterStatus": "NOT_WIRED — styles/design-system.css's base :root block independently hardcodes its own value for the corresponding --ds-* concept, not derived from this token. Establishing this derivation is Phase 1A/1B scope.",
+      "totalDistinctConsumerFiles": 3,
+      "consumersByFileCategory": {
+        "component:UNREACHABLE": 2,
+        "route:PUBLIC_CUSTOMER": 1
+      }
+    },
+    "--aol-bg-2": {
+      "directVarUsage": {
+        "totalUsages": 0,
+        "fileCount": 0,
+        "consumers": []
+      },
+      "cssSourceDirectUsage": {
+        "totalUsages": 3,
+        "fileCount": 1,
+        "consumers": [
+          {
+            "file": "styles/globals.css",
+            "count": 3
+          }
+        ]
+      },
+      "tailwindClasses": [
+        {
+          "family": "legacy surface-* (fallback)",
+          "cls": "surface-bg-muted",
+          "wired": true,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        },
+        {
+          "family": "brand.* (correct)",
+          "cls": "brand-obsidian-2",
+          "wired": true,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        },
+        {
+          "family": "convenience alias",
+          "cls": "deepCharcoal",
+          "wired": true,
+          "totalUsages": 45,
+          "fileCount": 23,
+          "consumers": [
+            {
+              "file": "components/Badge.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/blog/BlogPostPreview.tsx",
+              "count": 2
+            },
+            {
+              "file": "components/BookHero.tsx",
+              "count": 4
+            },
+            {
+              "file": "components/books/BookCard.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/Breadcrumb.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/Button.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/downloads/DownloadsGrid.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/events/EventPageHeader.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/FeaturedBook.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/FloatingTeaserCTA.tsx",
+              "count": 4
+            },
+            {
+              "file": "components/homepage/MilestonesTimeline.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/homepage/TestimonialsSection.tsx",
+              "count": 3
+            },
+            {
+              "file": "components/mdx/Badge.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/mdx/BrandFrame.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/mdx/CTA.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/mdx/DownloadCard.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/mdx/ResourcesCTA.tsx",
+              "count": 3
+            },
+            {
+              "file": "components/NewsletterForm.tsx",
+              "count": 3
+            },
+            {
+              "file": "components/PostHero.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/QuickActionBar.tsx",
+              "count": 6
+            },
+            {
+              "file": "components/RelatedContent.tsx",
+              "count": 2
+            },
+            {
+              "file": "components/resources/ResourceGrid.tsx",
+              "count": 4
+            },
+            {
+              "file": "components/ui/SectionHeading.tsx",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "family": "aol.* (DEAD literal)",
+          "cls": "aol-lifted",
+          "wired": false,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        }
+      ],
+      "shadcnAdapterStatus": "NOT_WIRED — app/globals.css's Shadcn block (--background, --foreground, --primary, --destructive, etc.) is independently defined in OKLCH, not derived from this token. Establishing this derivation is Phase 1A/1B scope.",
+      "dsAdapterStatus": "NOT_WIRED — styles/design-system.css's base :root block independently hardcodes its own value for the corresponding --ds-* concept, not derived from this token. Establishing this derivation is Phase 1A/1B scope.",
+      "totalDistinctConsumerFiles": 23,
+      "consumersByFileCategory": {
+        "component:UNREACHABLE": 17,
+        "component:SHARED_PUBLIC_REACHABLE": 6
+      }
+    },
+    "--aol-bg-3": {
+      "directVarUsage": {
+        "totalUsages": 0,
+        "fileCount": 0,
+        "consumers": []
+      },
+      "cssSourceDirectUsage": {
+        "totalUsages": 7,
+        "fileCount": 1,
+        "consumers": [
+          {
+            "file": "styles/globals.css",
+            "count": 7
+          }
+        ]
+      },
+      "tailwindClasses": [
+        {
+          "family": "brand.* (correct)",
+          "cls": "brand-charcoal",
+          "wired": true,
+          "totalUsages": 18,
+          "fileCount": 6,
+          "consumers": [
+            {
+              "file": "components/alignment/EnterpriseDashboardController.tsx",
+              "count": 2
+            },
+            {
+              "file": "components/alignment/EnterpriseIntelligenceDashboard.tsx",
+              "count": 8
+            },
+            {
+              "file": "components/alignment/ExecutiveSynthesisDashboard.tsx",
+              "count": 2
+            },
+            {
+              "file": "components/alignment/MarketCaptureDashboard.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/alignment/OGRReadinessChecklist.tsx",
+              "count": 3
+            },
+            {
+              "file": "components/briefing/FragilityRadar.tsx",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "family": "convenience alias",
+          "cls": "charcoal",
+          "wired": true,
+          "totalUsages": 11,
+          "fileCount": 7,
+          "consumers": [
+            {
+              "file": "pages/brands/index.tsx",
+              "count": 1
+            },
+            {
+              "file": "pages/works-in-progress.tsx",
+              "count": 2
+            },
+            {
+              "file": "components/ContentPageTemplate.tsx",
+              "count": 3
+            },
+            {
+              "file": "components/diagrams/LegacyDiagram.jsx",
+              "count": 2
+            },
+            {
+              "file": "components/DownloadCard.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/mdx/ctas.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/Quote.tsx",
+              "count": 1
+            }
+          ]
+        }
+      ],
+      "shadcnAdapterStatus": "NOT_WIRED — app/globals.css's Shadcn block (--background, --foreground, --primary, --destructive, etc.) is independently defined in OKLCH, not derived from this token. Establishing this derivation is Phase 1A/1B scope.",
+      "dsAdapterStatus": "NOT_WIRED — styles/design-system.css's base :root block independently hardcodes its own value for the corresponding --ds-* concept, not derived from this token. Establishing this derivation is Phase 1A/1B scope.",
+      "totalDistinctConsumerFiles": 13,
+      "consumersByFileCategory": {
+        "component:UNREACHABLE": 9,
+        "component:ADMIN_ONLY": 1,
+        "route:PUBLIC_CUSTOMER": 2,
+        "component:SHARED_PUBLIC_REACHABLE": 1
+      }
+    },
+    "--aol-panel": {
+      "directVarUsage": {
+        "totalUsages": 0,
+        "fileCount": 0,
+        "consumers": []
+      },
+      "cssSourceDirectUsage": {
+        "totalUsages": 0,
+        "fileCount": 0,
+        "consumers": []
+      },
+      "tailwindClasses": [
+        {
+          "family": "legacy surface-* (fallback)",
+          "cls": "surface-panel",
+          "wired": true,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        },
+        {
+          "family": "brand.* (correct)",
+          "cls": "brand-panel",
+          "wired": true,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        },
+        {
+          "family": "aol.* (DEAD literal)",
+          "cls": "aol-panel",
+          "wired": false,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        }
+      ],
+      "shadcnAdapterStatus": "NOT_WIRED — app/globals.css's Shadcn block (--background, --foreground, --primary, --destructive, etc.) is independently defined in OKLCH, not derived from this token. Establishing this derivation is Phase 1A/1B scope.",
+      "dsAdapterStatus": "NOT_WIRED — styles/design-system.css's base :root block independently hardcodes its own value for the corresponding --ds-* concept, not derived from this token. Establishing this derivation is Phase 1A/1B scope.",
+      "totalDistinctConsumerFiles": 0,
+      "consumersByFileCategory": {}
+    },
+    "--aol-panel-2": {
+      "directVarUsage": {
+        "totalUsages": 0,
+        "fileCount": 0,
+        "consumers": []
+      },
+      "cssSourceDirectUsage": {
+        "totalUsages": 0,
+        "fileCount": 0,
+        "consumers": []
+      },
+      "tailwindClasses": [
+        {
+          "family": "legacy surface-* (fallback)",
+          "cls": "surface-panel-alt",
+          "wired": true,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        },
+        {
+          "family": "brand.* (correct)",
+          "cls": "brand-panel-2",
+          "wired": true,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        }
+      ],
+      "shadcnAdapterStatus": "NOT_WIRED — app/globals.css's Shadcn block (--background, --foreground, --primary, --destructive, etc.) is independently defined in OKLCH, not derived from this token. Establishing this derivation is Phase 1A/1B scope.",
+      "dsAdapterStatus": "NOT_WIRED — styles/design-system.css's base :root block independently hardcodes its own value for the corresponding --ds-* concept, not derived from this token. Establishing this derivation is Phase 1A/1B scope.",
+      "totalDistinctConsumerFiles": 0,
+      "consumersByFileCategory": {}
+    },
+    "--aol-panel-3": {
+      "directVarUsage": {
+        "totalUsages": 0,
+        "fileCount": 0,
+        "consumers": []
+      },
+      "cssSourceDirectUsage": {
+        "totalUsages": 0,
+        "fileCount": 0,
+        "consumers": []
+      },
+      "tailwindClasses": [
+        {
+          "family": "brand.* (correct)",
+          "cls": "brand-panel-3",
+          "wired": true,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        }
+      ],
+      "shadcnAdapterStatus": "NOT_WIRED — app/globals.css's Shadcn block (--background, --foreground, --primary, --destructive, etc.) is independently defined in OKLCH, not derived from this token. Establishing this derivation is Phase 1A/1B scope.",
+      "dsAdapterStatus": "NOT_WIRED — styles/design-system.css's base :root block independently hardcodes its own value for the corresponding --ds-* concept, not derived from this token. Establishing this derivation is Phase 1A/1B scope.",
+      "totalDistinctConsumerFiles": 0,
+      "consumersByFileCategory": {}
+    },
+    "--aol-ink": {
+      "directVarUsage": {
+        "totalUsages": 0,
+        "fileCount": 0,
+        "consumers": []
+      },
+      "cssSourceDirectUsage": {
+        "totalUsages": 15,
+        "fileCount": 2,
+        "consumers": [
+          {
+            "file": "styles/globals.css",
+            "count": 7
+          },
+          {
+            "file": "app/globals.css",
+            "count": 8
+          }
+        ]
+      },
+      "tailwindClasses": [
+        {
+          "family": "top-level semantic",
+          "cls": "foreground",
+          "wired": true,
+          "totalUsages": 2,
+          "fileCount": 1,
+          "consumers": [
+            {
+              "file": "components/test-tailwind.jsx",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "family": "legacy surface-* (fallback)",
+          "cls": "surface-text",
+          "wired": true,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        },
+        {
+          "family": "brand.* (correct)",
+          "cls": "brand-cream",
+          "wired": true,
+          "totalUsages": 33,
+          "fileCount": 7,
+          "consumers": [
+            {
+              "file": "components/alignment/EnterpriseDashboardController.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/alignment/EnterpriseIntelligenceDashboard.tsx",
+              "count": 5
+            },
+            {
+              "file": "components/alignment/ExecutiveSynthesisDashboard.tsx",
+              "count": 8
+            },
+            {
+              "file": "components/alignment/MarketCaptureDashboard.tsx",
+              "count": 6
+            },
+            {
+              "file": "components/alignment/OGRFutureHorizon.tsx",
+              "count": 5
+            },
+            {
+              "file": "components/alignment/OGRReadinessChecklist.tsx",
+              "count": 4
+            },
+            {
+              "file": "components/briefing/FragilityRadar.tsx",
+              "count": 4
+            }
+          ]
+        },
+        {
+          "family": "convenience alias",
+          "cls": "cream",
+          "wired": true,
+          "totalUsages": 106,
+          "fileCount": 43,
+          "consumers": [
+            {
+              "file": "pages/accessibility.tsx",
+              "count": 7
+            },
+            {
+              "file": "pages/brands/index.tsx",
+              "count": 6
+            },
+            {
+              "file": "pages/debug/content.tsx",
+              "count": 5
+            },
+            {
+              "file": "pages/fatherhood/index.tsx",
+              "count": 1
+            },
+            {
+              "file": "pages/newsletter.tsx",
+              "count": 3
+            },
+            {
+              "file": "pages/prints/index.tsx",
+              "count": 3
+            },
+            {
+              "file": "pages/speaking/index.tsx",
+              "count": 1
+            },
+            {
+              "file": "pages/strategy/index.tsx",
+              "count": 1
+            },
+            {
+              "file": "pages/subscribe.tsx",
+              "count": 2
+            },
+            {
+              "file": "app/(dashboard)/portfolio/page.tsx",
+              "count": 3
+            },
+            {
+              "file": "components/admin/ShortsAnalytics.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/Article.tsx",
+              "count": 2
+            },
+            {
+              "file": "components/Badge.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/blog/BlogFeatured.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/blog/BlogHeader.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/blog/BlogSafeWrapper.tsx",
+              "count": 5
+            },
+            {
+              "file": "components/blog/BlogSidebar.tsx",
+              "count": 6
+            },
+            {
+              "file": "components/blog/ResourceGrid.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/BookHero.tsx",
+              "count": 4
+            },
+            {
+              "file": "components/CanonInvocation.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/Cards/ArticleHero.tsx",
+              "count": 2
+            },
+            {
+              "file": "components/Cards/BookCard.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/Cards/utils.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/content/CardDisplay.tsx",
+              "count": 3
+            },
+            {
+              "file": "components/content/FeatureGrid.jsx",
+              "count": 1
+            },
+            {
+              "file": "components/ContentlayerDocPage.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/ContentPageTemplate.tsx",
+              "count": 5
+            },
+            {
+              "file": "components/diagrams/LegacyDiagram.jsx",
+              "count": 1
+            },
+            {
+              "file": "components/DownloadCard.tsx",
+              "count": 3
+            },
+            {
+              "file": "components/FeaturedBook.tsx",
+              "count": 3
+            },
+            {
+              "file": "components/FloatingTeaserCTA.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/homepage/MilestonesTimeline.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/homepage/TestimonialsSection.tsx",
+              "count": 2
+            },
+            {
+              "file": "components/InlineCTA.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/LegalStrip.tsx",
+              "count": 4
+            },
+            {
+              "file": "components/mdx/Badge.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/mdx/CTA.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/mdx/ctas.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/NewsletterForm.tsx",
+              "count": 2
+            },
+            {
+              "file": "components/PostHero.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/QuickActionBar.tsx",
+              "count": 13
+            },
+            {
+              "file": "components/resources/ResourceGrid.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/SocialFollowStrip.tsx",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "family": "convenience alias",
+          "cls": "warmWhite",
+          "wired": true,
+          "totalUsages": 19,
+          "fileCount": 14,
+          "consumers": [
+            {
+              "file": "components/Badge.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/Button.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/events/EventResources.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/FeaturedBook.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/icons/BrandLogo.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/icons/SocialIcons/BrandLogo.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/LaunchSubscribe.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/mdx/Badge.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/mdx/ResourcesCTA.tsx",
+              "count": 2
+            },
+            {
+              "file": "components/mdx/shortcodes.tsx",
+              "count": 4
+            },
+            {
+              "file": "components/NewsletterForm.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/PostHero.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/QuickActionBar.tsx",
+              "count": 2
+            },
+            {
+              "file": "components/resources/ResourceGrid.tsx",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "family": "aol.* (DEAD literal)",
+          "cls": "aol-heading",
+          "wired": false,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        },
+        {
+          "family": "aol.* (DEAD literal)",
+          "cls": "aol-body",
+          "wired": false,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        }
+      ],
+      "shadcnAdapterStatus": "NOT_WIRED — app/globals.css's Shadcn block (--background, --foreground, --primary, --destructive, etc.) is independently defined in OKLCH, not derived from this token. Establishing this derivation is Phase 1A/1B scope.",
+      "dsAdapterStatus": "NOT_WIRED — styles/design-system.css's base :root block independently hardcodes its own value for the corresponding --ds-* concept, not derived from this token. Establishing this derivation is Phase 1A/1B scope.",
+      "totalDistinctConsumerFiles": 58,
+      "consumersByFileCategory": {
+        "component:UNREACHABLE": 42,
+        "component:ADMIN_ONLY": 1,
+        "route:CONTROLLED_CUSTOMER": 1,
+        "route:PUBLIC_CUSTOMER": 9,
+        "component:SHARED_PUBLIC_REACHABLE": 5
+      }
+    },
+    "--aol-ink-dim": {
+      "directVarUsage": {
+        "totalUsages": 0,
+        "fileCount": 0,
+        "consumers": []
+      },
+      "cssSourceDirectUsage": {
+        "totalUsages": 7,
+        "fileCount": 1,
+        "consumers": [
+          {
+            "file": "app/globals.css",
+            "count": 7
+          }
+        ]
+      },
+      "tailwindClasses": [
+        {
+          "family": "brand.* (correct)",
+          "cls": "brand-cream-dim",
+          "wired": true,
+          "totalUsages": 3,
+          "fileCount": 2,
+          "consumers": [
+            {
+              "file": "components/alignment/EnterpriseIntelligenceDashboard.tsx",
+              "count": 2
+            },
+            {
+              "file": "components/briefing/FragilityRadar.tsx",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "family": "aol.* (DEAD literal)",
+          "cls": "aol-dim",
+          "wired": false,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        }
+      ],
+      "shadcnAdapterStatus": "NOT_WIRED — app/globals.css's Shadcn block (--background, --foreground, --primary, --destructive, etc.) is independently defined in OKLCH, not derived from this token. Establishing this derivation is Phase 1A/1B scope.",
+      "dsAdapterStatus": "NOT_WIRED — styles/design-system.css's base :root block independently hardcodes its own value for the corresponding --ds-* concept, not derived from this token. Establishing this derivation is Phase 1A/1B scope.",
+      "totalDistinctConsumerFiles": 2,
+      "consumersByFileCategory": {
+        "component:UNREACHABLE": 1,
+        "component:ADMIN_ONLY": 1
+      }
+    },
+    "--aol-ink-muted": {
+      "directVarUsage": {
+        "totalUsages": 0,
+        "fileCount": 0,
+        "consumers": []
+      },
+      "cssSourceDirectUsage": {
+        "totalUsages": 3,
+        "fileCount": 1,
+        "consumers": [
+          {
+            "file": "app/globals.css",
+            "count": 3
+          }
+        ]
+      },
+      "tailwindClasses": [
+        {
+          "family": "legacy surface-* (fallback)",
+          "cls": "surface-text-muted",
+          "wired": true,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        },
+        {
+          "family": "brand.* (correct)",
+          "cls": "brand-cream-muted",
+          "wired": true,
+          "totalUsages": 3,
+          "fileCount": 2,
+          "consumers": [
+            {
+              "file": "components/alignment/EnterpriseIntelligenceDashboard.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/briefing/FragilityRadar.tsx",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "family": "aol.* (DEAD literal)",
+          "cls": "aol-muted",
+          "wired": false,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        },
+        {
+          "family": "aol.* (DEAD literal)",
+          "cls": "aol-faint",
+          "wired": false,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        }
+      ],
+      "shadcnAdapterStatus": "NOT_WIRED — app/globals.css's Shadcn block (--background, --foreground, --primary, --destructive, etc.) is independently defined in OKLCH, not derived from this token. Establishing this derivation is Phase 1A/1B scope.",
+      "dsAdapterStatus": "NOT_WIRED — styles/design-system.css's base :root block independently hardcodes its own value for the corresponding --ds-* concept, not derived from this token. Establishing this derivation is Phase 1A/1B scope.",
+      "totalDistinctConsumerFiles": 2,
+      "consumersByFileCategory": {
+        "component:UNREACHABLE": 1,
+        "component:ADMIN_ONLY": 1
+      }
+    },
+    "--aol-gold": {
+      "directVarUsage": {
+        "totalUsages": 0,
+        "fileCount": 0,
+        "consumers": []
+      },
+      "cssSourceDirectUsage": {
+        "totalUsages": 25,
+        "fileCount": 2,
+        "consumers": [
+          {
+            "file": "styles/globals.css",
+            "count": 3
+          },
+          {
+            "file": "app/globals.css",
+            "count": 22
+          }
+        ]
+      },
+      "tailwindClasses": [
+        {
+          "family": "top-level semantic",
+          "cls": "ring",
+          "wired": true,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        },
+        {
+          "family": "legacy surface-* (fallback)",
+          "cls": "surface-accent",
+          "wired": true,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        },
+        {
+          "family": "brand.* (correct)",
+          "cls": "brand-gold",
+          "wired": true,
+          "totalUsages": 116,
+          "fileCount": 7,
+          "consumers": [
+            {
+              "file": "components/alignment/EnterpriseDashboardContainer.tsx",
+              "count": 2
+            },
+            {
+              "file": "components/alignment/EnterpriseDashboardController.tsx",
+              "count": 6
+            },
+            {
+              "file": "components/alignment/EnterpriseIntelligenceDashboard.tsx",
+              "count": 7
+            },
+            {
+              "file": "components/alignment/ExecutiveSynthesisDashboard.tsx",
+              "count": 39
+            },
+            {
+              "file": "components/alignment/MarketCaptureDashboard.tsx",
+              "count": 23
+            },
+            {
+              "file": "components/alignment/OGRFutureHorizon.tsx",
+              "count": 23
+            },
+            {
+              "file": "components/alignment/OGRReadinessChecklist.tsx",
+              "count": 16
+            }
+          ]
+        },
+        {
+          "family": "convenience alias",
+          "cls": "softGold",
+          "wired": true,
+          "totalUsages": 111,
+          "fileCount": 27,
+          "consumers": [
+            {
+              "file": "pages/accessibility.tsx",
+              "count": 1
+            },
+            {
+              "file": "pages/works-in-progress.tsx",
+              "count": 2
+            },
+            {
+              "file": "components/Article.tsx",
+              "count": 3
+            },
+            {
+              "file": "components/Badge.tsx",
+              "count": 2
+            },
+            {
+              "file": "components/blog/BlogPostPreview.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/BookHero.tsx",
+              "count": 5
+            },
+            {
+              "file": "components/books/BookCard.tsx",
+              "count": 13
+            },
+            {
+              "file": "components/canon/CanonResourceCard.tsx",
+              "count": 6
+            },
+            {
+              "file": "components/CanonInvocation.tsx",
+              "count": 5
+            },
+            {
+              "file": "components/Cards/ArticleHero.tsx",
+              "count": 10
+            },
+            {
+              "file": "components/Cards/BookCard.tsx",
+              "count": 9
+            },
+            {
+              "file": "components/Cards/utils.tsx",
+              "count": 9
+            },
+            {
+              "file": "components/ContentPageTemplate.tsx",
+              "count": 7
+            },
+            {
+              "file": "components/Divider.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/downloads/DownloadsGrid.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/EmailSignup.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/EventCard.tsx",
+              "count": 6
+            },
+            {
+              "file": "components/FeaturedBook.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/homepage/TestimonialsSection.tsx",
+              "count": 4
+            },
+            {
+              "file": "components/LegalStrip.tsx",
+              "count": 6
+            },
+            {
+              "file": "components/mdx/Badge.tsx",
+              "count": 2
+            },
+            {
+              "file": "components/mdx/Divider.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/mdx/HeroEyebrow.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/mdx/ResourcesCTA.tsx",
+              "count": 4
+            },
+            {
+              "file": "components/NewsletterForm.tsx",
+              "count": 6
+            },
+            {
+              "file": "components/resources/ResourceGrid.tsx",
+              "count": 3
+            },
+            {
+              "file": "components/Rule.tsx",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "family": "convenience alias",
+          "cls": "gold",
+          "wired": true,
+          "totalUsages": 320,
+          "fileCount": 36,
+          "consumers": [
+            {
+              "file": "pages/accessibility.tsx",
+              "count": 3
+            },
+            {
+              "file": "pages/admin/pdf-dashboard.tsx",
+              "count": 6
+            },
+            {
+              "file": "pages/brands/index.tsx",
+              "count": 44
+            },
+            {
+              "file": "pages/debug/content.tsx",
+              "count": 8
+            },
+            {
+              "file": "pages/fatherhood/index.tsx",
+              "count": 27
+            },
+            {
+              "file": "pages/inner-circle/admin.tsx",
+              "count": 19
+            },
+            {
+              "file": "pages/inner-circle/resend.tsx",
+              "count": 8
+            },
+            {
+              "file": "pages/newsletter.tsx",
+              "count": 18
+            },
+            {
+              "file": "pages/prints/index.tsx",
+              "count": 42
+            },
+            {
+              "file": "pages/speaking/index.tsx",
+              "count": 21
+            },
+            {
+              "file": "pages/subscribe.tsx",
+              "count": 18
+            },
+            {
+              "file": "components/admin/ShortsAnalytics.tsx",
+              "count": 8
+            },
+            {
+              "file": "components/books/PurchaseOptions.tsx",
+              "count": 2
+            },
+            {
+              "file": "components/books/RelatedBooks.tsx",
+              "count": 7
+            },
+            {
+              "file": "components/CanonReference.tsx",
+              "count": 5
+            },
+            {
+              "file": "components/content/FeatureGrid.jsx",
+              "count": 1
+            },
+            {
+              "file": "components/ContentlayerDocPage.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/dashboard/admin/BriefSearch.tsx",
+              "count": 6
+            },
+            {
+              "file": "components/diagrams/LegacyDiagram.jsx",
+              "count": 2
+            },
+            {
+              "file": "components/DownloadCard.tsx",
+              "count": 11
+            },
+            {
+              "file": "components/events/AddToCalendar.tsx",
+              "count": 4
+            },
+            {
+              "file": "components/events/ChathamBadge.tsx",
+              "count": 4
+            },
+            {
+              "file": "components/events/ChathamCallout.tsx",
+              "count": 4
+            },
+            {
+              "file": "components/forms/DiagnosticConsultation.tsx",
+              "count": 11
+            },
+            {
+              "file": "components/LegalStrip.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/lexicon/LexiconEntry.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/mdx/BriefSummaryCard.tsx",
+              "count": 5
+            },
+            {
+              "file": "components/mdx/CtaPresetComponent.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/mdx/ctas.tsx",
+              "count": 7
+            },
+            {
+              "file": "components/mdx/EmbossedBrandMark.tsx",
+              "count": 3
+            },
+            {
+              "file": "components/mdx/MissingComponent.tsx",
+              "count": 2
+            },
+            {
+              "file": "components/mdx/Quote.tsx",
+              "count": 2
+            },
+            {
+              "file": "components/PDFFilters.tsx",
+              "count": 8
+            },
+            {
+              "file": "components/Quote.tsx",
+              "count": 1
+            },
+            {
+              "file": "components/ShareRow.tsx",
+              "count": 2
+            },
+            {
+              "file": "components/SocialFollowStrip.tsx",
+              "count": 7
+            }
+          ]
+        },
+        {
+          "family": "aol.* (DEAD literal)",
+          "cls": "aol-gold",
+          "wired": false,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        }
+      ],
+      "shadcnAdapterStatus": "NOT_WIRED — app/globals.css's Shadcn block (--background, --foreground, --primary, --destructive, etc.) is independently defined in OKLCH, not derived from this token. Establishing this derivation is Phase 1A/1B scope.",
+      "dsAdapterStatus": "NOT_WIRED — styles/design-system.css's base :root block independently hardcodes its own value for the corresponding --ds-* concept, not derived from this token. Establishing this derivation is Phase 1A/1B scope.",
+      "totalDistinctConsumerFiles": 68,
+      "consumersByFileCategory": {
+        "component:UNREACHABLE": 43,
+        "route:CONTROLLED_CUSTOMER": 2,
+        "route:PUBLIC_CUSTOMER": 8,
+        "component:SHARED_PUBLIC_REACHABLE": 11,
+        "route:ADMIN": 1,
+        "route:INTERNAL_OPERATOR": 1,
+        "component:ADMIN_ONLY": 2
+      }
+    },
+    "--aol-gold-strong": {
+      "directVarUsage": {
+        "totalUsages": 0,
+        "fileCount": 0,
+        "consumers": []
+      },
+      "cssSourceDirectUsage": {
+        "totalUsages": 6,
+        "fileCount": 1,
+        "consumers": [
+          {
+            "file": "app/globals.css",
+            "count": 6
+          }
+        ]
+      },
+      "tailwindClasses": [
+        {
+          "family": "brand.* (correct)",
+          "cls": "brand-gold-strong",
+          "wired": true,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        },
+        {
+          "family": "convenience alias",
+          "cls": "amber",
+          "wired": true,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        },
+        {
+          "family": "aol.* (DEAD literal)",
+          "cls": "aol-gold-strong",
+          "wired": false,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        },
+        {
+          "family": "aol.* (DEAD literal)",
+          "cls": "aol-amber",
+          "wired": false,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        }
+      ],
+      "shadcnAdapterStatus": "NOT_WIRED — app/globals.css's Shadcn block (--background, --foreground, --primary, --destructive, etc.) is independently defined in OKLCH, not derived from this token. Establishing this derivation is Phase 1A/1B scope.",
+      "dsAdapterStatus": "NOT_WIRED — styles/design-system.css's base :root block independently hardcodes its own value for the corresponding --ds-* concept, not derived from this token. Establishing this derivation is Phase 1A/1B scope.",
+      "totalDistinctConsumerFiles": 0,
+      "consumersByFileCategory": {}
+    },
+    "--aol-gold-soft": {
+      "directVarUsage": {
+        "totalUsages": 0,
+        "fileCount": 0,
+        "consumers": []
+      },
+      "cssSourceDirectUsage": {
+        "totalUsages": 0,
+        "fileCount": 0,
+        "consumers": []
+      },
+      "tailwindClasses": [
+        {
+          "family": "legacy surface-* (fallback)",
+          "cls": "surface-accent-soft",
+          "wired": true,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        },
+        {
+          "family": "brand.* (correct)",
+          "cls": "brand-gold-soft",
+          "wired": true,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        },
+        {
+          "family": "aol.* (DEAD literal)",
+          "cls": "aol-gold-soft",
+          "wired": false,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        }
+      ],
+      "shadcnAdapterStatus": "NOT_WIRED — app/globals.css's Shadcn block (--background, --foreground, --primary, --destructive, etc.) is independently defined in OKLCH, not derived from this token. Establishing this derivation is Phase 1A/1B scope.",
+      "dsAdapterStatus": "NOT_WIRED — styles/design-system.css's base :root block independently hardcodes its own value for the corresponding --ds-* concept, not derived from this token. Establishing this derivation is Phase 1A/1B scope.",
+      "totalDistinctConsumerFiles": 0,
+      "consumersByFileCategory": {}
+    },
+    "--aol-danger": {
+      "directVarUsage": {
+        "totalUsages": 0,
+        "fileCount": 0,
+        "consumers": []
+      },
+      "cssSourceDirectUsage": {
+        "totalUsages": 0,
+        "fileCount": 0,
+        "consumers": []
+      },
+      "tailwindClasses": [
+        {
+          "family": "brand.* (correct)",
+          "cls": "brand-danger",
+          "wired": true,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        }
+      ],
+      "shadcnAdapterStatus": "NOT_WIRED — app/globals.css's Shadcn block (--background, --foreground, --primary, --destructive, etc.) is independently defined in OKLCH, not derived from this token. Establishing this derivation is Phase 1A/1B scope.",
+      "dsAdapterStatus": "NOT_WIRED — styles/design-system.css's base :root block independently hardcodes its own value for the corresponding --ds-* concept, not derived from this token. Establishing this derivation is Phase 1A/1B scope.",
+      "totalDistinctConsumerFiles": 0,
+      "consumersByFileCategory": {}
+    },
+    "--aol-success": {
+      "directVarUsage": {
+        "totalUsages": 0,
+        "fileCount": 0,
+        "consumers": []
+      },
+      "cssSourceDirectUsage": {
+        "totalUsages": 0,
+        "fileCount": 0,
+        "consumers": []
+      },
+      "tailwindClasses": [
+        {
+          "family": "brand.* (correct)",
+          "cls": "brand-success",
+          "wired": true,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        }
+      ],
+      "shadcnAdapterStatus": "NOT_WIRED — app/globals.css's Shadcn block (--background, --foreground, --primary, --destructive, etc.) is independently defined in OKLCH, not derived from this token. Establishing this derivation is Phase 1A/1B scope.",
+      "dsAdapterStatus": "NOT_WIRED — styles/design-system.css's base :root block independently hardcodes its own value for the corresponding --ds-* concept, not derived from this token. Establishing this derivation is Phase 1A/1B scope.",
+      "totalDistinctConsumerFiles": 0,
+      "consumersByFileCategory": {}
+    },
+    "--aol-warning": {
+      "directVarUsage": {
+        "totalUsages": 0,
+        "fileCount": 0,
+        "consumers": []
+      },
+      "cssSourceDirectUsage": {
+        "totalUsages": 0,
+        "fileCount": 0,
+        "consumers": []
+      },
+      "tailwindClasses": [
+        {
+          "family": "brand.* (correct)",
+          "cls": "brand-warning",
+          "wired": true,
+          "totalUsages": 0,
+          "fileCount": 0,
+          "consumers": []
+        }
+      ],
+      "shadcnAdapterStatus": "NOT_WIRED — app/globals.css's Shadcn block (--background, --foreground, --primary, --destructive, etc.) is independently defined in OKLCH, not derived from this token. Establishing this derivation is Phase 1A/1B scope.",
+      "dsAdapterStatus": "NOT_WIRED — styles/design-system.css's base :root block independently hardcodes its own value for the corresponding --ds-* concept, not derived from this token. Establishing this derivation is Phase 1A/1B scope.",
+      "totalDistinctConsumerFiles": 0,
+      "consumersByFileCategory": {}
+    }
+  }
+}

@@ -1,0 +1,39 @@
+/* styles/foundation/ds-foundation.css
+ *
+ * DS colour-semantic adapter layer — Phase 1A/1B. Derives the DS system's
+ * colour semantics that overlap AOL's authority from aol-foundation.css.
+ * DS's non-colour-owned scales (spacing, radii, motion, shadow, z-index,
+ * neutral/steel tonal scales, surface-contract machinery) are untouched —
+ * out of scope for this pass, still owned directly by
+ * lib/design-system/* and styles/design-system.css's foundation-token
+ * block.
+ *
+ * Phase 1A/1B scope: this file defines the TARGET adapter mapping. It does
+ * NOT yet win the cascade — styles/design-system.css's own :root block
+ * (lines 110-137) still defines --ds-text/--ds-panel/--ds-accent/etc
+ * directly and, being later in import order, still wins today. Phase 1B's
+ * adapter verification measures this file's intended mapping against that
+ * current reality; it does not cut over rendering.
+ *
+ * The 11 per-surface override blocks in styles/design-system.css
+ * (.ds-surface-canon, .ds-surface-vault, etc.) are intentional per-surface
+ * customisation, explicitly untouched by this file — they override on top
+ * of whichever base layer wins.
+ */
+
+:root {
+  --ds-background: rgb(var(--aol-bg));
+  --ds-background-muted: rgb(var(--aol-bg-2));
+  --ds-panel: rgb(var(--aol-panel));
+  --ds-panel-alt: rgb(var(--aol-panel-2));
+  --ds-text: rgb(var(--aol-ink));
+  --ds-text-muted: rgb(var(--aol-ink-dim));
+  --ds-text-subtle: rgb(var(--aol-ink-muted));
+  --ds-link: rgb(var(--aol-gold-soft));
+  --ds-accent: rgb(var(--aol-gold));
+  --ds-accent-soft: rgb(var(--aol-gold) / 0.20);
+  --ds-success: rgb(var(--aol-success));
+  --ds-warning: rgb(var(--aol-warning));
+  --ds-danger: rgb(var(--aol-danger));
+  --ds-focus-ring: rgb(var(--aol-gold) / 0.55);
+}
