@@ -184,7 +184,7 @@ function IntelligenceArchitecture() {
               <p className="font-sans text-[11px] font-bold uppercase tracking-[0.16em]" style={{ color: brass }}>{domain.title}</p>
               <div className="mt-4 space-y-2">
                 {domain.items.map((item) => (
-                  <Link key={item.href} href={item.href} className="block border-l-2 py-1.5 pl-3 text-sm transition hover:opacity-70" style={{ borderColor: brass + '30', color: graphite }}>
+                  <Link key={item.label} href={item.href} className="block border-l-2 py-1.5 pl-3 text-sm transition hover:opacity-70" style={{ borderColor: brass + '30', color: graphite }}>
                     {item.label}
                   </Link>
                 ))}
@@ -201,7 +201,7 @@ function IntelligenceArchitecture() {
               { label: 'Provenance', href: '/provenance/demo' },
               { label: 'Release authority', href: '/trust-centre' },
             ].map((item) => (
-              <Link key={item.href} href={item.href} className="font-mono text-[11px] uppercase tracking-[0.14em] transition hover:opacity-70" style={{ color: graphite }}>
+              <Link key={item.label} href={item.href} className="font-mono text-[11px] uppercase tracking-[0.14em] transition hover:opacity-70" style={{ color: graphite }}>
                 {item.label} <ArrowRight className="inline h-3 w-3" aria-hidden />
               </Link>
             ))}
