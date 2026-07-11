@@ -223,4 +223,3 @@ Produced before any token definition changes, per the Phase 1 authorization. For
 - **DS adapter:** NOT_WIRED — styles/design-system.css's base :root block independently hardcodes its own value for the corresponding --ds-* concept, not derived from this token. Establishing this derivation is Phase 1A/1B scope.
 - **Total distinct consumer files:** 0
 - **By file category:**
-
