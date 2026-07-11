@@ -26,14 +26,14 @@
  * explicit, owner-approved value convergence — not an accident, and not
  * hidden here.
  *
- * Phase 1A scope: this file exists and is imported by both routers, but
- * does NOT yet win any cascade — styles/globals.css and app/globals.css
- * both still define these same 15 variable names later in their own
- * stylesheets, and (per normal CSS cascade rules) their own later
- * declarations still win today. Removing those duplicate declarations is
- * explicitly NOT this pass's scope ("do not migrate customer pages", "do
- * not perform raw-colour cleanup") — Phase 1B verifies parity against
- * this foundation; it does not cut over rendering to it.
+ * Phase 1B update: styles/globals.css and app/globals.css no longer
+ * redeclare these 15 variable names — those duplicate :root blocks were
+ * removed (see the "relocated to the shared foundation" comments left in
+ * their place). This file's values now win the cascade on both routers.
+ * Router-specific base/layout rules, border/focus/selection tokens
+ * (--aol-border, --aol-line*, --aol-surface*, --aol-watermark), fonts, and
+ * the Shadcn/DS adapter targets remain untouched in their own files —
+ * only the 15 authorized colour tokens relocated.
  *
  * Scope note: only the 15 tokens explicitly authorized (background,
  * panels, ink, gold, status) are defined here. Border/focus/selection
