@@ -8,7 +8,6 @@
  */
 import { MARKET_CALL_LEDGER, type MarketCallRecord } from "../market-intelligence-call-ledger";
 import { buildLineageFromCall, type CallLineageRecord, type LineageStatus } from "./edition-lineage";
-import { resolveMarketAccountabilityEvidence } from "./market-accountability-evidence";
 
 export interface CallLineage {
   originalCallId: string;
@@ -68,23 +67,8 @@ export function getCrossEditionReview(): CallLineage[] {
   return MARKET_CALL_LEDGER.map(buildCallLineage);
 }
 
-/**
- * §12 PUBLIC gate — surface-facing cross-edition review. PREVIEW mode (no authoritative
- * ledger) is drawn from seed fixtures and must be labelled as illustrative.
- */
-export function getPublicCrossEditionReview(opts: import("./market-accountability-evidence").ResolveEvidenceOptions = {}): {
-  mode: import("./market-accountability-evidence").EvidenceMode; preview: boolean; review: CallLineage[]; summary: CrossEditionSummary;
-} {
-  const evidence = resolveMarketAccountabilityEvidence(opts);
-  const review = evidence.calls.map(buildCallLineage);
-  return { mode: evidence.mode, preview: !evidence.publicPublishable, review, summary: summarizeLineages(review) };
-}
-
 export function getCrossEditionSummary(): CrossEditionSummary {
-  return summarizeLineages(getCrossEditionReview());
-}
-
-function summarizeLineages(lineages: CallLineage[]): CrossEditionSummary {
+  const lineages = getCrossEditionReview();
   return {
     totalCalls: lineages.length,
     originated: lineages.filter(l => l.lineageStatus === "ORIGINATED").length,

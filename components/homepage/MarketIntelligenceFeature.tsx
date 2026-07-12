@@ -36,7 +36,7 @@ const EDITIONS = [
     icon: Lock,
     tag:  "Institutional Edition",
     body: "Active Q1 2026 institutional edition for the current Q2 2026 decision window.",
-    href: "/artifacts/global-market-intelligence-report-q1-2026",
+    href: "/intelligence",
     cta:  "Purchase report",
     gold: true,
   },

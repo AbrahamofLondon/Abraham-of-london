@@ -1,0 +1,7 @@
+{
+  "STATUS": "DEFERRED — NO DATA",
+  "warning": "This file contains zero emission-diff data. Its presence is not evidence of completed work. Do not consume this file programmatically as if it had a real diff payload.",
+  "reason": "Requires compiling both the current custom extractor and an experimental default-extraction configuration, then diffing emitted class sets across representative routes per brief §11 steps 3-6. Not attempted in Phase 0 (measurement-only, no build experiments).",
+  "prerequisite": "tailwind-extractor-trigger-inventory.json (done, Phase 0) identifies the 3 files that would be affected by any extractor change.",
+  "scheduledFor": "Phase 3"
+}

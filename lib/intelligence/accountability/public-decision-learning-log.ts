@@ -9,7 +9,6 @@
  */
 import { MARKET_CALL_LEDGER, type MarketCallRecord, type MarketCallOutcomeStatus } from "../market-intelligence-call-ledger";
 import { buildFalsificationCondition, type FalsificationCondition } from "./falsification-semantics";
-import { resolveMarketAccountabilityEvidence, type EvidenceMode, type ResolveEvidenceOptions } from "./market-accountability-evidence";
 
 export interface LearningLogEntry {
   originalCallId: string;
@@ -65,20 +64,8 @@ export function getLearningLogEntry(callId: string): LearningLogEntry | null {
   return call ? buildLearningLogEntry(call) : null;
 }
 
-/**
- * §11 PUBLIC gate — the surface-facing learning log. In PREVIEW mode (no authoritative
- * persisted ledger) entries are drawn from seed fixtures and MUST be labelled as an
- * illustration of the register, not a published accountability record.
- */
-export function getPublicLearningLog(opts: ResolveEvidenceOptions = {}): {
-  mode: EvidenceMode; preview: boolean; entries: LearningLogEntry[]; summary: ReturnType<typeof summarizeLearningLog>;
-} {
-  const evidence = resolveMarketAccountabilityEvidence(opts);
-  const entries = evidence.calls.map(buildLearningLogEntry);
-  return { mode: evidence.mode, preview: !evidence.publicPublishable, entries, summary: summarizeLearningLog(entries) };
-}
-
-export function summarizeLearningLog(entries: LearningLogEntry[]) {
+export function getLearningLogSummary() {
+  const entries = getLearningLog();
   return {
     totalEntries: entries.length,
     confirmed: entries.filter(e => e.outcomeStatus === "CONFIRMED_STRONGLY" || e.outcomeStatus === "DIRECTIONALLY_CONFIRMED").length,
@@ -90,11 +77,6 @@ export function summarizeLearningLog(entries: LearningLogEntry[]) {
     referenceOnlyConditions: entries.filter(e => e.falsificationCondition.status === "REFERENCE_ONLY").length,
     notSpecified: entries.filter(e => e.falsificationCondition.status === "NOT_SPECIFIED_IN_SOURCE").length,
   };
-}
-
-/** Backward-compatible summary over the full (seed/preview) log. */
-export function getLearningLogSummary() {
-  return summarizeLearningLog(getLearningLog());
 }
 
 function groupBy<T>(items: T[], fn: (item: T) => string): Record<string, T[]> {

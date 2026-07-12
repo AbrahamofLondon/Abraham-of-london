@@ -1,0 +1,3 @@
+A	lib/governance/claim-boundary-authority.test.ts
+A	lib/governance/claim-boundary-authority.ts
+A	scripts/check-claim-boundary.ts

@@ -20,6 +20,7 @@
  */
 
 import { MARKET_CALL_LEDGER, type MarketCallRecord } from "../market-intelligence-call-ledger";
+import type { EvidenceAuthority, PublicEvidenceEnvelope } from "./market-decision-integrity-index";
 
 export type EvidenceMode = "AUTHORITATIVE" | "PREVIEW_SEED";
 

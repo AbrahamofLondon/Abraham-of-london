@@ -117,54 +117,45 @@ export function buildAlertMessage(trigger: FalsificationTrigger): string {
   return `You previously said this decision should be revisited if "${trigger.statedTrigger}". The recorded evidence now meets that condition. Review is required.`;
 }
 
-// ── §14 evidence-admissibility gate (mandatory) ───────────────────────────────
-// The raw state machine above trusts a caller-supplied strength. §14 forbids two
-// things it cannot enforce alone: converting DRAFT GMI into authoritative trigger
-// evidence, and using weak proxy evidence to force a high-stakes review. This gate
-// is the admissibility authority that must sit in front of the state machine for any
-// real evaluation.
+// Evidence admissibility -- Section 14 hardening
 
 export interface ObservedEvidence {
-  source: EvidenceSource;
+  source: EvidenceSource | "external_evidence";
   claimedStrength: "none" | "weak" | "moderate" | "strong";
-  /** for a gmi_edition source: the edition's release state. DRAFT/CONTROLLED are inadmissible. */
   editionState?: "DRAFT" | "CONTROLLED" | "RELEASED";
-  /** whether the evidence is verified / human-approved (i.e. authoritative). */
   verified?: boolean;
 }
 
 export interface AdmissibilityResult {
-  admissibleStrength: "none" | "weak" | "moderate" | "strong";
   admissible: boolean;
+  admissibleStrength: "none" | "weak" | "moderate" | "strong";
   downgraded: boolean;
   reason: string;
 }
 
-/**
- * Assess whether observed evidence may drive a high-stakes transition.
- *   • DRAFT/CONTROLLED GMI editions are never authoritative → strength forced to none;
- *   • weak proxy evidence is recorded but can never escalate;
- *   • claimed-strong evidence that is not verified is capped at moderate.
- */
-export function assessEvidenceAdmissibility(ev: ObservedEvidence): AdmissibilityResult {
-  if (ev.source === "gmi_edition" && ev.editionState && ev.editionState !== "RELEASED") {
-    return { admissibleStrength: "none", admissible: false, downgraded: true, reason: `A ${ev.editionState} GMI edition is not authoritative trigger evidence; only a RELEASED edition counts.` };
+export function assessEvidenceAdmissibility(evidence: ObservedEvidence): AdmissibilityResult {
+  if (evidence.source === "gmi_edition") {
+    if (evidence.editionState === "DRAFT" || evidence.editionState === "CONTROLLED") {
+      return { admissible: false, admissibleStrength: "none", downgraded: false, reason: "GMI edition is " + evidence.editionState + " -- not admissible" };
+    }
+    if (evidence.editionState === "RELEASED" && evidence.verified) {
+      return { admissible: true, admissibleStrength: evidence.claimedStrength, downgraded: false, reason: "Released, verified GMI edition evidence is admissible" };
+    }
   }
-  if (ev.claimedStrength === "weak") {
-    return { admissibleStrength: "weak", admissible: true, downgraded: false, reason: "Weak proxy evidence is recorded but cannot force a high-stakes review." };
+  if (evidence.claimedStrength === "strong" && !evidence.verified) {
+    return { admissible: true, admissibleStrength: "moderate", downgraded: true, reason: "Unverified strong evidence capped at moderate" };
   }
-  if (ev.claimedStrength === "strong" && ev.verified === false) {
-    return { admissibleStrength: "moderate", admissible: true, downgraded: true, reason: "Unverified evidence cannot count as strong; capped at moderate until verified." };
+  if (evidence.claimedStrength === "weak") {
+    return { admissible: true, admissibleStrength: "weak", downgraded: false, reason: "Weak evidence admissible but insufficient for escalation" };
   }
-  return { admissibleStrength: ev.claimedStrength, admissible: true, downgraded: false, reason: "Evidence admissible at claimed strength." };
+  return { admissible: true, admissibleStrength: evidence.claimedStrength, downgraded: false, reason: "Evidence admitted at claimed strength" };
 }
 
-/** Public entry: gate admissibility (§14), then advance the state machine. */
-export function evaluateTriggerWithEvidence(
-  trigger: FalsificationTrigger,
-  ev: ObservedEvidence,
-): WatchdogEvaluation & { admissibility: AdmissibilityResult } {
-  const admissibility = assessEvidenceAdmissibility(ev);
+export function evaluateTriggerWithEvidence(trigger: FalsificationTrigger, evidence: ObservedEvidence): WatchdogEvaluation & { admissibility: AdmissibilityResult } {
+  const admissibility = assessEvidenceAdmissibility(evidence);
+  if (!admissibility.admissible) {
+    return { ...evaluateTrigger(trigger, "none"), admissibility };
+  }
   const evaluation = evaluateTrigger(trigger, admissibility.admissibleStrength);
   return { ...evaluation, admissibility };
 }

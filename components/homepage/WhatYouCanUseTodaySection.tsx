@@ -23,7 +23,7 @@ const ESTATE_PILLARS = [
     status: "Governed intelligence line",
     label: "Global Market Intelligence",
     summary: "Quarterly market intelligence that reviews prior material calls before issuing the next report.",
-    href: "/artifacts/global-market-intelligence-report-q1-2026",
+    href: "/intelligence",
     accent: "rgba(216,180,254,0.80)",
     primary: false,
   },

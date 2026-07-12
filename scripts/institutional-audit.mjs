@@ -71,10 +71,17 @@ const AUTHORIZED_PREFIXES = [
   '/assets'
 ];
 
+const EXCLUDED_DIRS = new Set([
+  'source-material',   // Draft creative works outside publication contract
+  '_partials',         // Content fragments, not standalone documents
+  'artifacts',         // Archived/static assets, not live content
+]);
+
 const getFiles = (dir) => {
   if (!fs.existsSync(dir)) return [];
   const entries = fs.readdirSync(dir, { withFileTypes: true });
   return entries.flatMap((entry) => {
+    if (entry.isDirectory() && EXCLUDED_DIRS.has(entry.name)) return [];
     const res = path.resolve(dir, entry.name);
     return entry.isDirectory() ? getFiles(res) : res;
   });

@@ -1,0 +1,72 @@
+/* styles/foundation/aol-foundation.css
+ *
+ * Canonical AOL semantic token authority — Phase 1A, shared foundation
+ * introduction. Router-independent. These 15 values are the exact,
+ * explicit owner decisions from the Phase 1 authorization — not a
+ * Pages-vs-App default inference, not a redesign.
+ *
+ * Provenance of each value (per the owner's canonical decision):
+ *   --aol-bg, --aol-bg-2, --aol-bg-3       = Pages Router's existing values
+ *   --aol-gold                              = Pages Router's existing value
+ *   --aol-panel, --aol-panel-2, --aol-panel-3,
+ *   --aol-ink, --aol-ink-dim, --aol-ink-muted,
+ *   --aol-gold-strong, --aol-gold-soft,
+ *   --aol-danger, --aol-success, --aol-warning
+ *                                            = App Router's existing values
+ *
+ * IMPORTANT — this is NOT yet a "no appearance change" pass for all 15
+ * tokens. 11 of the 15 canonical values match App Router's current
+ * numbers rather than Pages Router's. Pages Router is the more heavily
+ * used surface (see reports/visual/token-blast-radius-inventory.md) and
+ * was what the Phase 0 baseline screenshots/contrast measurements were
+ * taken against. Once a later phase removes the duplicate definitions
+ * from styles/globals.css and this foundation's values start winning the
+ * cascade there, ink/panel/gold-strong/gold-soft/danger/success/warning
+ * WILL visibly change on Pages-Router-rendered pages. That is an
+ * explicit, owner-approved value convergence — not an accident, and not
+ * hidden here.
+ *
+ * Phase 1B update: styles/globals.css and app/globals.css no longer
+ * redeclare these 15 variable names — those duplicate :root blocks were
+ * removed (see the "relocated to the shared foundation" comments left in
+ * their place). This file's values now win the cascade on both routers.
+ * Router-specific base/layout rules, border/focus/selection tokens
+ * (--aol-border, --aol-line*, --aol-surface*, --aol-watermark), fonts, and
+ * the Shadcn/DS adapter targets remain untouched in their own files —
+ * only the 15 authorized colour tokens relocated.
+ *
+ * Scope note: only the 15 tokens explicitly authorized (background,
+ * panels, ink, gold, status) are defined here. Border/focus/selection
+ * semantics and font tokens were NOT part of this authorization and are
+ * deliberately not included — adding them here would exceed what was
+ * approved.
+ */
+
+:root {
+  /* ── Background ladder (Pages Router values) ───────────────────────── */
+  --aol-bg: 6 6 9;
+  --aol-bg-2: 9 9 12;
+  --aol-bg-3: 14 14 18;
+
+  /* ── Panel ladder (App Router values) ───────────────────────────────── */
+  --aol-panel: 18 18 20;
+  --aol-panel-2: 22 22 25;
+  --aol-panel-3: 28 28 32;
+
+  /* ── Ink hierarchy (App Router values — genuinely distinct luminance
+   * steps, unlike Pages Router's degenerate all-identical ink/ink-dim/
+   * ink-muted) ────────────────────────────────────────────────────────── */
+  --aol-ink: 250 249 245;
+  --aol-ink-dim: 225 224 220;
+  --aol-ink-muted: 160 160 165;
+
+  /* ── Brand gold family (gold = Pages; gold-strong/gold-soft = App) ──── */
+  --aol-gold: 201 169 110;
+  --aol-gold-strong: 222 190 126;
+  --aol-gold-soft: 170 144 94;
+
+  /* ── Status colours (App Router values) ─────────────────────────────── */
+  --aol-danger: 185 65 65;
+  --aol-success: 46 160 110;
+  --aol-warning: 214 135 34;
+}

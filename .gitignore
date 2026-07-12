@@ -257,6 +257,11 @@ reports/**/*.md
 !reports/product-release-readiness-matrix.json
 !reports/product-release-governance-matrix.json
 
+# Exception: the visual-authority-convergence programme's baseline and
+# per-phase reports are versioned evidence compared against at every phase
+# (see reports/visual/visual-authority-baseline.md), not disposable CI output.
+!reports/visual/**
+
 # ------------------------------
 # Video build outputs (large files — use LFS or external storage)
 # ------------------------------

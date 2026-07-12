@@ -1,0 +1,57 @@
+{
+  "generatedAt": "2026-07-10T16:44:43.999Z",
+  "dimensions": "pages/app files: FILE OWNERSHIP CLASS (route taxonomy). components/ files: REACHABILITY CLASS (import-graph analysis, not directory location).",
+  "filesScanned": 2143,
+  "byCategory": {
+    "PUBLIC_CUSTOMER": {
+      "hex": 456,
+      "rgb": 2723,
+      "files": 145
+    },
+    "CONTROLLED_CUSTOMER": {
+      "hex": 231,
+      "rgb": 2424,
+      "files": 77
+    },
+    "ADMIN": {
+      "hex": 294,
+      "rgb": 516,
+      "files": 46
+    },
+    "PAGES_NON_ROUTE": {
+      "hex": 40,
+      "rgb": 34,
+      "files": 10
+    },
+    "PUBLIC_ACCOUNTABILITY": {
+      "hex": 5,
+      "rgb": 1,
+      "files": 1
+    },
+    "APP_NON_ROUTE": {
+      "hex": 141,
+      "rgb": 154,
+      "files": 33
+    },
+    "ADMIN_ONLY": {
+      "hex": 189,
+      "rgb": 29,
+      "files": 30
+    },
+    "UNREACHABLE": {
+      "hex": 1232,
+      "rgb": 1560,
+      "files": 227
+    },
+    "SHARED_PUBLIC_REACHABLE": {
+      "hex": 390,
+      "rgb": 702,
+      "files": 90
+    },
+    "SHARED_CONTROLLED_REACHABLE": {
+      "hex": 100,
+      "rgb": 1034,
+      "files": 74
+    }
+  }
+}

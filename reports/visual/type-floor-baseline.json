@@ -1,0 +1,1732 @@
+{
+  "generatedAt": "2026-07-10T16:44:08.520Z",
+  "floorPx": 11,
+  "totalViolations": 5685,
+  "filesWithViolations": 431,
+  "byFile": [
+    {
+      "file": "pages/diagnostics/executive-reporting/run.tsx",
+      "count": 152
+    },
+    {
+      "file": "pages/strategy-room/index.tsx",
+      "count": 146
+    },
+    {
+      "file": "pages/diagnostics/enterprise-assessment.tsx",
+      "count": 138
+    },
+    {
+      "file": "pages/decision-centre.tsx",
+      "count": 132
+    },
+    {
+      "file": "pages/diagnostics/team-assessment.tsx",
+      "count": 106
+    },
+    {
+      "file": "pages/strategy-room/session/[id].tsx",
+      "count": 103
+    },
+    {
+      "file": "pages/pricing.tsx",
+      "count": 89
+    },
+    {
+      "file": "pages/diagnostics/executive-reporting.tsx",
+      "count": 59
+    },
+    {
+      "file": "pages/provenance/sample-export.tsx",
+      "count": 53
+    },
+    {
+      "file": "pages/boardroom-brief.tsx",
+      "count": 49
+    },
+    {
+      "file": "pages/decision-centre/case/[caseId].tsx",
+      "count": 46
+    },
+    {
+      "file": "pages/evidence/[slug].tsx",
+      "count": 45
+    },
+    {
+      "file": "pages/benchmark-context.tsx",
+      "count": 42
+    },
+    {
+      "file": "pages/decision-instruments/[slug].tsx",
+      "count": 41
+    },
+    {
+      "file": "pages/products.tsx",
+      "count": 41
+    },
+    {
+      "file": "pages/tools/decision-delay-exposure.tsx",
+      "count": 41
+    },
+    {
+      "file": "pages/security-review.tsx",
+      "count": 39
+    },
+    {
+      "file": "pages/provenance/anchor-log.tsx",
+      "count": 38
+    },
+    {
+      "file": "pages/artifacts.tsx",
+      "count": 36
+    },
+    {
+      "file": "pages/enterprise.tsx",
+      "count": 36
+    },
+    {
+      "file": "pages/method.tsx",
+      "count": 36
+    },
+    {
+      "file": "pages/consulting/index.tsx",
+      "count": 35
+    },
+    {
+      "file": "pages/diagnostics/constitutional-diagnostic.tsx",
+      "count": 35
+    },
+    {
+      "file": "pages/editorials/[slug].tsx",
+      "count": 35
+    },
+    {
+      "file": "pages/oversight/brief/[cycleId].tsx",
+      "count": 35
+    },
+    {
+      "file": "app/portal/PortalClient.tsx",
+      "count": 35
+    },
+    {
+      "file": "pages/trust.tsx",
+      "count": 34
+    },
+    {
+      "file": "pages/counsel/index.tsx",
+      "count": 33
+    },
+    {
+      "file": "pages/decision-instruments/index.tsx",
+      "count": 33
+    },
+    {
+      "file": "pages/decision-paths/index.tsx",
+      "count": 33
+    },
+    {
+      "file": "pages/enterprise-decision-scan.tsx",
+      "count": 32
+    },
+    {
+      "file": "components/strategy-room/Form.tsx",
+      "count": 32
+    },
+    {
+      "file": "pages/provenance/demo.tsx",
+      "count": 31
+    },
+    {
+      "file": "components/strategy-room/ExecutionFlow.tsx",
+      "count": 31
+    },
+    {
+      "file": "pages/about/founder.tsx",
+      "count": 30
+    },
+    {
+      "file": "pages/admin/security-assurance-requests.tsx",
+      "count": 30
+    },
+    {
+      "file": "pages/oversight/index.tsx",
+      "count": 30
+    },
+    {
+      "file": "pages/developers.tsx",
+      "count": 29
+    },
+    {
+      "file": "components/homepage/ExecutiveReportingFlagship.tsx",
+      "count": 29
+    },
+    {
+      "file": "pages/playbooks/[slug].tsx",
+      "count": 28
+    },
+    {
+      "file": "components/alignment/PatternBreakerContract.tsx",
+      "count": 28
+    },
+    {
+      "file": "components/kernel/FreeSignalResult.tsx",
+      "count": 28
+    },
+    {
+      "file": "pages/evidence/index.tsx",
+      "count": 27
+    },
+    {
+      "file": "components/diagnostics/BoardSummaryPreview.tsx",
+      "count": 27
+    },
+    {
+      "file": "components/pdf/TelemetryReport.tsx",
+      "count": 27
+    },
+    {
+      "file": "pages/admin/boardroom/orders/[id].tsx",
+      "count": 26
+    },
+    {
+      "file": "pages/admin/feedback.tsx",
+      "count": 26
+    },
+    {
+      "file": "pages/consulting/interventions.tsx",
+      "count": 26
+    },
+    {
+      "file": "pages/outcome/check.tsx",
+      "count": 26
+    },
+    {
+      "file": "pages/retainer.tsx",
+      "count": 26
+    },
+    {
+      "file": "pages/retainers/index.tsx",
+      "count": 26
+    },
+    {
+      "file": "pages/retainers/status/[token].tsx",
+      "count": 26
+    },
+    {
+      "file": "components/diagnostics/results/EvidenceChainSurface.tsx",
+      "count": 26
+    },
+    {
+      "file": "pages/boardroom/[sessionId].tsx",
+      "count": 25
+    },
+    {
+      "file": "pages/briefing/return/[sessionKey].tsx",
+      "count": 25
+    },
+    {
+      "file": "app/admin/decision-intelligence/PageClient.tsx",
+      "count": 25
+    },
+    {
+      "file": "pages/lab/living-case.tsx",
+      "count": 24
+    },
+    {
+      "file": "components/sovereign/InstitutionalMemoryPanel.tsx",
+      "count": 24
+    },
+    {
+      "file": "pages/account/organisation.tsx",
+      "count": 23
+    },
+    {
+      "file": "pages/admin/case-studies.tsx",
+      "count": 23
+    },
+    {
+      "file": "pages/admin/retainers.tsx",
+      "count": 23
+    },
+    {
+      "file": "pages/boardroom/index.tsx",
+      "count": 23
+    },
+    {
+      "file": "pages/editorials/intelligence-briefs.tsx",
+      "count": 23
+    },
+    {
+      "file": "pages/frameworks/index.tsx",
+      "count": 23
+    },
+    {
+      "file": "pages/institutional/index.tsx",
+      "count": 23
+    },
+    {
+      "file": "pages/professionals.tsx",
+      "count": 23
+    },
+    {
+      "file": "pages/provenance/case/[subjectType]/[subjectId].tsx",
+      "count": 23
+    },
+    {
+      "file": "pages/report/[reportId].tsx",
+      "count": 23
+    },
+    {
+      "file": "app/admin/commercial/PageClient.tsx",
+      "count": 23
+    },
+    {
+      "file": "components/instruments/BoardBriefBuilderRunner.tsx",
+      "count": 23
+    },
+    {
+      "file": "pages/admin/suppression-ledger.tsx",
+      "count": 22
+    },
+    {
+      "file": "pages/counsel/intake.tsx",
+      "count": 22
+    },
+    {
+      "file": "pages/scenario-stress-test.tsx",
+      "count": 22
+    },
+    {
+      "file": "components/sovereign/BoardroomSignalExposure.tsx",
+      "count": 22
+    },
+    {
+      "file": "pages/admin/outcome-verification.tsx",
+      "count": 21
+    },
+    {
+      "file": "pages/return-brief/[caseId].tsx",
+      "count": 21
+    },
+    {
+      "file": "components/alignment/PatternObservatory.tsx",
+      "count": 21
+    },
+    {
+      "file": "components/diagnostics/results/AITerrainExposure.tsx",
+      "count": 21
+    },
+    {
+      "file": "components/diagnostics/results/OutcomeVerification.tsx",
+      "count": 21
+    },
+    {
+      "file": "pages/admin/fulfilment/index.tsx",
+      "count": 20
+    },
+    {
+      "file": "pages/case-studies/index.tsx",
+      "count": 20
+    },
+    {
+      "file": "pages/decision-pathway.tsx",
+      "count": 20
+    },
+    {
+      "file": "pages/design-partners.tsx",
+      "count": 20
+    },
+    {
+      "file": "pages/founders/index.tsx",
+      "count": 20
+    },
+    {
+      "file": "pages/admin/authority-center.tsx",
+      "count": 19
+    },
+    {
+      "file": "pages/admin/case-studies/[id].tsx",
+      "count": 19
+    },
+    {
+      "file": "pages/briefs/index.tsx",
+      "count": 19
+    },
+    {
+      "file": "pages/case-studies/[slug].tsx",
+      "count": 19
+    },
+    {
+      "file": "pages/enterprise-decision-authority.tsx",
+      "count": 19
+    },
+    {
+      "file": "pages/private-clients/index.tsx",
+      "count": 19
+    },
+    {
+      "file": "components/sovereign/CohortIntelligencePanel.tsx",
+      "count": 19
+    },
+    {
+      "file": "pages/admin/boardroom/orders.tsx",
+      "count": 18
+    },
+    {
+      "file": "pages/case/shared/[token].tsx",
+      "count": 18
+    },
+    {
+      "file": "pages/diagnostics/purpose-alignment.tsx",
+      "count": 18
+    },
+    {
+      "file": "pages/retainers/readiness.tsx",
+      "count": 18
+    },
+    {
+      "file": "components/diagnostics/ERUpgradePanel.tsx",
+      "count": 18
+    },
+    {
+      "file": "components/executive/ExecutiveSnapshotBlock.tsx",
+      "count": 18
+    },
+    {
+      "file": "components/homepage/HeroBanner.tsx",
+      "count": 18
+    },
+    {
+      "file": "pages/about.tsx",
+      "count": 17
+    },
+    {
+      "file": "pages/playbooks/[slug]/run.tsx",
+      "count": 17
+    },
+    {
+      "file": "pages/toolkits/[slug].tsx",
+      "count": 17
+    },
+    {
+      "file": "pages/verification.tsx",
+      "count": 17
+    },
+    {
+      "file": "components/diagnostics/results/LongitudinalIntelligence.tsx",
+      "count": 17
+    },
+    {
+      "file": "components/diagnostics/results/MultiStakeholderDivergence.tsx",
+      "count": 17
+    },
+    {
+      "file": "components/instruments/TeamAlignmentGapMapRunner.tsx",
+      "count": 17
+    },
+    {
+      "file": "components/product/BenchmarkMovementSignal.tsx",
+      "count": 17
+    },
+    {
+      "file": "components/product/ProductAuthorityPanel.tsx",
+      "count": 17
+    },
+    {
+      "file": "components/sovereign/ForensicAccountPanel.tsx",
+      "count": 17
+    },
+    {
+      "file": "pages/admin/outcome-ledger.tsx",
+      "count": 16
+    },
+    {
+      "file": "components/alignment/DemographicContextCapture.tsx",
+      "count": 16
+    },
+    {
+      "file": "components/diagnostics/CostOfDelaySection.tsx",
+      "count": 16
+    },
+    {
+      "file": "components/feedback/FeedbackWidget.tsx",
+      "count": 16
+    },
+    {
+      "file": "components/instruments/InstrumentShell.tsx",
+      "count": 16
+    },
+    {
+      "file": "components/instruments/StrategicPriorityStackRunner.tsx",
+      "count": 16
+    },
+    {
+      "file": "components/product/CaseSharePanel.tsx",
+      "count": 16
+    },
+    {
+      "file": "components/product/OutcomeContributionPanel.tsx",
+      "count": 16
+    },
+    {
+      "file": "pages/admin/enterprise-pipeline.tsx",
+      "count": 15
+    },
+    {
+      "file": "pages/boardroom-mode.tsx",
+      "count": 15
+    },
+    {
+      "file": "pages/editorials/index.tsx",
+      "count": 15
+    },
+    {
+      "file": "pages/provenance/explained.tsx",
+      "count": 15
+    },
+    {
+      "file": "pages/quick-check.tsx",
+      "count": 15
+    },
+    {
+      "file": "components/alignment/PastContractInterrupt.tsx",
+      "count": 15
+    },
+    {
+      "file": "components/diagnostics/ERPreview.tsx",
+      "count": 15
+    },
+    {
+      "file": "pages/blog/series/[seriesSlug]/index.tsx",
+      "count": 14
+    },
+    {
+      "file": "pages/counsel/status.tsx",
+      "count": 14
+    },
+    {
+      "file": "pages/decision-instruments/operator-decision-pack/run.tsx",
+      "count": 14
+    },
+    {
+      "file": "pages/decision-instruments/signal/index.tsx",
+      "count": 14
+    },
+    {
+      "file": "pages/media/index.tsx",
+      "count": 14
+    },
+    {
+      "file": "pages/retainer/intake.tsx",
+      "count": 14
+    },
+    {
+      "file": "components/diagnostics/AssessmentResultSurface.tsx",
+      "count": 14
+    },
+    {
+      "file": "components/diagnostics/results/ExecutiveDecisionAuthorityBlock.tsx",
+      "count": 14
+    },
+    {
+      "file": "components/instruments/ExecutionRiskIndexRunner.tsx",
+      "count": 14
+    },
+    {
+      "file": "components/instruments/GovernanceDriftDetectorRunner.tsx",
+      "count": 14
+    },
+    {
+      "file": "components/print/BriefCoverPage.tsx",
+      "count": 14
+    },
+    {
+      "file": "components/product/FreeTierUpgradeModal.tsx",
+      "count": 14
+    },
+    {
+      "file": "components/sovereign/IntelligenceSignalCard.tsx",
+      "count": 14
+    },
+    {
+      "file": "components/strategy-room/SignalPressurePanel.tsx",
+      "count": 14
+    },
+    {
+      "file": "pages/admin/enterprise-foundation.tsx",
+      "count": 13
+    },
+    {
+      "file": "pages/boardroom-brief/confirmation.tsx",
+      "count": 13
+    },
+    {
+      "file": "pages/editorials/series/[seriesSlug]/index.tsx",
+      "count": 13
+    },
+    {
+      "file": "pages/engagements/operator-pilot.tsx",
+      "count": 13
+    },
+    {
+      "file": "pages/intelligence/gmi/index.tsx",
+      "count": 13
+    },
+    {
+      "file": "pages/my-instruments/index.tsx",
+      "count": 13
+    },
+    {
+      "file": "components/decision-centre/LadderPathwayPanel.tsx",
+      "count": 13
+    },
+    {
+      "file": "components/diagnostics/results/PredictiveConsequence.tsx",
+      "count": 13
+    },
+    {
+      "file": "components/homepage/DoctrineShowcase.tsx",
+      "count": 13
+    },
+    {
+      "file": "components/instruments/EscalationReadinessRunner.tsx",
+      "count": 13
+    },
+    {
+      "file": "components/instruments/StructuralFailureCanvasRunner.tsx",
+      "count": 13
+    },
+    {
+      "file": "components/outcomes/OutcomeVerificationPanel.tsx",
+      "count": 13
+    },
+    {
+      "file": "pages/checkout/personal-decision-audit.tsx",
+      "count": 12
+    },
+    {
+      "file": "pages/diagnostics/board-summary.tsx",
+      "count": 12
+    },
+    {
+      "file": "pages/education-research/index.tsx",
+      "count": 12
+    },
+    {
+      "file": "pages/foundations.tsx",
+      "count": 12
+    },
+    {
+      "file": "pages/playbooks/index.tsx",
+      "count": 12
+    },
+    {
+      "file": "pages/pressure.tsx",
+      "count": 12
+    },
+    {
+      "file": "components/homepage/ProtocolInitiation.tsx",
+      "count": 12
+    },
+    {
+      "file": "components/homepage/StatsBar.tsx",
+      "count": 12
+    },
+    {
+      "file": "components/Intelligence/internal/DecisionTracePanel.tsx",
+      "count": 12
+    },
+    {
+      "file": "components/product/BenchmarkNarrativeBlock.tsx",
+      "count": 12
+    },
+    {
+      "file": "components/product/BenchmarkTeamAlignmentPanel.tsx",
+      "count": 12
+    },
+    {
+      "file": "components/product/DecisionOutcomeCapture.tsx",
+      "count": 12
+    },
+    {
+      "file": "pages/admin/analytics.tsx",
+      "count": 11
+    },
+    {
+      "file": "pages/enterprise/preview.tsx",
+      "count": 11
+    },
+    {
+      "file": "pages/invite.tsx",
+      "count": 11
+    },
+    {
+      "file": "pages/library/index.tsx",
+      "count": 11
+    },
+    {
+      "file": "app/settings/integrations/IntegrationsClient.tsx",
+      "count": 11
+    },
+    {
+      "file": "components/diagnostics/results/DecisionGradeBlocks.tsx",
+      "count": 11
+    },
+    {
+      "file": "components/homepage/OperatorBriefing.tsx",
+      "count": 11
+    },
+    {
+      "file": "components/homepage/VenturesSection.tsx",
+      "count": 11
+    },
+    {
+      "file": "components/instruments/DecisionExposureRunner.tsx",
+      "count": 11
+    },
+    {
+      "file": "components/instruments/InterventionPathRunner.tsx",
+      "count": 11
+    },
+    {
+      "file": "components/Intelligence/MarketIntelligenceCatalogue.tsx",
+      "count": 11
+    },
+    {
+      "file": "components/product/ContextualUpgradePrompt.tsx",
+      "count": 11
+    },
+    {
+      "file": "components/tools/SendToSelfForm.tsx",
+      "count": 11
+    },
+    {
+      "file": "components/trust/WorkedDecisionExample.tsx",
+      "count": 11
+    },
+    {
+      "file": "pages/downloads/[...slug].tsx",
+      "count": 10
+    },
+    {
+      "file": "pages/engagements/selective-pilot.tsx",
+      "count": 10
+    },
+    {
+      "file": "pages/return-brief/index.tsx",
+      "count": 10
+    },
+    {
+      "file": "pages/why-not-ai.tsx",
+      "count": 10
+    },
+    {
+      "file": "components/diagnostics/ResultEmailCapture.tsx",
+      "count": 10
+    },
+    {
+      "file": "components/diagnostics/results/SystemMemoryBlock.tsx",
+      "count": 10
+    },
+    {
+      "file": "components/homepage/ProvenanceThesisSection.tsx",
+      "count": 10
+    },
+    {
+      "file": "components/instruments/MandateClarityRunner.tsx",
+      "count": 10
+    },
+    {
+      "file": "components/Intelligence/public/ContradictionMapPreview.tsx",
+      "count": 10
+    },
+    {
+      "file": "components/Intelligence/public/DecisionVelocityCard.tsx",
+      "count": 10
+    },
+    {
+      "file": "components/print/ForensicMarkLayer.tsx",
+      "count": 10
+    },
+    {
+      "file": "components/print/InstitutionalBriefDocument.tsx",
+      "count": 10
+    },
+    {
+      "file": "components/product/StaleCaseAlert.tsx",
+      "count": 10
+    },
+    {
+      "file": "components/product/ValueReceipt.tsx",
+      "count": 10
+    },
+    {
+      "file": "components/strategy-room/AIInterventionSuggestions.tsx",
+      "count": 10
+    },
+    {
+      "file": "pages/admin/calibration.tsx",
+      "count": 9
+    },
+    {
+      "file": "pages/admin/demo-conversion.tsx",
+      "count": 9
+    },
+    {
+      "file": "pages/admin/product-authority.tsx",
+      "count": 9
+    },
+    {
+      "file": "pages/canon/glossary.tsx",
+      "count": 9
+    },
+    {
+      "file": "pages/inner-circle-portal.tsx",
+      "count": 9
+    },
+    {
+      "file": "components/diagnostics/GovernanceEvidenceBridge.tsx",
+      "count": 9
+    },
+    {
+      "file": "components/diagnostics/results/InheritedThreadContext.tsx",
+      "count": 9
+    },
+    {
+      "file": "components/diagnostics/unified/FeedbackLoop.tsx",
+      "count": 9
+    },
+    {
+      "file": "components/enhanced/VenturesSection.tsx",
+      "count": 9
+    },
+    {
+      "file": "components/homepage/EventsSection.tsx",
+      "count": 9
+    },
+    {
+      "file": "components/homepage/ExecutiveIntelligenceStrip.tsx",
+      "count": 9
+    },
+    {
+      "file": "components/homepage/HeroSection.tsx",
+      "count": 9
+    },
+    {
+      "file": "components/homepage/InstitutionalHero.tsx",
+      "count": 9
+    },
+    {
+      "file": "components/homepage/StartHereStrip.tsx",
+      "count": 9
+    },
+    {
+      "file": "components/Intelligence/public/CrossAssessmentInsight.tsx",
+      "count": 9
+    },
+    {
+      "file": "components/Intelligence/public/WhatChangedPanel.tsx",
+      "count": 9
+    },
+    {
+      "file": "components/product/AdmissionNotice.tsx",
+      "count": 9
+    },
+    {
+      "file": "components/product/BenchmarkContextPanel.tsx",
+      "count": 9
+    },
+    {
+      "file": "components/product/DataRightsPanel.tsx",
+      "count": 9
+    },
+    {
+      "file": "components/product/TrialExpiredCaseSelection.tsx",
+      "count": 9
+    },
+    {
+      "file": "components/product/UpgradePrompt.tsx",
+      "count": 9
+    },
+    {
+      "file": "components/reporting/pdf/ExecutiveBriefingPdfDocument.tsx",
+      "count": 9
+    },
+    {
+      "file": "components/sovereign/BenchmarkStrip.tsx",
+      "count": 9
+    },
+    {
+      "file": "components/strategy-room/AdvantagePathBlock.tsx",
+      "count": 9
+    },
+    {
+      "file": "components/strategy-room/RetainerEntryGate.tsx",
+      "count": 9
+    },
+    {
+      "file": "pages/admin/launch-dashboard.tsx",
+      "count": 8
+    },
+    {
+      "file": "pages/decision-instruments/history.tsx",
+      "count": 8
+    },
+    {
+      "file": "pages/security/disclosure.tsx",
+      "count": 8
+    },
+    {
+      "file": "pages/system.tsx",
+      "count": 8
+    },
+    {
+      "file": "pages/toolkits/index.tsx",
+      "count": 8
+    },
+    {
+      "file": "components/commercial/EvidenceLimitedOfferPage.tsx",
+      "count": 8
+    },
+    {
+      "file": "components/commercial/ProductRecommendationCard.tsx",
+      "count": 8
+    },
+    {
+      "file": "components/decision-centre/RetainerMemoryPreview.tsx",
+      "count": 8
+    },
+    {
+      "file": "components/diagnostics/CommercialExposurePanel.tsx",
+      "count": 8
+    },
+    {
+      "file": "components/diagnostics/results/LadderProgressionGate.tsx",
+      "count": 8
+    },
+    {
+      "file": "components/homepage/CanonInstitutionalIntro.tsx",
+      "count": 8
+    },
+    {
+      "file": "components/kernel/GovernedRefusalBlock.tsx",
+      "count": 8
+    },
+    {
+      "file": "components/kernel/WhatSystemNoticedBlock.tsx",
+      "count": 8
+    },
+    {
+      "file": "components/print/BriefHeaderBar.tsx",
+      "count": 8
+    },
+    {
+      "file": "components/product/EfficacyCommandBlock.tsx",
+      "count": 8
+    },
+    {
+      "file": "components/product/ProvenanceBadge.tsx",
+      "count": 8
+    },
+    {
+      "file": "components/product/SurfaceBoundaryPanel.tsx",
+      "count": 8
+    },
+    {
+      "file": "components/WhoIWorkWith.tsx",
+      "count": 8
+    },
+    {
+      "file": "pages/admin/conversion-dashboard.tsx",
+      "count": 7
+    },
+    {
+      "file": "pages/admin/delivery-queue.tsx",
+      "count": 7
+    },
+    {
+      "file": "pages/admin/intelligence/gmi/publication-readiness.tsx",
+      "count": 7
+    },
+    {
+      "file": "pages/briefs/institutional-alpha.tsx",
+      "count": 7
+    },
+    {
+      "file": "pages/briefs/sovereign-intelligence.tsx",
+      "count": 7
+    },
+    {
+      "file": "pages/editorials/catalogue.tsx",
+      "count": 7
+    },
+    {
+      "file": "pages/editorials/discovery.tsx",
+      "count": 7
+    },
+    {
+      "file": "pages/evidence/standards.tsx",
+      "count": 7
+    },
+    {
+      "file": "components/assessments/AssessmentSuiteLadder.tsx",
+      "count": 7
+    },
+    {
+      "file": "components/decision-centre/RetainerOversightPreview.tsx",
+      "count": 7
+    },
+    {
+      "file": "components/diagnostics/ExecutiveBuyerFitSection.tsx",
+      "count": 7
+    },
+    {
+      "file": "components/homepage/ContentShowcase.tsx",
+      "count": 7
+    },
+    {
+      "file": "components/homepage/MarketIntelligenceFeature.tsx",
+      "count": 7
+    },
+    {
+      "file": "components/homepage/VaultTeaserRail.tsx",
+      "count": 7
+    },
+    {
+      "file": "components/playbooks/PlaybookCard.tsx",
+      "count": 7
+    },
+    {
+      "file": "components/print/KeyJudgementsPanel.tsx",
+      "count": 7
+    },
+    {
+      "file": "components/product/BenchmarkCaseBadge.tsx",
+      "count": 7
+    },
+    {
+      "file": "components/product/ChainOfCustodyTimeline.tsx",
+      "count": 7
+    },
+    {
+      "file": "components/product/ResultPathwayPanel.tsx",
+      "count": 7
+    },
+    {
+      "file": "components/sovereign/IntelligenceSignalPanel.tsx",
+      "count": 7
+    },
+    {
+      "file": "pages/account/proof-pack.tsx",
+      "count": 6
+    },
+    {
+      "file": "pages/admin/advisory-queue.tsx",
+      "count": 6
+    },
+    {
+      "file": "pages/admin/billing.tsx",
+      "count": 6
+    },
+    {
+      "file": "pages/changelog.tsx",
+      "count": 6
+    },
+    {
+      "file": "pages/inner-circle/dashboard.tsx",
+      "count": 6
+    },
+    {
+      "file": "pages/inner-circle/tools/rise-decay-scorecard.tsx",
+      "count": 6
+    },
+    {
+      "file": "components/diagnostics/ExecutiveReportingPaywall.tsx",
+      "count": 6
+    },
+    {
+      "file": "components/diagnostics/results/FreeLayerBoundary.tsx",
+      "count": 6
+    },
+    {
+      "file": "components/diagnostics/results/RecommendedPlaybooks.tsx",
+      "count": 6
+    },
+    {
+      "file": "components/diagnostics/results/ResultCost.tsx",
+      "count": 6
+    },
+    {
+      "file": "components/diagnostics/unified/ConsequenceTimeline.tsx",
+      "count": 6
+    },
+    {
+      "file": "components/homepage/EngagementLanes.tsx",
+      "count": 6
+    },
+    {
+      "file": "components/homepage/ServiceLines.tsx",
+      "count": 6
+    },
+    {
+      "file": "components/Intelligence/MarketIntelligenceChronology.tsx",
+      "count": 6
+    },
+    {
+      "file": "components/living/WhatTheSystemHeard.tsx",
+      "count": 6
+    },
+    {
+      "file": "components/print/BriefFooterBar.tsx",
+      "count": 6
+    },
+    {
+      "file": "components/print/ExecutiveSummaryPanel.tsx",
+      "count": 6
+    },
+    {
+      "file": "components/product/ContinuityStatement.tsx",
+      "count": 6
+    },
+    {
+      "file": "components/product/ProductAuthorityNotice.tsx",
+      "count": 6
+    },
+    {
+      "file": "components/product/ProductEvidenceStatus.tsx",
+      "count": 6
+    },
+    {
+      "file": "components/product/ProvenanceSummaryPanel.tsx",
+      "count": 6
+    },
+    {
+      "file": "components/product/SaveSessionCasePanel.tsx",
+      "count": 6
+    },
+    {
+      "file": "components/strategy-room/CounselStatusPanel.tsx",
+      "count": 6
+    },
+    {
+      "file": "components/strategy-room/GovernanceEvidenceCarryForward.tsx",
+      "count": 6
+    },
+    {
+      "file": "pages/admin/decision-instrument-runs.tsx",
+      "count": 5
+    },
+    {
+      "file": "pages/api/og/short.tsx",
+      "count": 5
+    },
+    {
+      "file": "pages/blog/index.tsx",
+      "count": 5
+    },
+    {
+      "file": "pages/briefs/[slug].tsx",
+      "count": 5
+    },
+    {
+      "file": "pages/corridor/index.tsx",
+      "count": 5
+    },
+    {
+      "file": "pages/decision-instruments/board-brief-builder/run.tsx",
+      "count": 5
+    },
+    {
+      "file": "pages/decision-instruments/decision-exposure-instrument/start.tsx",
+      "count": 5
+    },
+    {
+      "file": "pages/decision-instruments/governance-drift-detector/run.tsx",
+      "count": 5
+    },
+    {
+      "file": "pages/decision-instruments/intervention-path-selector/start.tsx",
+      "count": 5
+    },
+    {
+      "file": "pages/decision-instruments/mandate-clarity-framework/start.tsx",
+      "count": 5
+    },
+    {
+      "file": "pages/decision-instruments/operator-decision-pack/start.tsx",
+      "count": 5
+    },
+    {
+      "file": "pages/decision-instruments/strategic-priority-stack-builder/run.tsx",
+      "count": 5
+    },
+    {
+      "file": "pages/foundry/decision-test.tsx",
+      "count": 5
+    },
+    {
+      "file": "pages/intelligence/gmi/performance.tsx",
+      "count": 5
+    },
+    {
+      "file": "pages/intelligence/gmi/q2-2026.tsx",
+      "count": 5
+    },
+    {
+      "file": "pages/kernel/signal.tsx",
+      "count": 5
+    },
+    {
+      "file": "pages/private/frameworks/[slug].tsx",
+      "count": 5
+    },
+    {
+      "file": "pages/test-your-decision.tsx",
+      "count": 5
+    },
+    {
+      "file": "components/diagnostics/results/EngagementReadinessPanel.tsx",
+      "count": 5
+    },
+    {
+      "file": "components/diagnostics/results/ResultAction.tsx",
+      "count": 5
+    },
+    {
+      "file": "components/diagnostics/unified/DirectiveCTA.tsx",
+      "count": 5
+    },
+    {
+      "file": "components/homepage/EditorialIntelligenceBand.tsx",
+      "count": 5
+    },
+    {
+      "file": "components/homepage/HomepageFinalCTA.tsx",
+      "count": 5
+    },
+    {
+      "file": "components/homepage/OperatorPilotBlock.tsx",
+      "count": 5
+    },
+    {
+      "file": "components/homepage/StrategicFunnelStrip.tsx",
+      "count": 5
+    },
+    {
+      "file": "components/Intelligence/internal/DeterminismProof.tsx",
+      "count": 5
+    },
+    {
+      "file": "components/onboarding/DecisionCentreChecklist.tsx",
+      "count": 5
+    },
+    {
+      "file": "components/oversight/GovernedAutomationPosture.tsx",
+      "count": 5
+    },
+    {
+      "file": "components/print/SignatureBlock.tsx",
+      "count": 5
+    },
+    {
+      "file": "components/product/SaveCaseConversionPanel.tsx",
+      "count": 5
+    },
+    {
+      "file": "components/sovereign/SovereignPositionSummary.tsx",
+      "count": 5
+    },
+    {
+      "file": "components/strategy-room/DynamicConsequencePanel.tsx",
+      "count": 5
+    },
+    {
+      "file": "pages/decision-instruments/execution-risk-index/run.tsx",
+      "count": 4
+    },
+    {
+      "file": "pages/decision-instruments/intervention-path-selector/run.tsx",
+      "count": 4
+    },
+    {
+      "file": "pages/decision-instruments/structural-failure-diagnostic-canvas/run.tsx",
+      "count": 4
+    },
+    {
+      "file": "pages/decision-instruments/team-alignment-gap-map/run.tsx",
+      "count": 4
+    },
+    {
+      "file": "pages/evidence/seals.tsx",
+      "count": 4
+    },
+    {
+      "file": "pages/inner-circle/briefings.tsx",
+      "count": 4
+    },
+    {
+      "file": "pages/intelligence/gmi/methodology.tsx",
+      "count": 4
+    },
+    {
+      "file": "components/decision-centre/DecisionCentreOrientation.tsx",
+      "count": 4
+    },
+    {
+      "file": "components/diagnostics/results/ProductAdvantageBlocks.tsx",
+      "count": 4
+    },
+    {
+      "file": "components/diagnostics/results/ResultContradiction.tsx",
+      "count": 4
+    },
+    {
+      "file": "components/diagnostics/results/ResultDiagnostics.tsx",
+      "count": 4
+    },
+    {
+      "file": "components/diagnostics/unified/LimitationsBlock.tsx",
+      "count": 4
+    },
+    {
+      "file": "components/homepage/HomepageHero.tsx",
+      "count": 4
+    },
+    {
+      "file": "components/homepage/InstitutionalTrailer.tsx",
+      "count": 4
+    },
+    {
+      "file": "components/homepage/WhatYouCanUseTodaySection.tsx",
+      "count": 4
+    },
+    {
+      "file": "components/Intelligence/user/ClientIntelligenceStack.tsx",
+      "count": 4
+    },
+    {
+      "file": "components/playbooks/PlaybookContinuationPanel.tsx",
+      "count": 4
+    },
+    {
+      "file": "components/print/EmbossedBrandMark.tsx",
+      "count": 4
+    },
+    {
+      "file": "components/product/ConsequencePath.tsx",
+      "count": 4
+    },
+    {
+      "file": "components/ShortCard.backup.tsx",
+      "count": 4
+    },
+    {
+      "file": "components/ShortCard.tsx",
+      "count": 4
+    },
+    {
+      "file": "components/strategy-room/DecisionTimeline.tsx",
+      "count": 4
+    },
+    {
+      "file": "components/trust/PlainEnglishDecisionLayer.tsx",
+      "count": 4
+    },
+    {
+      "file": "pages/admin/artifacts.tsx",
+      "count": 3
+    },
+    {
+      "file": "pages/admin/briefs.tsx",
+      "count": 3
+    },
+    {
+      "file": "pages/admin/dev/session.tsx",
+      "count": 3
+    },
+    {
+      "file": "pages/admin/intelligence/gmi-falsification.tsx",
+      "count": 3
+    },
+    {
+      "file": "pages/admin/operations.tsx",
+      "count": 3
+    },
+    {
+      "file": "pages/decision-instruments/decision-exposure-instrument/run.tsx",
+      "count": 3
+    },
+    {
+      "file": "pages/decision-instruments/escalation-readiness-scorecard/run.tsx",
+      "count": 3
+    },
+    {
+      "file": "pages/decision-instruments/mandate-clarity-framework/run.tsx",
+      "count": 3
+    },
+    {
+      "file": "pages/foundry/index.tsx",
+      "count": 3
+    },
+    {
+      "file": "pages/foundry/market-signal-test.tsx",
+      "count": 3
+    },
+    {
+      "file": "pages/foundry/release-risk-test.tsx",
+      "count": 3
+    },
+    {
+      "file": "pages/intelligence/contradictions.tsx",
+      "count": 3
+    },
+    {
+      "file": "pages/intelligence/gmi/calls.tsx",
+      "count": 3
+    },
+    {
+      "file": "pages/intelligence/memory.tsx",
+      "count": 3
+    },
+    {
+      "file": "pages/intelligence/reports.tsx",
+      "count": 3
+    },
+    {
+      "file": "pages/shorts/index.tsx",
+      "count": 3
+    },
+    {
+      "file": "app/foundry/case/success/page.tsx",
+      "count": 3
+    },
+    {
+      "file": "components/commercial/EvidenceBoundaryNotice.tsx",
+      "count": 3
+    },
+    {
+      "file": "components/content/NextStepCTA.tsx",
+      "count": 3
+    },
+    {
+      "file": "components/counsel/CounselMemorySummary.tsx",
+      "count": 3
+    },
+    {
+      "file": "components/diagnostics/results/BoardSnapshot.tsx",
+      "count": 3
+    },
+    {
+      "file": "components/diagnostics/results/ResultEscalation.tsx",
+      "count": 3
+    },
+    {
+      "file": "components/diagnostics/unified/CaseActiveBanner.tsx",
+      "count": 3
+    },
+    {
+      "file": "components/homepage/CredibilityQuotes.tsx",
+      "count": 3
+    },
+    {
+      "file": "components/homepage/DecisionDelayExposureCTASection.tsx",
+      "count": 3
+    },
+    {
+      "file": "components/homepage/EarnedProgressionBlock.tsx",
+      "count": 3
+    },
+    {
+      "file": "components/homepage/ExecutiveReportingSection.tsx",
+      "count": 3
+    },
+    {
+      "file": "components/homepage/MemoryContinuityPreview.tsx",
+      "count": 3
+    },
+    {
+      "file": "components/homepage/ProfessionalContinuitySection.tsx",
+      "count": 3
+    },
+    {
+      "file": "components/homepage/VerificationSpineBlock.tsx",
+      "count": 3
+    },
+    {
+      "file": "components/Intelligence/GmiEvidenceRoom.tsx",
+      "count": 3
+    },
+    {
+      "file": "components/Intelligence/GmiPriorCallScorecard.tsx",
+      "count": 3
+    },
+    {
+      "file": "components/product/ValueProtectedSummary.tsx",
+      "count": 3
+    },
+    {
+      "file": "components/strategy-room/AvoidancePatternNotice.tsx",
+      "count": 3
+    },
+    {
+      "file": "components/strategy-room/EscalationTriggerPanel.tsx",
+      "count": 3
+    },
+    {
+      "file": "components/trust/SecurityAssuranceStatusStrip.tsx",
+      "count": 3
+    },
+    {
+      "file": "pages/diagnostics/watch.tsx",
+      "count": 2
+    },
+    {
+      "file": "pages/engagements/index.tsx",
+      "count": 2
+    },
+    {
+      "file": "pages/engagements/retained-oversight.tsx",
+      "count": 2
+    },
+    {
+      "file": "pages/intelligence/gmi/falsification.tsx",
+      "count": 2
+    },
+    {
+      "file": "pages/intelligence/gmi/red-team.tsx",
+      "count": 2
+    },
+    {
+      "file": "components/alignment/PurposeAlignmentRadarChart.tsx",
+      "count": 2
+    },
+    {
+      "file": "components/alignment/PurposeAlignmentTrendChart.tsx",
+      "count": 2
+    },
+    {
+      "file": "components/analytics/distribution-chart.tsx",
+      "count": 2
+    },
+    {
+      "file": "components/commercial/CheckoutButton.tsx",
+      "count": 2
+    },
+    {
+      "file": "components/counsel/CounselCaseTimeline.tsx",
+      "count": 2
+    },
+    {
+      "file": "components/dashboard/ChartContent.tsx",
+      "count": 2
+    },
+    {
+      "file": "components/dashboard/LiveDataDashboard.tsx",
+      "count": 2
+    },
+    {
+      "file": "components/diagnostics/results/CompetitivePosition.tsx",
+      "count": 2
+    },
+    {
+      "file": "components/diagnostics/results/DecisionTerrainStatus.tsx",
+      "count": 2
+    },
+    {
+      "file": "components/diagnostics/results/ResultCondition.tsx",
+      "count": 2
+    },
+    {
+      "file": "components/diagnostics/results/ResultDecision.tsx",
+      "count": 2
+    },
+    {
+      "file": "components/diagnostics/results/ResultTrajectory.tsx",
+      "count": 2
+    },
+    {
+      "file": "components/diagnostics/results/TrajectoryLine.tsx",
+      "count": 2
+    },
+    {
+      "file": "components/homepage/BodyOfWorkBehindSystem.tsx",
+      "count": 2
+    },
+    {
+      "file": "components/homepage/FoundryEntrySection.tsx",
+      "count": 2
+    },
+    {
+      "file": "components/homepage/OutputArtifactPreview.tsx",
+      "count": 2
+    },
+    {
+      "file": "components/homepage/RetainedOversightSection.tsx",
+      "count": 2
+    },
+    {
+      "file": "components/homepage/StrategyRoomSection.tsx",
+      "count": 2
+    },
+    {
+      "file": "components/MandateStatement.tsx",
+      "count": 2
+    },
+    {
+      "file": "components/oversight/CrossScopePatternSummary.tsx",
+      "count": 2
+    },
+    {
+      "file": "components/oversight/PortfolioMemorySummary.tsx",
+      "count": 2
+    },
+    {
+      "file": "components/product/NextAdmissibleMovePanel.tsx",
+      "count": 2
+    },
+    {
+      "file": "components/product/ProductAuthorityWrapper.tsx",
+      "count": 2
+    },
+    {
+      "file": "components/product/RetainerCycleMemoryPanel.tsx",
+      "count": 2
+    },
+    {
+      "file": "components/strategy-room/DecisionStateBanner.tsx",
+      "count": 2
+    },
+    {
+      "file": "components/strategy-room/ReturnBriefInterruptionBar.tsx",
+      "count": 2
+    },
+    {
+      "file": "components/trust/TrustInfoRow.tsx",
+      "count": 2
+    },
+    {
+      "file": "pages/admin/intelligence/gmi/batch-score.tsx",
+      "count": 1
+    },
+    {
+      "file": "pages/admin/intelligence/gmi/source-workbench.tsx",
+      "count": 1
+    },
+    {
+      "file": "pages/admin/proof.tsx",
+      "count": 1
+    },
+    {
+      "file": "pages/books/index.tsx",
+      "count": 1
+    },
+    {
+      "file": "pages/engagements/operator-pilot-status.tsx",
+      "count": 1
+    },
+    {
+      "file": "pages/intelligence/gmi/board-pulse.tsx",
+      "count": 1
+    },
+    {
+      "file": "pages/intelligence/gmi/post-mortem.tsx",
+      "count": 1
+    },
+    {
+      "file": "pages/intelligence/gmi/use-cases.tsx",
+      "count": 1
+    },
+    {
+      "file": "pages/oversight/portfolio.tsx",
+      "count": 1
+    },
+    {
+      "file": "pages/private/admin/premium-downloads.tsx",
+      "count": 1
+    },
+    {
+      "file": "app/__pdf/[slug]/page.tsx",
+      "count": 1
+    },
+    {
+      "file": "components/content/ArticleCoverImage.tsx",
+      "count": 1
+    },
+    {
+      "file": "components/diagnostics/results/ThresholdProximityLine.tsx",
+      "count": 1
+    },
+    {
+      "file": "components/emails/TeaserEmail.tsx",
+      "count": 1
+    },
+    {
+      "file": "components/homepage/CredibilityStrip.tsx",
+      "count": 1
+    },
+    {
+      "file": "components/homepage/homepagePrimitives.tsx",
+      "count": 1
+    },
+    {
+      "file": "components/homepage/PlaybooksSection.tsx",
+      "count": 1
+    },
+    {
+      "file": "components/homepage/RefusalDemo.tsx",
+      "count": 1
+    },
+    {
+      "file": "components/homepage/SectionCTAStrip.tsx",
+      "count": 1
+    },
+    {
+      "file": "components/homepage/SectionDivider.tsx",
+      "count": 1
+    },
+    {
+      "file": "components/homepage/TrustArchitectureBlock.tsx",
+      "count": 1
+    },
+    {
+      "file": "components/inner-circle/WorkspaceNav.tsx",
+      "count": 1
+    },
+    {
+      "file": "components/living/GovernedActionPanel.tsx",
+      "count": 1
+    },
+    {
+      "file": "components/oversight/RetainedMemoryLossPanel.tsx",
+      "count": 1
+    },
+    {
+      "file": "components/product/DeliveryFormatPanel.tsx",
+      "count": 1
+    },
+    {
+      "file": "components/product/FirstEncounterProof.tsx",
+      "count": 1
+    },
+    {
+      "file": "components/proof/ProofCapturePrompt.tsx",
+      "count": 1
+    },
+    {
+      "file": "components/proof/PublicProofBlocks.tsx",
+      "count": 1
+    },
+    {
+      "file": "components/providers/Toaster.tsx",
+      "count": 1
+    },
+    {
+      "file": "components/trust/ArbiterBadge.tsx",
+      "count": 1
+    },
+    {
+      "file": "components/trust/LegalIdentityBlock.tsx",
+      "count": 1
+    }
+  ]
+}

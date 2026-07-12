@@ -1,0 +1,329 @@
+{
+  "generatedAt": "2026-07-10T16:44:04.467Z",
+  "selectorsScanned": [
+    "city-gate-card",
+    "architecture-card",
+    "nav-pill-premium",
+    "aol-grain",
+    "aol-grain-overlay",
+    "hairline-premium",
+    "hairline-gold",
+    "forensic-trace",
+    "aol-mdx-content"
+  ],
+  "cssSourcesScanned": [
+    "styles/globals.css",
+    "app/globals.css",
+    "styles/design-system.css",
+    "styles/brand-system.css"
+  ],
+  "routerLoadMap": {
+    "styles/globals.css": "Pages Router (via pages/_app.tsx)",
+    "app/globals.css": "App Router (via app/layout.tsx)",
+    "styles/design-system.css": "Pages Router only (via pages/_app.tsx) — NOT loaded by App Router",
+    "styles/brand-system.css": "Neither router — not imported anywhere"
+  },
+  "register": {
+    "city-gate-card": {
+      "definitionCount": 3,
+      "definitions": [
+        {
+          "file": "styles/globals.css",
+          "line": 274,
+          "loadedBy": "Pages Router (via pages/_app.tsx)",
+          "ruleBodyPreview": "{ border-radius: 1.75rem; border: 1px solid rgba(255, 255, 255, 0.12); background: rgb(var(--aol-bg-3)); box-shadow: 0 32px 100px -50px rgba(0, 0, 0, 0.98); position: relative; "
+        },
+        {
+          "file": "app/globals.css",
+          "line": 296,
+          "loadedBy": "App Router (via app/layout.tsx)",
+          "ruleBodyPreview": "{ @apply rounded-[28px] border backdrop-blur-md; border-color: rgba(255, 255, 255, 0.10); background: radial-gradient(circle at center, rgba(var(--aol-gold), 0.05) 0%, transparent 70"
+        },
+        {
+          "file": "styles/brand-system.css",
+          "line": 19,
+          "loadedBy": "Neither router — not imported anywhere",
+          "ruleBodyPreview": "{ @apply relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.02] backdrop-blur-xl transition-all duration-500; }"
+        }
+      ],
+      "consumerCount": 6,
+      "consumers": [
+        {
+          "file": "components/alignment/EnterpriseDashboardController.tsx",
+          "line": 88
+        },
+        {
+          "file": "components/alignment/EnterpriseIntelligenceDashboard.tsx",
+          "line": 84
+        },
+        {
+          "file": "components/briefing/FragilityRadar.tsx",
+          "line": 66
+        },
+        {
+          "file": "components/layout/CommandNavigation.tsx",
+          "line": 131
+        },
+        {
+          "file": "components/layout/ProtocolFooter.tsx",
+          "line": 110
+        },
+        {
+          "file": "components/ui/BrandAssets.tsx",
+          "line": 14
+        }
+      ]
+    },
+    "architecture-card": {
+      "definitionCount": 2,
+      "definitions": [
+        {
+          "file": "styles/globals.css",
+          "line": 256,
+          "loadedBy": "Pages Router (via pages/_app.tsx)",
+          "ruleBodyPreview": "{ border-radius: 1.5rem; border: 1px solid rgba(255, 255, 255, 0.12); background: rgb(var(--aol-bg-3)); box-shadow: 0 24px 72px -30px rgba(0, 0, 0, 0.84); transition: border-"
+        },
+        {
+          "file": "app/globals.css",
+          "line": 228,
+          "loadedBy": "App Router (via app/layout.tsx)",
+          "ruleBodyPreview": "{ @apply rounded-[30px] border backdrop-blur-md; border-color: rgba(255, 255, 255, 0.10); background: linear-gradient(180deg, rgba(255, 255, 255, 0.045) 0%, rgba(255, 255, 255, 0.018"
+        }
+      ],
+      "consumerCount": 0,
+      "consumers": []
+    },
+    "nav-pill-premium": {
+      "definitionCount": 2,
+      "definitions": [
+        {
+          "file": "styles/globals.css",
+          "line": 230,
+          "loadedBy": "Pages Router (via pages/_app.tsx)",
+          "ruleBodyPreview": "{ border-radius: 9999px; border: 1px solid rgba(255, 255, 255, 0.12); background: rgb(var(--aol-bg-2)); padding: 0.5rem 1rem; font-size: 9px; font-family: var(--font-family-mon"
+        },
+        {
+          "file": "app/globals.css",
+          "line": 211,
+          "loadedBy": "App Router (via app/layout.tsx)",
+          "ruleBodyPreview": "{ @apply rounded-full border px-4 py-2 text-[9px] uppercase backdrop-blur-md; font-family: var(--font-mono); letter-spacing: 0.34em; border-color: rgba(255, 255, 255, 0.10); backgr"
+        }
+      ],
+      "consumerCount": 0,
+      "consumers": []
+    },
+    "aol-grain": {
+      "definitionCount": 2,
+      "definitions": [
+        {
+          "file": "styles/globals.css",
+          "line": 219,
+          "loadedBy": "Pages Router (via pages/_app.tsx)",
+          "ruleBodyPreview": "{ background-image: url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOct"
+        },
+        {
+          "file": "app/globals.css",
+          "line": 201,
+          "loadedBy": "App Router (via app/layout.tsx)",
+          "ruleBodyPreview": "{ background-image: url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOct"
+        }
+      ],
+      "consumerCount": 12,
+      "consumers": [
+        {
+          "file": "pages/artifacts/[id].tsx",
+          "line": 354
+        },
+        {
+          "file": "pages/directorate/dossier/[id].tsx",
+          "line": 116
+        },
+        {
+          "file": "pages/vault/index.tsx",
+          "line": 226
+        },
+        {
+          "file": "components/AppShell.tsx",
+          "line": 61
+        },
+        {
+          "file": "components/blog/ClassicBlogReader.tsx",
+          "line": 237
+        },
+        {
+          "file": "components/content/DirectorateOversight.tsx",
+          "line": 356
+        },
+        {
+          "file": "components/dashboard/PDFDataDashboard.tsx",
+          "line": 91
+        },
+        {
+          "file": "components/essays/EssaysHero.tsx",
+          "line": 55
+        },
+        {
+          "file": "components/homepage/OGRFlagshipSection.tsx",
+          "line": 65
+        },
+        {
+          "file": "components/shorts/ShortHero.tsx",
+          "line": 52
+        },
+        {
+          "file": "components/shorts/ShortsSignalRail.tsx",
+          "line": 191
+        },
+        {
+          "file": "components/system/Block.tsx",
+          "line": 34
+        }
+      ]
+    },
+    "aol-grain-overlay": {
+      "definitionCount": 2,
+      "definitions": [
+        {
+          "file": "styles/globals.css",
+          "line": 206,
+          "loadedBy": "Pages Router (via pages/_app.tsx)",
+          "ruleBodyPreview": "{ position: fixed; inset: 0; pointer-events: none; z-index: 100; mix-blend-mode: overlay; opacity: 0.015; background-image: url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 "
+        },
+        {
+          "file": "app/globals.css",
+          "line": 193,
+          "loadedBy": "App Router (via app/layout.tsx)",
+          "ruleBodyPreview": "{ @apply fixed inset-0 pointer-events-none z-[100] mix-blend-overlay; opacity: 0.013; background-image: url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/s"
+        }
+      ],
+      "consumerCount": 1,
+      "consumers": [
+        {
+          "file": "components/AppShell.tsx",
+          "line": 61
+        }
+      ]
+    },
+    "hairline-premium": {
+      "definitionCount": 2,
+      "definitions": [
+        {
+          "file": "styles/globals.css",
+          "line": 303,
+          "loadedBy": "Pages Router (via pages/_app.tsx)",
+          "ruleBodyPreview": "{ height: 1px; width: 100%; background-image: linear-gradient( to right, transparent, rgba(255, 255, 255, 0.12), transparent ); }"
+        },
+        {
+          "file": "app/globals.css",
+          "line": 334,
+          "loadedBy": "App Router (via app/layout.tsx)",
+          "ruleBodyPreview": "{ height: 1px; width: 100%; background-image: linear-gradient( to right, transparent, rgba(255, 255, 255, 0.10), transparent ); }"
+        }
+      ],
+      "consumerCount": 0,
+      "consumers": []
+    },
+    "hairline-gold": {
+      "definitionCount": 2,
+      "definitions": [
+        {
+          "file": "styles/globals.css",
+          "line": 314,
+          "loadedBy": "Pages Router (via pages/_app.tsx)",
+          "ruleBodyPreview": "{ height: 1px; width: 100%; background-image: linear-gradient( to right, transparent, rgba(201, 169, 110, 0.34), transparent ); }"
+        },
+        {
+          "file": "app/globals.css",
+          "line": 345,
+          "loadedBy": "App Router (via app/layout.tsx)",
+          "ruleBodyPreview": "{ height: 1px; width: 100%; background-image: linear-gradient( to right, transparent, rgba(var(--aol-gold), 0.28), transparent ); }"
+        }
+      ],
+      "consumerCount": 0,
+      "consumers": []
+    },
+    "forensic-trace": {
+      "definitionCount": 4,
+      "definitions": [
+        {
+          "file": "styles/globals.css",
+          "line": 490,
+          "loadedBy": "Pages Router (via pages/_app.tsx)",
+          "ruleBodyPreview": "{ font-family: var(--font-family-mono); font-size: 10px; letter-spacing: 0.05em; color: rgba(242, 241, 238, 0.68); border: 1px dashed rgba(255, 255, 255, 0.10); background: rgb"
+        },
+        {
+          "file": "styles/globals.css",
+          "line": 564,
+          "loadedBy": "Pages Router (via pages/_app.tsx)",
+          "ruleBodyPreview": "{ border: 1px solid #ccc; background: #f5f5f5; color: #333; page-break-inside: avoid; }"
+        },
+        {
+          "file": "app/globals.css",
+          "line": 448,
+          "loadedBy": "App Router (via app/layout.tsx)",
+          "ruleBodyPreview": "{ font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.05em; color: rgba(var(--aol-ink-muted), 0.96); border: 1px dashed rgba(255, 255, 255, 0.14); background: rgb"
+        },
+        {
+          "file": "app/globals.css",
+          "line": 623,
+          "loadedBy": "App Router (via app/layout.tsx)",
+          "ruleBodyPreview": "{ border: 1px solid #ccc; background: #f5f5f5; color: #333; page-break-inside: avoid; }"
+        }
+      ],
+      "consumerCount": 0,
+      "consumers": []
+    },
+    "aol-mdx-content": {
+      "definitionCount": 2,
+      "definitions": [
+        {
+          "file": "styles/globals.css",
+          "line": 360,
+          "loadedBy": "Pages Router (via pages/_app.tsx)",
+          "ruleBodyPreview": "{ position: relative; z-index: 10; color: rgb(var(--aol-ink)); font-size: 16px; line-height: 1.80; }"
+        },
+        {
+          "file": "app/globals.css",
+          "line": 389,
+          "loadedBy": "App Router (via app/layout.tsx)",
+          "ruleBodyPreview": "{ position: relative; z-index: 10; color: rgb(var(--aol-ink)); font-size: 16px; line-height: 1.82; }"
+        }
+      ],
+      "consumerCount": 8,
+      "consumers": [
+        {
+          "file": "pages/blog/series/[seriesSlug]/[partSlug].tsx",
+          "line": 281
+        },
+        {
+          "file": "pages/editorials/series/[seriesSlug]/[partSlug].tsx",
+          "line": 287
+        },
+        {
+          "file": "components/blog/ClassicBlogReader.tsx",
+          "line": 395
+        },
+        {
+          "file": "components/content/DirectorateOversight.tsx",
+          "line": 478
+        },
+        {
+          "file": "components/mdx/ClientOnlyMDXRenderer.tsx",
+          "line": 252
+        },
+        {
+          "file": "components/mdx/MDXContentWrapper.tsx",
+          "line": 196
+        },
+        {
+          "file": "components/mdx/MDXLayoutRenderer.tsx",
+          "line": 70
+        },
+        {
+          "file": "components/mdx/TableOfContents.test.ts",
+          "line": 15
+        }
+      ]
+    }
+  }
+}
