@@ -3,14 +3,12 @@
  *
  * §8 — DII → cross-moat integration.
  *
- * Feeds the Market Decision Integrity Index into the existing buildCrossMoatBrief
- * function in compounding-intelligence.ts. The GmiEditionView already has a
- * `dii: number | null` field — this bridge ensures the DII is populated from
- * the canonical methodology authority before the cross-moat brief is built.
+ * Feeds the Market Decision Integrity Index into cross-moat briefs.
+ * This is an INTERNAL module — it must NOT be used on public surfaces
+ * without verified evidence.
  */
-import { calculateEditionDii } from "./market-decision-integrity-index";
+import { calculateEditionDii, type VerifiedMarketEvidence } from "./market-decision-integrity-index";
 import { DII_METHODOLOGY } from "./dii-methodology-authority";
-import type { GmiEditionView } from "../compounding/compounding-intelligence";
 
 export interface DiicontextInput {
   editionId: string;
@@ -26,16 +24,8 @@ export interface DiicontextInput {
   calibrationTrend: string;
 }
 
-export function enrichEditionWithDii(edition: GmiEditionView): GmiEditionView {
-  const editionDii = calculateEditionDii(edition.editionId);
-  if (!editionDii || editionDii.diiScore === null) {
-    return { ...edition, dii: null };
-  }
-  return { ...edition, dii: editionDii.diiScore };
-}
-
-export function buildDiicontextInput(editionId: string): DiicontextInput | null {
-  const editionDii = calculateEditionDii(editionId);
+export function buildDiicontextInput(editionId: string, evidence?: VerifiedMarketEvidence): DiicontextInput | null {
+  const editionDii = calculateEditionDii(editionId, evidence);
   if (!editionDii) return null;
   return {
     editionId,

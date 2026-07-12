@@ -1,88 +1,57 @@
 import { GetServerSideProps } from "next";
-import Head from "next/head";
-import Layout from "@/components/Layout";
-import { getLearningLog, getLearningLogSummary } from "@/lib/intelligence/accountability/public-decision-learning-log";
-import {
-  InstitutionalSurfaceShell, SurfaceCover, StateBadge, EvidenceMeta, SectionLedger,
-  MetricStatement, PreviewBanner, EmptyEvidenceState, RelationshipNavigator,
-  brass, brassLight, evidenceGrey,
-} from "@/components/institutional";
+import type { EvidenceAuthority } from "../../lib/intelligence/accountability/market-decision-integrity-index";
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const entries = getLearningLog();
-  const summary = getLearningLogSummary();
-  const log = { entries, summary, preview: summary.totalEntries === 0 };
-  return { props: { entries: JSON.parse(JSON.stringify(log.entries)), summary: JSON.parse(JSON.stringify(log.summary)), preview: log.preview } };
+  // No verified evidence available — truthful empty state
+  // The Learning Log must NOT render MARKET_CALL_LEDGER on public surfaces
+  const authority: EvidenceAuthority = "UNAVAILABLE";
+  return {
+    props: {
+      entries: [],
+      summary: {
+        totalEntries: 0,
+        confirmed: 0,
+        partiallyConfirmed: 0,
+        notConfirmed: 0,
+        pendingReview: 0,
+        byEdition: [],
+        specifiedConditions: 0,
+        referenceOnlyConditions: 0,
+        notSpecified: 0,
+      },
+      authority,
+    },
+  };
 };
 
-export default function LearningLogPage({ entries, summary, preview }: { entries: any[]; summary: any; preview: boolean }) {
-  const hasEntries = entries.length > 0;
+export default function LearningLogPage({ entries, summary, authority }: { entries: any[]; summary: any; authority: EvidenceAuthority }) {
   return (
-    <Layout title="Decision Learning Log | Abraham of London" description="What was believed, what happened, what was learned." headerTransparent fullWidth>
-      <Head><meta name="robots" content="noindex" /></Head>
-      <InstitutionalSurfaceShell>
-        <SurfaceCover
-          eyebrow="Accountability"
-          title="Decision Learning Log"
-          description="What was believed, what happened, what was learned — and what changed because of the learning."
-        >
-          <div className="mt-8 flex flex-wrap gap-6">
-            <EvidenceMeta label="Record status" value={preview ? "Preview" : "Published"} />
-            <EvidenceMeta label="Total entries" value={String(summary.totalEntries)} />
-            <EvidenceMeta label="Methodology" value="Append-only learning record v1.0" />
-          </div>
-        </SurfaceCover>
-
-        {preview && <PreviewBanner />}
-
-        <SectionLedger title="Outcome distribution">
-          <div className="grid grid-cols-3 gap-3 md:grid-cols-3">
-            <MetricStatement value={summary.confirmed} label="Confirmed" />
-            <MetricStatement value={summary.notConfirmed} label="Not confirmed" />
-            <MetricStatement value={summary.pendingReview} label="Pending review" />
-          </div>
-          <div className="mt-4 flex flex-wrap gap-4">
-            <EvidenceMeta label="Specified conditions" value={String(summary.specifiedConditions)} />
-            <EvidenceMeta label="Reference only" value={String(summary.referenceOnlyConditions)} />
-            <EvidenceMeta label="Not specified" value={String(summary.notSpecified)} />
-          </div>
-        </SectionLedger>
-
-        <SectionLedger title="Append-only learning record">
-          {hasEntries ? (
-            <div className="space-y-6">
-              {entries.map((entry: any) => (
-                <div key={entry.originalCallId} className="border p-5" style={{ borderColor: 'rgba(255,255,255,0.08)', backgroundColor: 'rgba(255,255,255,0.015)' }}>
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <p className="font-serif text-xl" style={{ color: 'rgba(255,255,255,0.85)' }}>{entry.originalCall}</p>
-                    <StateBadge state={entry.outcomeStatus} />
-                  </div>
-                  <div className="mt-4 grid gap-4 md:grid-cols-2">
-                    <div>
-                      <EvidenceMeta label="Edition" value={entry.edition} />
-                      <EvidenceMeta label="Original confidence" value={entry.originalConfidence} />
-                      <EvidenceMeta label="Falsification condition" value={entry.falsificationCondition.status === "SPECIFIED" ? entry.falsificationCondition.description : entry.falsificationCondition.status} />
-                    </div>
-                    <div>
-                      <EvidenceMeta label="Outcome" value={entry.outcomeStatus.replace(/_/g, ' ')} />
-                      <EvidenceMeta label="What changed" value={entry.whatChanged || 'No change recorded'} />
-                      {entry.learning && <EvidenceMeta label="What we learned" value={entry.learning} />}
-                    </div>
-                  </div>
-                  
-                </div>
-              ))}
-            </div>
-          ) : (
-            <EmptyEvidenceState title="No learning records" description="Learning records appear when calls have been reviewed and outcomes recorded." />
-          )}
-        </SectionLedger>
-
-        <RelationshipNavigator
-          upstream={[{ label: "Cross-Edition Review", href: "/market-intelligence/cross-edition-review" }, { label: "DII", href: "/market-intelligence/dii" }]}
-          current="Decision Learning Log"
-        />
-      </InstitutionalSurfaceShell>
-    </Layout>
+    <div style={{ maxWidth: 800, margin: "0 auto", padding: 24, fontFamily: "Georgia, serif", color: "rgba(255,255,255,0.82)", background: "#0a0a0b" }}>
+      <h1 style={{ fontSize: 28, fontWeight: 300, borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: 16 }}>
+        Decision Learning Log
+      </h1>
+      <p style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", marginBottom: 24 }}>
+        Authority: {authority} — Evidence not yet released
+      </p>
+      <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", padding: 24, marginBottom: 24 }}>
+        <p style={{ fontSize: 14, color: "rgba(255,255,255,0.45)", lineHeight: 1.6 }}>
+          No verified evidence is available. The Decision Learning Log requires a released edition with verified, human-reviewed market calls and their falsification conditions. Until then, no records are displayed.
+        </p>
+      </div>
+      <div style={{ display: "flex", gap: 12, marginBottom: 24 }}>
+        <div style={{ flex: 1, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", padding: 16, textAlign: "center" }}>
+          <div style={{ fontSize: 24, fontWeight: 300, color: "rgba(255,255,255,0.3)" }}>0</div>
+          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>Confirmed</div>
+        </div>
+        <div style={{ flex: 1, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", padding: 16, textAlign: "center" }}>
+          <div style={{ fontSize: 24, fontWeight: 300, color: "rgba(255,255,255,0.3)" }}>0</div>
+          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>Not Confirmed</div>
+        </div>
+        <div style={{ flex: 1, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", padding: 16, textAlign: "center" }}>
+          <div style={{ fontSize: 24, fontWeight: 300, color: "rgba(255,255,255,0.3)" }}>0</div>
+          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>Pending Review</div>
+        </div>
+      </div>
+    </div>
   );
 }
