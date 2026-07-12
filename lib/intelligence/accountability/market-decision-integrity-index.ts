@@ -16,6 +16,11 @@ export type PublicationStatus = "INSUFFICIENT_COVERAGE" | "PRELIMINARY" | "PUBLI
 
 export interface DiiComponentScore { measure: DiicomponentMeasure; score: number; weight: number; weightRationale: string; rationale: string; }
 export interface DiiCoverage { status: CoverageStatus; totalCalls: number; scoredCalls: number; pendingCalls: number; minRequired: number; }
+export interface DecisionIntegrityInput {
+  calls?: readonly MarketCallRecord[];
+  evidenceAuthority?: "AUTHORITATIVE" | "SEED" | "PROXY";
+}
+
 export interface EditionTrend { editionId: string; editionLabel: string; diiScore: number | null; publicationStatus: PublicationStatus; componentScores: DiiComponentScore[]; coverage: DiiCoverage; callCount: number; }
 export interface DecisionIntegrityIndex { headlineScore: number | null; publicationStatus: PublicationStatus; componentScores: DiiComponentScore[]; coverage: DiiCoverage; methodologyVersion: string; editionTrend: EditionTrend[]; generatedAt: string; }
 
@@ -95,8 +100,22 @@ function buildEditionTrend(calls: MarketCallRecord[], editionLabel: string): Edi
   return { editionId: calls[0]?.reportId ?? "unknown", editionLabel, diiScore: headlineScore, publicationStatus: pubStatus, componentScores: components, coverage, callCount: calls.length };
 }
 
-export function calculateDecisionIntegrityIndex(): DecisionIntegrityIndex {
-  const allCalls = [...MARKET_CALL_LEDGER], coverage = calculateCoverage(allCalls);
+export function calculateDecisionIntegrityIndex(input?: DecisionIntegrityInput): DecisionIntegrityIndex {
+  const authority = input?.evidenceAuthority ?? "SEED";
+  const allCalls = input?.calls ? [...input.calls] : [...MARKET_CALL_LEDGER];
+  const coverage = calculateCoverage(allCalls);
+  // Without explicit authoritative evidence, the DII must remain PREVIEW
+  if (authority !== "AUTHORITATIVE") {
+    return {
+      headlineScore: null,
+      publicationStatus: "PRELIMINARY",
+      componentScores: buildComponentScores(allCalls),
+      coverage,
+      methodologyVersion: DII_METHODOLOGY.methodologyVersion,
+      editionTrend: [],
+      generatedAt: new Date().toISOString(),
+    };
+  }
   const editionMap = new Map<string, MarketCallRecord[]>();
   for (const call of allCalls) { const existing = editionMap.get(call.reportId) || []; existing.push(call); editionMap.set(call.reportId, existing); }
   const editionTrend: EditionTrend[] = [];

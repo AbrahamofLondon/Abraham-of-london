@@ -2,7 +2,7 @@ import { GetServerSideProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import Layout from "@/components/Layout";
-import { getCrossEditionReview } from "@/lib/intelligence/accountability/cross-edition-call-review";
+import { getCrossEditionReview, getCrossEditionSummary } from "@/lib/intelligence/accountability/cross-edition-call-review";
 import {
   InstitutionalSurfaceShell, SurfaceCover, StateBadge, EvidenceMeta, SectionLedger,
   MetricStatement, MethodologyReceipt, PreviewBanner,
@@ -10,7 +10,9 @@ import {
 } from "@/components/institutional";
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const r = { review: getCrossEditionReview(), summary: { byEdition: [], totalCalls: 0, originated: 0, carriedForward: 0, revised: 0, closed: 0, falsified: 0, unresolved: 0 }, preview: false };
+  const review = getCrossEditionReview();
+  const summary = getCrossEditionSummary();
+  const r = { review, summary, preview: summary.totalCalls === 0 };
   return { props: { review: JSON.parse(JSON.stringify(r.review)), summary: JSON.parse(JSON.stringify(r.summary)), preview: r.preview } };
 };
 

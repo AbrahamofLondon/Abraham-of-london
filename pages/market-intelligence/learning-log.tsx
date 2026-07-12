@@ -1,7 +1,7 @@
 import { GetServerSideProps } from "next";
 import Head from "next/head";
 import Layout from "@/components/Layout";
-import { getLearningLog } from "@/lib/intelligence/accountability/public-decision-learning-log";
+import { getLearningLog, getLearningLogSummary } from "@/lib/intelligence/accountability/public-decision-learning-log";
 import {
   InstitutionalSurfaceShell, SurfaceCover, StateBadge, EvidenceMeta, SectionLedger,
   MetricStatement, PreviewBanner, EmptyEvidenceState, RelationshipNavigator,
@@ -9,7 +9,9 @@ import {
 } from "@/components/institutional";
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const log = { entries: getLearningLog(), summary: { totalEntries: 0, confirmed: 0, notConfirmed: 0, pendingReview: 0, specifiedConditions: 0, referenceOnlyConditions: 0, notSpecified: 0 }, preview: false };
+  const entries = getLearningLog();
+  const summary = getLearningLogSummary();
+  const log = { entries, summary, preview: summary.totalEntries === 0 };
   return { props: { entries: JSON.parse(JSON.stringify(log.entries)), summary: JSON.parse(JSON.stringify(log.summary)), preview: log.preview } };
 };
 
