@@ -34,9 +34,17 @@ Commit 4b9e91ade modifies two pre-existing files:
 
 Owner-approved for inclusion. No revert. No extraction.
 
-## GMI Q2 — Controlled and Unpublished
+## GMI Release Chain — Q2 Current, Q1 Superseded
 
-GMI Q2 remains in DRAFT/CONTROLLED lifecycle state. No checkout enabled. No publication.
+GMI Q2 2026 is the current published and purchasable edition.
+
+Its authoritative lifecycle state is ACTIVE_UNTIL_SUPERSEDED. It remains publicly visible and available through the canonical £59 self-serve checkout, using the existing GMI Stripe product and Q2 price binding.
+
+GMI Q1 2026 is SUPERSEDED. It remains publicly available as historical reference and for the public call-scoring record, but it is hidden from current pricing and has no new standalone checkout.
+
+GMI Q3 2026 remains a non-public, non-purchasable draft.
+
+The reconciliation did not create a new Stripe product or price. It preserved the already-authorised Q2 release, checkout, entitlement and fulfilment chain.
 
 ## Evidence Authority Boundary
 
@@ -62,8 +70,8 @@ that cannot be constructed outside the trusted resolver module. Runtime validati
 | Frozen install | PASS |
 | Typecheck | PASS |
 | Build | PASS |
-| Unit tests | 502/506 files, 7558/7568 tests (10 pre-existing failures) |
-| Playwright | 6 passed, 7 failed (pre-existing), 32 skipped (visual baseline opt-in) |
+| Unit tests | 7,563 / 7,568 passed; 5 documented failures |
+| Playwright | 6 passed, 7 documented failures, 32 explicit baseline-capture skips |
 | Vault audit engine | institutional-audit.mjs |
 | Vault policy | 56 advisory path-regression violations (pre-existing) |
 | Working tree | CLEAN |
