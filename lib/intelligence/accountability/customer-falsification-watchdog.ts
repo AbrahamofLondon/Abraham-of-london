@@ -116,3 +116,46 @@ export function evaluateTrigger(trigger: FalsificationTrigger, evidenceStrength:
 export function buildAlertMessage(trigger: FalsificationTrigger): string {
   return `You previously said this decision should be revisited if "${trigger.statedTrigger}". The recorded evidence now meets that condition. Review is required.`;
 }
+
+// Evidence admissibility -- Section 14 hardening
+
+export interface ObservedEvidence {
+  source: EvidenceSource | "external_evidence";
+  claimedStrength: "none" | "weak" | "moderate" | "strong";
+  editionState?: "DRAFT" | "CONTROLLED" | "RELEASED";
+  verified?: boolean;
+}
+
+export interface AdmissibilityResult {
+  admissible: boolean;
+  admissibleStrength: "none" | "weak" | "moderate" | "strong";
+  downgraded: boolean;
+  reason: string;
+}
+
+export function assessEvidenceAdmissibility(evidence: ObservedEvidence): AdmissibilityResult {
+  if (evidence.source === "gmi_edition") {
+    if (evidence.editionState === "DRAFT" || evidence.editionState === "CONTROLLED") {
+      return { admissible: false, admissibleStrength: "none", downgraded: false, reason: "GMI edition is " + evidence.editionState + " -- not admissible" };
+    }
+    if (evidence.editionState === "RELEASED" && evidence.verified) {
+      return { admissible: true, admissibleStrength: evidence.claimedStrength, downgraded: false, reason: "Released, verified GMI edition evidence is admissible" };
+    }
+  }
+  if (evidence.claimedStrength === "strong" && !evidence.verified) {
+    return { admissible: true, admissibleStrength: "moderate", downgraded: true, reason: "Unverified strong evidence capped at moderate" };
+  }
+  if (evidence.claimedStrength === "weak") {
+    return { admissible: true, admissibleStrength: "weak", downgraded: false, reason: "Weak evidence admissible but insufficient for escalation" };
+  }
+  return { admissible: true, admissibleStrength: evidence.claimedStrength, downgraded: false, reason: "Evidence admitted at claimed strength" };
+}
+
+export function evaluateTriggerWithEvidence(trigger: FalsificationTrigger, evidence: ObservedEvidence): WatchdogEvaluation & { admissibility: AdmissibilityResult } {
+  const admissibility = assessEvidenceAdmissibility(evidence);
+  if (!admissibility.admissible) {
+    return { ...evaluateTrigger(trigger, "none"), admissibility };
+  }
+  const evaluation = evaluateTrigger(trigger, admissibility.admissibleStrength);
+  return { ...evaluation, admissibility };
+}

@@ -57,6 +57,23 @@ export interface DecisionIntegrityIndex { headlineScore: number | null; publicat
  */
 const VERIFIED_EVIDENCE_BRAND: unique symbol = Symbol("VerifiedMarketEvidence");
 
+/**
+ * Runtime evidence registry — a module-scoped WeakSet containing every
+ * VerifiedMarketEvidence object produced by resolveVerifiedMarketEvidence().
+ * calculateDecisionIntegrityIndex() checks this set at runtime and rejects
+ * any object not registered here, regardless of its TypeScript type, brand
+ * symbol, or property shape.
+ *
+ * This is a RUNTIME enforcement that cannot be bypassed by:
+ * - casting with `as any`
+ * - JSON serialization/deserialization
+ * - copying the brand symbol or properties
+ * - constructing a structurally identical object
+ *
+ * Only resolveVerifiedMarketEvidence() can add objects to this set.
+ */
+const _verifiedEvidenceRegistry = new WeakSet<object>();
+
 export interface VerifiedMarketEvidence {
   /** Brand — prevents external construction. Symbol is never exported. */
   readonly [VERIFIED_EVIDENCE_BRAND]: typeof VERIFIED_EVIDENCE_BRAND;
@@ -201,6 +218,11 @@ function hashPayload(calls: readonly MarketCallRecord[]): string {
  * The branded type makes it impossible for callers to forge evidence objects.
  */
 export function calculateDecisionIntegrityIndex(evidence?: VerifiedMarketEvidence): DecisionIntegrityIndex {
+  // Runtime provenance check: reject any object not registered by the resolver
+  if (evidence && !_verifiedEvidenceRegistry.has(evidence)) {
+    evidence = undefined;
+  }
+
   if (!evidence) {
     return {
       headlineScore: null,
@@ -273,15 +295,21 @@ export function resolveVerifiedMarketEvidence(options: {
     callIds.every(id => receiptSourceIds.includes(id));
   if (!idsMatch) return null;
 
-  // All checks passed — construct branded evidence object
-  return {
+  // All checks passed — construct, freeze and register the evidence object
+  const raw = {
     [VERIFIED_EVIDENCE_BRAND]: VERIFIED_EVIDENCE_BRAND,
-    authority: "AUTHORITATIVE",
+    authority: "AUTHORITATIVE" as const,
     verificationReceiptId: receiptId,
     sourceIds: receipt.sourceIds,
     calls,
     verifiedAt: new Date().toISOString(),
-  };
+  } as VerifiedMarketEvidence;
+  const evidence = Object.freeze(raw) as VerifiedMarketEvidence;
+
+  // Register in runtime WeakSet so calculateDecisionIntegrityIndex can verify
+  _verifiedEvidenceRegistry.add(evidence);
+
+  return evidence;
 }
 
 /**
