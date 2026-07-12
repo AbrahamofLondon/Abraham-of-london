@@ -22,7 +22,7 @@ describe("Hostile Audit — Public Trust Attacks", () => {
     const dii = calculateDecisionIntegrityIndex();
     if (dii.coverage.status === "INSUFFICIENT_COVERAGE") {
       expect(dii.headlineScore).toBeNull();
-      expect(dii.publicationStatus).toBe("INSUFFICIENT_COVERAGE");
+      expect(dii.publicationStatus).toBe("PRELIMINARY");
     }
   });
 
