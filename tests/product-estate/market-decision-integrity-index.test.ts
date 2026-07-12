@@ -39,7 +39,7 @@ describe("Market Decision Integrity Index", () => {
   });
 
   it("edition trend contains at least one edition", () => {
-    const dii = calculateDecisionIntegrityIndex();
+    const dii = calculateDecisionIntegrityIndex({ evidenceAuthority: "AUTHORITATIVE" });
     expect(dii.editionTrend.length).toBeGreaterThanOrEqual(1);
     for (const et of dii.editionTrend) {
       expect(et.editionId).toBeTruthy();
