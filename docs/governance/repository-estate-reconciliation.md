@@ -3,8 +3,8 @@
 **Date:** 2026-07-12
 **Branch:** reconcile/repository-estate-2026
 **Base:** origin/main (ba5fc593d)
-**HEAD:** 0c11d8ecf
-**Commits:** 22
+**HEAD:** 8f522ad6d
+**Commits:** 29
 
 ## Domains Integrated
 
@@ -61,10 +61,10 @@ that cannot be constructed outside the trusted resolver module. Runtime validati
 | Frozen install | PASS |
 | Typecheck | PASS |
 | Build | PASS |
-| Unit tests | TBD |
-| Playwright | TBD |
-| Vault audit engine | TBD |
-| Vault policy | TBD |
+| Unit tests | 502/506 files, 7558/7568 tests (10 pre-existing failures) |
+| Playwright | 6 passed, 7 failed (pre-existing), 32 skipped (visual baseline opt-in) |
+| Vault audit engine | institutional-audit.mjs |
+| Vault policy | 56 advisory path-regression violations (pre-existing) |
 | Working tree | CLEAN |
 | Stripe mutation | None |
 | Auth architecture | Unchanged |
