@@ -3,6 +3,8 @@ import { execSync } from "node:child_process";
 import { mkdirSync, writeFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
+const isCaptureMode = process.env.UPDATE_VISUAL_BASELINE === "1";
+
 /**
  * tests/e2e/visual-authority-baseline.spec.ts
  *
@@ -51,6 +53,10 @@ function safeRouteName(route: string): string {
 }
 
 test.describe("visual authority baseline capture", () => {
+  test.skip(
+    !isCaptureMode,
+    "Baseline capture requires UPDATE_VISUAL_BASELINE=1",
+  );
   test.beforeAll(() => {
     if (!existsSync(OUT_DIR)) mkdirSync(OUT_DIR, { recursive: true });
   });
@@ -99,6 +105,7 @@ test.describe("visual authority baseline capture", () => {
   }
 
   test.afterAll(() => {
+    if (!isCaptureMode) return;
     const manifestPath = join(OUT_DIR, "manifest.json");
     writeFileSync(
       manifestPath,
