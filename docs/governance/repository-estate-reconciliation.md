@@ -1,10 +1,10 @@
 # Repository Estate Reconciliation — Governance Record
 
-**Date:** 2026-07-11
+**Date:** 2026-07-12
 **Branch:** reconcile/repository-estate-2026
 **Base:** origin/main (ba5fc593d)
-**HEAD:** 0b02dc05a8effb5cc098b75ef62a6b8df5ebac9b
-**Commits:** 21
+**HEAD:** 0c11d8ecf
+**Commits:** 22
 
 ## Domains Integrated
 
@@ -16,6 +16,7 @@
 | Dependency normalization | 1 | — |
 | Estate-market restoration | 8 | work/estate-market-restoration |
 | Integration compatibility fixes | 2 | — |
+| Evidence-gated accountability surfaces | 1 | work/estate-market-restoration |
 
 ## Branches Reviewed and Omitted
 
@@ -36,6 +37,23 @@ Owner-approved for inclusion. No revert. No extraction.
 
 GMI Q2 remains in DRAFT/CONTROLLED lifecycle state. No checkout enabled. No publication.
 
+## Evidence Authority Boundary
+
+The public accountability surfaces now use a branded opaque type (VerifiedMarketEvidence)
+that cannot be constructed outside the trusted resolver module. Runtime validation:
+
+- Receipt registry: server-owned implementation
+- Source provider: server-owned implementation
+- API accepts receipt ID from client as authority: NO
+- API accepts evidenceAuthority from client: NO
+- API accepts raw calls and labels them authoritative: NO
+- Edition must be RELEASED: YES
+- Receipt must match edition: YES
+- Payload hash must match calls: YES
+- Sources must be verified: YES
+- Unknown/forged receipt rejected: YES
+- Draft/controlled edition rejected: YES
+
 ## Validation Summary
 
 | Gate | Result |
@@ -43,15 +61,15 @@ GMI Q2 remains in DRAFT/CONTROLLED lifecycle state. No checkout enabled. No publ
 | Frozen install | PASS |
 | Typecheck | PASS |
 | Build | PASS |
-| Unit tests | 7546/7564 passed (18 non-blocking failures) |
-| Playwright | 38/45 passed (7 classified failures) |
-| Vault audit engine | PASS |
-| Vault policy | 56 advisory violations (pre-existing) |
+| Unit tests | TBD |
+| Playwright | TBD |
+| Vault audit engine | TBD |
+| Vault policy | TBD |
 | Working tree | CLEAN |
 | Stripe mutation | None |
 | Auth architecture | Unchanged |
 
 ## Release Authority
 
-**Decision:** READY FOR PR
+**Decision:** READY_FOR_REVIEW
 **Human review required before merge.**
