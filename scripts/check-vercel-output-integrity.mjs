@@ -58,7 +58,6 @@ const KNOWN_FAILED_LAMBDA_ROUTES_APP_PATHS = [
   // Permanently retired routes (no page file, redirect only):
   "app/dashboard/purpose-alignment/page",
   "app/dashboard/live/page",
-  "app/testing/lab/page",
 ];
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
