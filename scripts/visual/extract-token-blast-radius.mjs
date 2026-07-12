@@ -166,6 +166,8 @@ const TOKENS = {
   },
 };
 
+function escapeRegExp(v) { return v.replace(/[.*+?^${}()|[\]\\]/g, "$&"); }
+
 function walk(dir, acc = []) {
   let entries;
   try {
@@ -234,7 +236,7 @@ const inventory = {};
 
 for (const [token, def] of Object.entries(TOKENS)) {
   const varName = token; // e.g. --aol-bg
-  const directRe = new RegExp(`var\\(${varName.replace(/[-]/g, "\\-")}[),/ ]`, "g");
+  const directRe = new RegExp(`var\\(${escapeRegExp(varName)}[),/ ]`, "g");
 
   const directConsumers = [];
   for (const [f, content] of fileContents) {

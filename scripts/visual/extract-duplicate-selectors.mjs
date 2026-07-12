@@ -41,10 +41,12 @@ const ROUTER_LOAD_MAP = {
   "styles/brand-system.css": "Neither router — not imported anywhere",
 };
 
+function escapeRegExp(v) { return v.replace(/[.*+?^${}()|[\]\\]/g, "$&"); }
+
 function findRuleBody(src, className) {
   // Matches .className { ... } — first-level brace matching, not nested-aware,
   // sufficient for these flat utility-style rule definitions.
-  const re = new RegExp(`\\.${className.replace(/[-]/g, "\\-")}\\s*\\{`, "g");
+  const re = new RegExp(`\\.${escapeRegExp(className)}\\s*\\{`, "g");
   const results = [];
   let m;
   while ((m = re.exec(src)) !== null) {
