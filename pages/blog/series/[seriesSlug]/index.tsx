@@ -295,8 +295,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
   if (!series) return { notFound: true };
 
-  const totalMinutes = series.parts
-    .filter((p) => p.status === "PUBLISHED")
+  const totalMinutes = (series.previewParts ?? series.parts)
     .reduce((sum, p) => sum + parseMins(p.readTime), 0);
 
   return {

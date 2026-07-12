@@ -255,9 +255,10 @@ export function resolveAllSeries(
       excerpt: firstDoc.excerpt ?? firstDoc.description ?? "",
       category: firstDoc.category ?? "Essays",
       tags: Array.isArray(firstDoc.tags) ? firstDoc.tags : [],
-      // partCount reflects published parts only — drafts are not exposed in the
-      // public-facing ResolvedSeries. Use previewParts for scheduled previews.
-      partCount: publishedParts.length,
+      // partCount reflects the total publicly disclosed series length:
+      // published + scheduled preview parts. Internal drafts are excluded.
+      // publishedPartCount tracks how many are currently readable.
+      partCount: previewParts.length,
       publishedPartCount,
       status: seriesStatus,
       parts: publishedParts,
