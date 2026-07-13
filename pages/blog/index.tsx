@@ -980,10 +980,7 @@ export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
         totalPosts: items.length,
         seriesCatalogue,
       }),
-      // No revalidate — content is static (contentlayer build-time JSON).
-      // ISR would re-run getStaticProps in a Netlify Lambda where the
-      // runtime filesystem differs from the build container, risking
-      // cache poisoning. Redeploy to update content.
+      revalidate: 60,
     };
   } catch {
     return {
