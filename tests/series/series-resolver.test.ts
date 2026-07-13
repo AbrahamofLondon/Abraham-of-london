@@ -249,10 +249,23 @@ describe("Series Resolver", () => {
 
 
   describe("the-truth-in-the-frame — 9-part series count", () => {
+    const ORIGINAL_TODAY = process.env.MDX_PUBLICATION_TODAY;
+
+    beforeEach(() => {
+      process.env.MDX_PUBLICATION_TODAY = "2026-07-12";
+    });
+
+    afterEach(() => {
+      if (ORIGINAL_TODAY === undefined) {
+        delete process.env.MDX_PUBLICATION_TODAY;
+      } else {
+        process.env.MDX_PUBLICATION_TODAY = ORIGINAL_TODAY;
+      }
+    });
+
     it("reports partCount=9, publishedPartCount=1, previewParts=9, parts=1", () => {
-      const today = new Date("2026-07-12");
-      // Part 1: published (past date)
-      // Parts 2-9: scheduled (future dates)
+      // Part 1: 2026-07-07 is before 2026-07-12 → PUBLIC_READABLE_NOW
+      // Parts 2-9: 2026-07-14 through 2026-09-01 are after 2026-07-12 → SCHEDULED
       const parts = [
         { order: 1, slug: "before-the-word", date: "2026-07-07", draft: false },
         { order: 2, slug: "the-kings-shadow", date: "2026-07-14", draft: false },
@@ -294,6 +307,19 @@ describe("Series Resolver", () => {
   });
 
   describe("scheduled / preview-visible editorial series", () => {
+    const ORIGINAL_TODAY = process.env.MDX_PUBLICATION_TODAY;
+
+    beforeEach(() => {
+      process.env.MDX_PUBLICATION_TODAY = "2026-07-12";
+    });
+
+    afterEach(() => {
+      if (ORIGINAL_TODAY === undefined) {
+        delete process.env.MDX_PUBLICATION_TODAY;
+      } else {
+        process.env.MDX_PUBLICATION_TODAY = ORIGINAL_TODAY;
+      }
+    });
     it("includes series when all parts are SCHEDULED with preview permission", () => {
       // Simulate six editorial-series parts, all future-dated with seriesVisibility:scheduled
       // Slug is derived from directory name: "outsourcing-our-sense-of-meaning-and-belonging"
@@ -306,7 +332,7 @@ describe("Series Resolver", () => {
           excerpt: "First excerpt",
           slug: "part-one",
           slugSafe: "part-one",
-          date: "2027-01-13", // future
+          date: "2026-07-13", // future
           draft: false,
           published: true,
           category: "Special Edition",
@@ -335,7 +361,7 @@ describe("Series Resolver", () => {
           excerpt: "Second excerpt",
           slug: "part-two",
           slugSafe: "part-two",
-          date: "2027-01-20", // future
+          date: "2026-07-20", // future
           draft: false,
           published: true,
           category: "Special Edition",
