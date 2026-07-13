@@ -20,6 +20,7 @@ vi.mock("@/lib/series/data", () => ({
 
 import { resolveAllSeries, resolveSeriesBySlug } from "@/lib/series/resolver";
 import { isRouteEligibleNow } from "@/lib/content/publication-eligibility";
+import { getDocKind } from "@/lib/content/shared";
 
 // Helper to create a mock blog post document
 function mockBlogPost(overrides: Record<string, unknown> = {}) {
@@ -133,6 +134,55 @@ describe("isRouteEligibleNow helper", () => {
   });
 });
 
+describe("registry family integrity", () => {
+  it("getDocKind returns blog for a blog series Post", () => {
+    const doc = {
+      type: "Post",
+      docKind: "blog",
+      slug: "blog/series/the-truth-in-the-frame/before-the-word",
+      _raw: { flattenedPath: "blog/series/the-truth-in-the-frame/before-the-word" },
+    };
+    expect(getDocKind(doc)).toBe("blog");
+  });
+
+  it("getDocKind returns short for a Short", () => {
+    const doc = {
+      type: "Short",
+      docKind: "short",
+      slug: "shorts/when-you-feel-something",
+      _raw: { flattenedPath: "shorts/when-you-feel-something" },
+    };
+    expect(getDocKind(doc)).toBe("short");
+  });
+
+  it("a blog Post at /registry/shorts is rejected by family mismatch", () => {
+    // A blog series Post has docKind="blog".
+    // /registry/shorts expects docKind="short".
+    // blog !== short → rejected.
+    const doc = {
+      type: "Post",
+      docKind: "blog",
+      slug: "blog/series/the-truth-in-the-frame/the-kings-shadow",
+      _raw: { flattenedPath: "blog/series/the-truth-in-the-frame/the-kings-shadow" },
+    };
+    expect(getDocKind(doc)).toBe("blog");
+    expect(getDocKind(doc)).not.toBe("short");
+  });
+
+  it("a blog Post at /registry/dispatches is accepted by family (blog matches blog)", () => {
+    // /registry/dispatches expects docKind="blog" (dispatches = blog posts).
+    // A blog series Post has docKind="blog".
+    // blog === blog → accepted.
+    const doc = {
+      type: "Post",
+      docKind: "blog",
+      slug: "blog/series/the-truth-in-the-frame/before-the-word",
+      _raw: { flattenedPath: "blog/series/the-truth-in-the-frame/before-the-word" },
+    };
+    expect(getDocKind(doc)).toBe("blog");
+  });
+});
+
 describe("route eligibility across release boundary", () => {
   const ORIGINAL_TODAY = process.env.MDX_PUBLICATION_TODAY;
 
@@ -207,5 +257,36 @@ describe("route eligibility across release boundary", () => {
     process.env.MDX_PUBLICATION_TODAY = "2026-07-12";
     const doc = { date: "2026-07-14", draft: false, published: true, accessLevel: "member" };
     expect(isRouteEligibleNow(doc)).toBe(false);
+  });
+
+  it("at 2026-07-13: The King's Shadow is SCHEDULED, not route-eligible", () => {
+    process.env.MDX_PUBLICATION_TODAY = "2026-07-13";
+    mockTruthParts(makeTruthParts());
+
+    // Through the series resolver: Part Two should not be in parts
+    const result = resolveAllSeries("blog");
+    const series = result.find((s) => s.slug === "the-truth-in-the-frame");
+    expect(series).toBeDefined();
+    expect(series!.parts.find((p) => p.order === 2)).toBeUndefined();
+
+    // Through isRouteEligibleNow: a doc with date 2026-07-14 at 2026-07-13 is SCHEDULED
+    const doc = { date: "2026-07-14", draft: false, published: true, accessLevel: "public" };
+    expect(isRouteEligibleNow(doc)).toBe(false);
+  });
+
+  it("at 2026-07-14: The King's Shadow becomes route-eligible", () => {
+    process.env.MDX_PUBLICATION_TODAY = "2026-07-14";
+    mockTruthParts(makeTruthParts());
+
+    const result = resolveAllSeries("blog");
+    const series = result.find((s) => s.slug === "the-truth-in-the-frame");
+    expect(series).toBeDefined();
+    expect(series!.parts.find((p) => p.order === 2)).toBeDefined();
+    expect(series!.publishedPartCount).toBe(2);
+    expect(series!.partCount).toBe(9);
+
+    // Through isRouteEligibleNow: 2026-07-14 >= 2026-07-14 → PUBLIC_READABLE_NOW
+    const doc = { date: "2026-07-14", draft: false, published: true, accessLevel: "public" };
+    expect(isRouteEligibleNow(doc)).toBe(true);
   });
 });

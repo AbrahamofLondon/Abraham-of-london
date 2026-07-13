@@ -12,6 +12,7 @@ const ClientOnlyMDXRenderer = dynamic(() => import("@/components/mdx/ClientOnlyM
 import { getDocBySlug } from "@/lib/content/unified-router";
 import { getRenderableBody } from "@/lib/content/render-body";
 import { isRouteEligibleNow } from "@/lib/content/publication-eligibility";
+import { getDocKind } from "@/lib/content/shared";
 
 import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
 import type { AccessTier } from "@/lib/access/tiers";
@@ -277,11 +278,13 @@ export const getStaticProps: GetStaticProps<UniversalPageProps> = async ({
     return { notFound: true, revalidate: 60 };
   }
 
-  // Enforce registry type integrity: the resolved document must match the
-  // requested registry type. A Post must not be accessible at /registry/dispatches/...
-  const docType = String(docRaw?.type || docRaw?.docKind || "").toLowerCase();
-  const expectedType = typeRaw === "shorts" ? "short" : typeRaw === "dispatches" ? "post" : null;
-  if (expectedType && !docType.includes(expectedType)) {
+  // Enforce registry family integrity using the canonical document kind resolver.
+  // /registry/dispatches/* accepts only blog posts (docKind="blog").
+  // /registry/shorts/* accepts only short documents (docKind="short").
+  // A blog article must not be accessible at /registry/dispatches/the-kings-shadow.
+  const docFamily = getDocKind(docRaw);
+  const expectedFamily = typeRaw === "shorts" ? "short" : "blog";
+  if (docFamily !== expectedFamily) {
     return { notFound: true, revalidate: 60 };
   }
 
