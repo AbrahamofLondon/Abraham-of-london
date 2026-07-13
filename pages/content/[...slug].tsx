@@ -81,6 +81,10 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     getDocBySlug(slug);
 
   if (!doc) return { notFound: true };
+
+  // Series chapters belong only at /blog/series/[seriesSlug]/[partSlug]
+  if (doc.series) return { notFound: true };
+
   if (!isRouteEligibleNow(doc)) return { notFound: true, revalidate: 60 };
 
   const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(doc));

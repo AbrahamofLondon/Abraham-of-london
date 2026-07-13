@@ -286,6 +286,10 @@ export const getStaticProps = async ({ params }: GetStaticPropsContext) => {
   const rawDoc = getDocBySlug(needle);
 
   if (!rawDoc) return { notFound: true };
+
+  // Series chapters belong only at /blog/series/[seriesSlug]/[partSlug]
+  if (rawDoc.series) return { notFound: true };
+
   if (!isRouteEligibleNow(rawDoc)) return { notFound: true, revalidate: 60 };
 
   const requiredTier = normalizeRequiredTier(requiredTierFromDoc(rawDoc));

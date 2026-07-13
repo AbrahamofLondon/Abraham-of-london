@@ -228,7 +228,7 @@ const UniversalDispatchPage: NextPage<UniversalPageProps> = ({
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const { getAllPosts, getAllShorts } = await import("@/lib/content/server");
-  const allPosts = (getAllPosts() as any[]).filter((p) => isRouteEligibleNow(p));
+  const allPosts = (getAllPosts() as any[]).filter((p) => isRouteEligibleNow(p) && !p.series);
   const allShorts = (getAllShorts() as any[]).filter((s) => isRouteEligibleNow(s));
 
   // Cap prebuild to the 5 most recent items across BOTH types combined.
@@ -276,6 +276,11 @@ export const getStaticProps: GetStaticProps<UniversalPageProps> = async ({
 
   if (!docRaw || !isRouteEligibleNow(docRaw)) {
     return { notFound: true, revalidate: 60 };
+  }
+
+  // Series chapters belong only at /blog/series/[seriesSlug]/[partSlug]
+  if (docRaw.series) {
+    return { notFound: true };
   }
 
   // Enforce registry family integrity using the canonical document kind resolver.

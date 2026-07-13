@@ -38,6 +38,11 @@ export default async function handler(
       return res.status(404).json({ ok: false });
     }
 
+    // Series chapters belong only at /blog/series/[seriesSlug]/[partSlug]
+    if (doc.series) {
+      return res.status(404).json({ ok: false });
+    }
+
     const requiredTier = normalizeRequiredTier(requiredTierFromDoc(doc));
 
     if (requiredTier === "public") {

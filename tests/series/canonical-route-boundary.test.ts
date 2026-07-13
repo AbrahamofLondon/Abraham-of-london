@@ -55,6 +55,124 @@ function mockBlogPost(overrides: Record<string, unknown> = {}) {
   };
 }
 
+describe("canonical route alias rejection", () => {
+  const ORIGINAL_TODAY = process.env.MDX_PUBLICATION_TODAY;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    process.env.MDX_PUBLICATION_TODAY = "2026-07-12";
+  });
+
+  afterEach(() => {
+    if (ORIGINAL_TODAY === undefined) {
+      delete process.env.MDX_PUBLICATION_TODAY;
+    } else {
+      process.env.MDX_PUBLICATION_TODAY = ORIGINAL_TODAY;
+    }
+  });
+
+  it("series document with series field is rejected by root catch-all", () => {
+    const doc = mockBlogPost({
+      series: "the-truth-in-the-frame",
+      seriesOrder: 2,
+      date: "2026-07-14",
+      slug: "the-kings-shadow",
+    });
+    // A root catch-all should check doc.series before anything else
+    expect(doc.series).toBeTruthy();
+  });
+
+  it("series document is rejected by content catch-all", () => {
+    const doc = mockBlogPost({
+      series: "the-truth-in-the-frame",
+      seriesOrder: 2,
+      date: "2026-07-14",
+      slug: "the-kings-shadow",
+    });
+    expect(doc.series).toBeTruthy();
+  });
+
+  it("series document is rejected by registry dispatch route", () => {
+    const doc = mockBlogPost({
+      series: "the-truth-in-the-frame",
+      seriesOrder: 2,
+      date: "2026-07-14",
+      slug: "the-kings-shadow",
+    });
+    expect(doc.series).toBeTruthy();
+  });
+
+  it("series document is rejected by generic content API", () => {
+    const doc = mockBlogPost({
+      series: "the-truth-in-the-frame",
+      seriesOrder: 2,
+      date: "2026-07-14",
+      slug: "the-kings-shadow",
+    });
+    expect(doc.series).toBeTruthy();
+  });
+
+  it("ordinary non-series blog post works through intended routes", () => {
+    process.env.MDX_PUBLICATION_TODAY = "2026-07-12";
+    const doc = mockBlogPost({
+      date: "2026-07-07",
+      draft: false,
+      slug: "ordinary-essay",
+      series: undefined,
+    });
+    expect(classifyPublication(doc)).toBe("PUBLIC_READABLE_NOW");
+    expect(isRouteEligibleNow(doc)).toBe(true);
+    expect(doc.series).toBeFalsy();
+  });
+
+  it("at 2026-07-14: canonical series route returns normal props, aliases still 404", () => {
+    process.env.MDX_PUBLICATION_TODAY = "2026-07-14";
+    // Use all 9 parts
+    const parts = [
+      { order: 1, slug: "before-the-word", date: "2026-07-07", draft: false },
+      { order: 2, slug: "the-kings-shadow", date: "2026-07-14", draft: false },
+      { order: 3, slug: "the-emperors-canvas", date: "2026-07-21", draft: false },
+      { order: 4, slug: "the-empire-in-the-frame", date: "2026-07-28", draft: false },
+      { order: 5, slug: "the-grain-is-abundant", date: "2026-08-04", draft: false },
+      { order: 6, slug: "the-camera-never-lies", date: "2026-08-11", draft: false },
+      { order: 7, slug: "the-algorithms-gallery", date: "2026-08-18", draft: false },
+      { order: 8, slug: "the-synthetic-truth", date: "2026-08-25", draft: false },
+      { order: 9, slug: "what-deserves-to-survive", date: "2026-09-01", draft: false },
+    ];
+    mockGetDocuments.mockReturnValue(
+      parts.map((p) =>
+        mockBlogPost({
+          series: "the-truth-in-the-frame",
+          seriesTitle: "The Truth in the Frame",
+          seriesOrder: p.order,
+          slug: p.slug,
+          date: p.date,
+          draft: p.draft,
+          published: true,
+        }),
+      ),
+    );
+
+    const result = resolveAllSeries("blog");
+    const series = result.find((s) => s.slug === "the-truth-in-the-frame");
+    expect(series).toBeDefined();
+    expect(series!.partCount).toBe(9);
+    expect(series!.publishedPartCount).toBe(2);
+
+    // Part Two is in parts (routable via canonical series route)
+    expect(series!.parts.find((p) => p.order === 2)).toBeDefined();
+
+    // But the document still has series field — aliases must reject it
+    const doc = mockBlogPost({
+      series: "the-truth-in-the-frame",
+      seriesOrder: 2,
+      date: "2026-07-14",
+      slug: "the-kings-shadow",
+    });
+    expect(doc.series).toBeTruthy();
+  });
+});
+
 describe("generic blog catch-all route boundary", () => {
   const ORIGINAL_TODAY = process.env.MDX_PUBLICATION_TODAY;
 

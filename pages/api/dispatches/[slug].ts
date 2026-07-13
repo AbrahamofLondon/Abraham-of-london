@@ -91,6 +91,11 @@ export default async function handler(
     return res.status(404).json({ ok: false, reason: "NOT_FOUND" });
   }
 
+  // Series chapters belong only at /blog/series/[seriesSlug]/[partSlug]
+  if ((doc as any).series) {
+    return res.status(404).json({ ok: false, reason: "NOT_FOUND" });
+  }
+
   const requiredTier = tiers.normalizeRequired(
     requiredTierFromDoc(toTierDocLike(doc)),
   );
