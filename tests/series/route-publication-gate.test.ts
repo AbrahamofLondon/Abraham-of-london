@@ -183,6 +183,123 @@ describe("registry family integrity", () => {
   });
 });
 
+describe("ISR scheduled release boundary", () => {
+  const ORIGINAL_TODAY = process.env.MDX_PUBLICATION_TODAY;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    process.env.MDX_PUBLICATION_TODAY = "2026-07-12";
+  });
+
+  afterEach(() => {
+    if (ORIGINAL_TODAY === undefined) {
+      delete process.env.MDX_PUBLICATION_TODAY;
+    } else {
+      process.env.MDX_PUBLICATION_TODAY = ORIGINAL_TODAY;
+    }
+  });
+
+  it("at 2026-07-13: partCount=9, publishedPartCount=1", () => {
+    process.env.MDX_PUBLICATION_TODAY = "2026-07-13";
+    mockTruthParts(makeTruthParts());
+    const result = resolveAllSeries("blog");
+    const series = result.find((s) => s.slug === "the-truth-in-the-frame");
+    expect(series).toBeDefined();
+    expect(series!.partCount).toBe(9);
+    expect(series!.publishedPartCount).toBe(1);
+    expect(series!.parts).toHaveLength(1);
+    expect(series!.previewParts).toHaveLength(9);
+  });
+
+  it("at 2026-07-13: Part Two is scheduled, not route-eligible", () => {
+    process.env.MDX_PUBLICATION_TODAY = "2026-07-13";
+    mockTruthParts(makeTruthParts());
+
+    // Part Two is in previewParts (Coming soon) but not in parts (no route)
+    const result = resolveAllSeries("blog");
+    const series = result.find((s) => s.slug === "the-truth-in-the-frame");
+    expect(series).toBeDefined();
+    expect(series!.previewParts.find((p) => p.order === 2)).toBeDefined();
+    expect(series!.parts.find((p) => p.order === 2)).toBeUndefined();
+
+    // isRouteEligibleNow rejects it
+    const doc = { date: "2026-07-14", draft: false, published: true, accessLevel: "public" };
+    expect(isRouteEligibleNow(doc)).toBe(false);
+  });
+
+  it("at 2026-07-14: partCount=9, publishedPartCount=2, Part Two eligible", () => {
+    process.env.MDX_PUBLICATION_TODAY = "2026-07-14";
+    mockTruthParts(makeTruthParts());
+
+    const result = resolveAllSeries("blog");
+    const series = result.find((s) => s.slug === "the-truth-in-the-frame");
+    expect(series).toBeDefined();
+    expect(series!.partCount).toBe(9);
+    expect(series!.publishedPartCount).toBe(2);
+    expect(series!.parts).toHaveLength(2);
+    expect(series!.parts.find((p) => p.order === 2)).toBeDefined();
+
+    // isRouteEligibleNow accepts it
+    const doc = { date: "2026-07-14", draft: false, published: true, accessLevel: "public" };
+    expect(isRouteEligibleNow(doc)).toBe(true);
+  });
+
+  it("at 2026-07-14: Part Three remains scheduled and inaccessible", () => {
+    process.env.MDX_PUBLICATION_TODAY = "2026-07-14";
+    mockTruthParts(makeTruthParts());
+
+    const result = resolveAllSeries("blog");
+    const series = result.find((s) => s.slug === "the-truth-in-the-frame");
+    expect(series).toBeDefined();
+    expect(series!.parts.find((p) => p.order === 3)).toBeUndefined();
+    expect(series!.previewParts.find((p) => p.order === 3)).toBeDefined();
+
+    const doc = { date: "2026-07-21", draft: false, published: true, accessLevel: "public" };
+    expect(isRouteEligibleNow(doc)).toBe(false);
+  });
+
+  it("nonexistent part slug returns permanent notFound", () => {
+    process.env.MDX_PUBLICATION_TODAY = "2026-07-12";
+    mockTruthParts(makeTruthParts());
+
+    const result = resolveAllSeries("blog");
+    const series = result.find((s) => s.slug === "the-truth-in-the-frame");
+    expect(series).toBeDefined();
+
+    // A slug not in previewParts does not exist
+    expect(series!.previewParts.find((p) => p.slug === "nonexistent-slug")).toBeUndefined();
+  });
+
+  it("genuine internal draft remains unavailable", () => {
+    process.env.MDX_PUBLICATION_TODAY = "2026-07-12";
+    const parts = makeTruthParts();
+    parts.push({ order: 99, slug: "internal-draft", date: "2026-01-01", draft: true });
+    mockTruthParts(parts);
+
+    const result = resolveAllSeries("blog");
+    const series = result.find((s) => s.slug === "the-truth-in-the-frame");
+    expect(series).toBeDefined();
+    expect(series!.partCount).toBe(9);
+    expect(series!.previewParts.find((p) => p.order === 99)).toBeUndefined();
+  });
+
+  it("getStaticPaths with fallback:blocking prebuilds only published parts", () => {
+    process.env.MDX_PUBLICATION_TODAY = "2026-07-12";
+    mockTruthParts(makeTruthParts());
+
+    const result = resolveAllSeries("blog");
+    const series = result.find((s) => s.slug === "the-truth-in-the-frame");
+    expect(series).toBeDefined();
+
+    // Only published parts should be in parts (routable)
+    expect(series!.parts).toHaveLength(1);
+    expect(series!.parts[0]?.order).toBe(1);
+
+    // All 9 are in previewParts
+    expect(series!.previewParts).toHaveLength(9);
+  });
+});
+
 describe("scheduled content in public registries", () => {
   const ORIGINAL_TODAY = process.env.MDX_PUBLICATION_TODAY;
 
