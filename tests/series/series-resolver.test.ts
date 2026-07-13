@@ -306,7 +306,7 @@ describe("Series Resolver", () => {
           excerpt: "First excerpt",
           slug: "part-one",
           slugSafe: "part-one",
-          date: "2026-07-13", // future
+          date: "2027-01-13", // future
           draft: false,
           published: true,
           category: "Special Edition",
@@ -335,7 +335,7 @@ describe("Series Resolver", () => {
           excerpt: "Second excerpt",
           slug: "part-two",
           slugSafe: "part-two",
-          date: "2026-07-20", // future
+          date: "2027-01-20", // future
           draft: false,
           published: true,
           category: "Special Edition",
@@ -379,7 +379,7 @@ describe("Series Resolver", () => {
           excerpt: "First excerpt",
           slug: "part-one",
           slugSafe: "part-one",
-          date: "2026-07-13", // future
+          date: "2027-01-13", // future
           draft: false,
           published: true,
           category: "Special Edition",
@@ -408,7 +408,7 @@ describe("Series Resolver", () => {
           excerpt: "Second excerpt",
           slug: "part-two",
           slugSafe: "part-two",
-          date: "2026-07-20", // future
+          date: "2027-01-20", // future
           draft: false,
           published: true,
           category: "Special Edition",
@@ -487,7 +487,7 @@ describe("Series Resolver", () => {
           excerpt: "Preview excerpt",
           slug: "preview-part",
           slugSafe: "preview-part",
-          date: "2026-07-13", // future
+          date: "2027-01-13", // future
           draft: false,
           published: true,
           category: "Special Edition",
