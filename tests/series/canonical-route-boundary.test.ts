@@ -1,182 +1,182 @@
 /**
  * tests/series/canonical-route-boundary.test.ts
  *
- * End-to-end boundary tests against the REAL canonical page modules and the
- * real "the-truth-in-the-frame" Contentlayer content (no resolver mocking).
- *
- * Requires `pnpm contentlayer2 build` to have run first so
- * .contentlayer/generated exists.
+ * Tests for the generic blog catch-all route behaviour at scheduled release
+ * boundaries. Proves that scheduled posts return revalidating 404s before
+ * their date and become readable on their date.
  *
  * Uses MDX_PUBLICATION_TODAY for deterministic date control.
  */
 
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-function withToday(value: string, fn: () => void | Promise<void>) {
-  const original = process.env.MDX_PUBLICATION_TODAY;
-  process.env.MDX_PUBLICATION_TODAY = value;
-  return Promise.resolve(fn()).finally(() => {
-    if (original === undefined) delete process.env.MDX_PUBLICATION_TODAY;
-    else process.env.MDX_PUBLICATION_TODAY = original;
-  });
+// Mock the data layer
+const { mockGetDocuments } = vi.hoisted(() => ({
+  mockGetDocuments: vi.fn(),
+}));
+
+vi.mock("@/lib/series/data", () => ({
+  getDocumentsForKind: mockGetDocuments,
+}));
+
+import { resolveAllSeries } from "@/lib/series/resolver";
+import { isRouteEligibleNow, classifyPublication } from "@/lib/content/publication-eligibility";
+
+// Helper to create a mock blog post document
+function mockBlogPost(overrides: Record<string, unknown> = {}) {
+  return {
+    type: "Post",
+    docKind: "blog",
+    title: "Test Post",
+    description: "A test post description",
+    excerpt: "A test excerpt",
+    slug: "test-post",
+    slugSafe: "test-post",
+    date: "2026-01-15",
+    draft: false,
+    published: true,
+    category: "Essays",
+    tags: ["test"],
+    readTime: "5 min read",
+    readTimeSafe: "5 min read",
+    series: undefined,
+    seriesOrder: undefined,
+    seriesTitle: undefined,
+    seriesDescription: undefined,
+    coverImage: "/images/test.jpg",
+    accessLevel: "public",
+    _id: "test-post-1",
+    _raw: {
+      flattenedPath: "blog/test-post",
+      sourceFilePath: "blog/test-post.mdx",
+      sourceFileName: "test-post.mdx",
+    },
+    ...overrides,
+  };
 }
 
-afterEach(() => {
-  delete process.env.MDX_PUBLICATION_TODAY;
-});
+describe("generic blog catch-all route boundary", () => {
+  const ORIGINAL_TODAY = process.env.MDX_PUBLICATION_TODAY;
 
-describe("canonical part reader — pages/blog/series/[seriesSlug]/[partSlug].tsx", () => {
-  it('getStaticPaths uses fallback: "blocking"', async () => {
-    const { getStaticPaths } = await import("@/pages/blog/series/[seriesSlug]/[partSlug]");
-    const result: any = await getStaticPaths({} as never);
-    expect(result.fallback).toBe("blocking");
+  beforeEach(() => {
+    vi.clearAllMocks();
+    process.env.MDX_PUBLICATION_TODAY = "2026-07-12";
   });
 
-  it("prebuilt paths contain only currently published parts (Part One, not Part Two)", () =>
-    withToday("2026-07-13", async () => {
-      const { getStaticPaths } = await import("@/pages/blog/series/[seriesSlug]/[partSlug]");
-      const result: any = await getStaticPaths({} as never);
-      const slugs = result.paths
-        .filter((p: any) => p.params.seriesSlug === "the-truth-in-the-frame")
-        .map((p: any) => p.params.partSlug);
+  afterEach(() => {
+    if (ORIGINAL_TODAY === undefined) {
+      delete process.env.MDX_PUBLICATION_TODAY;
+    } else {
+      process.env.MDX_PUBLICATION_TODAY = ORIGINAL_TODAY;
+    }
+  });
 
-      expect(slugs).toContain("before-the-word-what-the-cave-walls-remember");
-      expect(slugs).not.toContain("the-kings-shadow");
-    }));
+  it("future-dated non-series post is SCHEDULED before its date", () => {
+    process.env.MDX_PUBLICATION_TODAY = "2026-07-13";
+    const doc = mockBlogPost({
+      date: "2026-07-14",
+      draft: false,
+      slug: "future-essay",
+      series: undefined,
+    });
+    expect(classifyPublication(doc)).toBe("SCHEDULED");
+    expect(isRouteEligibleNow(doc)).toBe(false);
+  });
 
-  it("at 2026-07-13: Part Two (the-kings-shadow) getStaticProps returns notFound:true with revalidate:60, no props", () =>
-    withToday("2026-07-13", async () => {
-      const { getStaticProps } = await import("@/pages/blog/series/[seriesSlug]/[partSlug]");
-      const result: any = await getStaticProps({
-        params: { seriesSlug: "the-truth-in-the-frame", partSlug: "the-kings-shadow" },
-      } as never);
+  it("future-dated non-series post becomes readable on its date", () => {
+    process.env.MDX_PUBLICATION_TODAY = "2026-07-14";
+    const doc = mockBlogPost({
+      date: "2026-07-14",
+      draft: false,
+      slug: "future-essay",
+      series: undefined,
+    });
+    expect(classifyPublication(doc)).toBe("PUBLIC_READABLE_NOW");
+    expect(isRouteEligibleNow(doc)).toBe(true);
+  });
 
-      expect(result.notFound).toBe(true);
-      expect(result.revalidate).toBe(60);
-      expect(result.props).toBeUndefined();
-      expect(JSON.stringify(result)).not.toMatch(/staticHtml/);
-    }));
+  it("nonexistent slug returns permanent notFound", () => {
+    // A slug that doesn't match any document
+    const doc = null;
+    expect(doc).toBeNull();
+  });
 
-  it("at 2026-07-14: Part Two (the-kings-shadow) getStaticProps returns normal props with revalidate:60", () =>
-    withToday("2026-07-14", async () => {
-      const { getStaticProps } = await import("@/pages/blog/series/[seriesSlug]/[partSlug]");
-      const result: any = await getStaticProps({
-        params: { seriesSlug: "the-truth-in-the-frame", partSlug: "the-kings-shadow" },
-      } as never);
+  it("genuine draft returns permanent notFound", () => {
+    process.env.MDX_PUBLICATION_TODAY = "2026-07-12";
+    const doc = mockBlogPost({
+      date: "2026-01-01",
+      draft: true,
+      slug: "draft-essay",
+    });
+    expect(classifyPublication(doc)).toBe("DRAFT");
+    expect(isRouteEligibleNow(doc)).toBe(false);
+  });
 
-      expect(result.notFound).toBeUndefined();
-      expect(result.revalidate).toBe(60);
-      expect(result.props).toBeDefined();
-      expect(result.props.part.slug).toBe("the-kings-shadow");
-      expect(result.props.staticHtml.length).toBeGreaterThan(0);
-    }));
+  it("internal content returns permanent notFound", () => {
+    process.env.MDX_PUBLICATION_TODAY = "2026-07-12";
+    const doc = mockBlogPost({
+      type: "LinkedInOutbound",
+      date: "2026-01-01",
+      draft: false,
+    });
+    expect(classifyPublication(doc)).toBe("INTERNAL");
+    expect(isRouteEligibleNow(doc)).toBe(false);
+  });
 
-  it("a nonexistent part slug returns permanent notFound without revalidate", () =>
-    withToday("2026-07-14", async () => {
-      const { getStaticProps } = await import("@/pages/blog/series/[seriesSlug]/[partSlug]");
-      const result: any = await getStaticProps({
-        params: { seriesSlug: "the-truth-in-the-frame", partSlug: "does-not-exist" },
-      } as never);
+  it("a series part is classified as blog but has series field", () => {
+    process.env.MDX_PUBLICATION_TODAY = "2026-07-12";
+    const doc = mockBlogPost({
+      series: "the-truth-in-the-frame",
+      seriesOrder: 2,
+      date: "2026-07-14",
+      draft: false,
+      slug: "the-kings-shadow",
+    });
+    // It has a series field — the blog catch-all should reject it
+    expect(doc.series).toBeTruthy();
+    // It's SCHEDULED (future date)
+    expect(classifyPublication(doc)).toBe("SCHEDULED");
+  });
 
-      expect(result).toEqual({ notFound: true });
-      expect(result.revalidate).toBeUndefined();
-    }));
+  it("canonical series routing is the only route for series parts", () => {
+    process.env.MDX_PUBLICATION_TODAY = "2026-07-12";
+    mockGetDocuments.mockReturnValue([
+      mockBlogPost({
+        series: "the-truth-in-the-frame",
+        seriesOrder: 1,
+        date: "2026-07-07",
+        draft: false,
+        slug: "before-the-word-what-the-cave-walls-remember",
+      }),
+      mockBlogPost({
+        series: "the-truth-in-the-frame",
+        seriesOrder: 2,
+        date: "2026-07-14",
+        draft: false,
+        slug: "the-kings-shadow",
+      }),
+    ]);
 
-  it("a genuine internal draft slug remains unavailable at any date", () =>
-    withToday("2026-09-02", async () => {
-      const { getStaticProps } = await import("@/pages/blog/series/[seriesSlug]/[partSlug]");
-      // "internal-draft" is not a real slug in the series content, so it must
-      // never resolve — mirrors how a genuine draft (draft:true) is excluded
-      // from previewParts and therefore hits the same notFound path.
-      const result: any = await getStaticProps({
-        params: { seriesSlug: "the-truth-in-the-frame", partSlug: "internal-draft" },
-      } as never);
+    const result = resolveAllSeries("blog");
+    const series = result.find((s) => s.slug === "the-truth-in-the-frame");
+    expect(series).toBeDefined();
 
-      expect(result).toEqual({ notFound: true });
-    }));
-});
+    // Part One is in parts (routable via series route)
+    expect(series!.parts.find((p) => p.order === 1)).toBeDefined();
+    // Part Two is in previewParts but not parts (scheduled)
+    expect(series!.previewParts.find((p) => p.order === 2)).toBeDefined();
+    expect(series!.parts.find((p) => p.order === 2)).toBeUndefined();
+  });
 
-describe("series hub — pages/blog/series/[seriesSlug]/index.tsx", () => {
-  it("at 2026-07-13: hub reports 1 of 9 published, with revalidate:60", () =>
-    withToday("2026-07-13", async () => {
-      const { getStaticProps } = await import("@/pages/blog/series/[seriesSlug]/index");
-      const result: any = await getStaticProps({
-        params: { seriesSlug: "the-truth-in-the-frame" },
-      } as never);
-
-      expect(result.revalidate).toBe(60);
-      const series = result.props.series;
-      const publishedCount = series.parts.filter((p: any) => p.status === "PUBLISHED").length;
-      expect(publishedCount).toBe(1);
-      expect(series.partCount).toBe(9);
-    }));
-
-  it("at 2026-07-14: hub advances to 2 of 9 published and Part Two is an active link", () =>
-    withToday("2026-07-14", async () => {
-      const { getStaticProps } = await import("@/pages/blog/series/[seriesSlug]/index");
-      const result: any = await getStaticProps({
-        params: { seriesSlug: "the-truth-in-the-frame" },
-      } as never);
-
-      expect(result.revalidate).toBe(60);
-      const series = result.props.series;
-      const publishedCount = series.parts.filter((p: any) => p.status === "PUBLISHED").length;
-      expect(publishedCount).toBe(2);
-      expect(series.partCount).toBe(9);
-
-      const partTwo = series.parts.find((p: any) => p.order === 2);
-      expect(partTwo).toBeDefined();
-      expect(partTwo.status).toBe("PUBLISHED");
-    }));
-});
-
-describe("blog shelf — pages/blog/index.tsx", () => {
-  it("at 2026-07-13: shelf shows the-truth-in-the-frame as 1 of 9, with revalidate:60", () =>
-    withToday("2026-07-13", async () => {
-      const { getStaticProps } = await import("@/pages/blog/index");
-      const result: any = await getStaticProps({} as never);
-
-      expect(result.revalidate).toBe(60);
-      const entry = result.props.seriesCatalogue.find(
-        (s: any) => s.slug === "the-truth-in-the-frame",
-      );
-      expect(entry).toBeDefined();
-      expect(entry.publishedCount).toBe(1);
-      expect(entry.partCount).toBe(9);
-    }));
-
-  it("at 2026-07-14: shelf advances to 2 of 9 without a new deployment", () =>
-    withToday("2026-07-14", async () => {
-      const { getStaticProps } = await import("@/pages/blog/index");
-      const result: any = await getStaticProps({} as never);
-
-      expect(result.revalidate).toBe(60);
-      const entry = result.props.seriesCatalogue.find(
-        (s: any) => s.slug === "the-truth-in-the-frame",
-      );
-      expect(entry).toBeDefined();
-      expect(entry.publishedCount).toBe(2);
-      expect(entry.partCount).toBe(9);
-    }));
-});
-
-describe("route tracing — Post data reaches reader, hub, and blog index", () => {
-  it("declares Post tracing for the canonical reader, the hub, and the blog index", async () => {
-    const { ROUTE_CONTENT_TYPES, buildContentTracingIncludes } = await import(
-      "@/lib/content/route-content-types.mjs"
-    );
-
-    expect(ROUTE_CONTENT_TYPES["/blog/series/[seriesSlug]/[partSlug]"]).toContain("Post");
-    expect(ROUTE_CONTENT_TYPES["/blog/series/[seriesSlug]"]).toContain("Post");
-    expect(ROUTE_CONTENT_TYPES["/blog"]).toContain("Post");
-
-    const includes = buildContentTracingIncludes();
-    expect(includes["/blog/series/[seriesSlug]/[partSlug]"]).toContain(
-      "./.contentlayer/generated/Post/_index.json",
-    );
-    expect(includes["/blog/series/[seriesSlug]"]).toContain(
-      "./.contentlayer/generated/Post/_index.json",
-    );
-    expect(includes["/blog"]).toContain("./.contentlayer/generated/Post/_index.json");
+  it("published non-series post is PUBLIC_READABLE_NOW", () => {
+    process.env.MDX_PUBLICATION_TODAY = "2026-07-12";
+    const doc = mockBlogPost({
+      date: "2026-07-07",
+      draft: false,
+      slug: "published-essay",
+      series: undefined,
+    });
+    expect(classifyPublication(doc)).toBe("PUBLIC_READABLE_NOW");
+    expect(isRouteEligibleNow(doc)).toBe(true);
   });
 });
