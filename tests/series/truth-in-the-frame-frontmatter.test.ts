@@ -112,36 +112,29 @@ describe("The Truth in the Frame — real MDX frontmatter contract", () => {
     }
   });
 
-  it("Part 1 is PUBLIC_READABLE_NOW (past date, not draft)", () => {
-    const fm = parseFrontmatter(path.join(dir, "before-the-word-what-the-cave-walls-remember.mdx"));
-    expect(fm.draft).toBe("false");
-    expect(fm.published).toBe("true");
-    expect(fm.accessLevel).toBe("public");
-    expect(new Date(fm.date) < new Date("2026-07-12")).toBe(true);
-  });
-
-  it("Parts 2-9 are SCHEDULED (future dates)", () => {
+  it("all nine parts are public scheduled content: draft=false, published=true, accessLevel=public", () => {
     const fmBySlug: Record<string, Record<string, string>> = {};
     for (const file of files) {
       const fm = parseFrontmatter(file);
       fmBySlug[fm.slug] = fm;
     }
 
-    for (const expected of EXPECTED_PARTS.slice(1)) {
+    for (const expected of EXPECTED_PARTS) {
       const fm = fmBySlug[expected.slug];
       expect(fm).toBeDefined();
-      expect(new Date(fm.date) > new Date("2026-07-12")).toBe(true);
+      expect(fm.draft).toBe("false");
+      expect(fm.published).toBe("true");
       expect(fm.accessLevel).toBe("public");
+      expect(fm.date).toBe(expected.date);
+      expect(parseInt(fm.seriesOrder, 10)).toBe(expected.order);
     }
   });
 
   it("no outbound or source-material files are counted", () => {
-    // Verify we're only reading from the blog series directory
     const allFiles = fs.readdirSync(dir);
     const mdxFiles = allFiles.filter((f) => f.endsWith(".mdx"));
     expect(mdxFiles).toHaveLength(9);
 
-    // Verify no outbound prefixes
     for (const f of mdxFiles) {
       expect(f).not.toMatch(/^(facebook|linkedin|x|social|outbound)/i);
     }
