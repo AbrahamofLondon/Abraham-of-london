@@ -4,6 +4,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { getInnerCircleAccess } from "@/lib/inner-circle/access.server";
 import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
 import { getDocBySlug, type UnifiedDoc } from "@/lib/content/unified-router";
+import { isRouteEligibleNow } from "@/lib/content/publication-eligibility";
 
 type Ok = {
   ok: true;
@@ -86,7 +87,7 @@ export default async function handler(
 
   const doc = getDocBySlug(`dispatches/${slug}`) || getDocBySlug(slug);
 
-  if (!doc || doc.draft === true || doc.published === false) {
+  if (!doc || !isRouteEligibleNow(doc)) {
     return res.status(404).json({ ok: false, reason: "NOT_FOUND" });
   }
 

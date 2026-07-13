@@ -11,6 +11,7 @@ const ClientOnlyMDXRenderer = dynamic(() => import("@/components/mdx/ClientOnlyM
 
 import { getDocBySlug } from "@/lib/content/unified-router";
 import { getRenderableBody } from "@/lib/content/render-body";
+import { isRouteEligibleNow } from "@/lib/content/publication-eligibility";
 
 import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
 import type { AccessTier } from "@/lib/access/tiers";
@@ -272,7 +273,15 @@ export const getStaticProps: GetStaticProps<UniversalPageProps> = async ({
   const docRaw: any =
     getDocBySlug(`${typeRaw}/${slugRaw}`) || getDocBySlug(slugRaw);
 
-  if (!docRaw || docRaw.draft) {
+  if (!docRaw || !isRouteEligibleNow(docRaw)) {
+    return { notFound: true, revalidate: 60 };
+  }
+
+  // Enforce registry type integrity: the resolved document must match the
+  // requested registry type. A Post must not be accessible at /registry/dispatches/...
+  const docType = String(docRaw?.type || docRaw?.docKind || "").toLowerCase();
+  const expectedType = typeRaw === "shorts" ? "short" : typeRaw === "dispatches" ? "post" : null;
+  if (expectedType && !docType.includes(expectedType)) {
     return { notFound: true, revalidate: 60 };
   }
 
