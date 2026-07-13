@@ -11,6 +11,7 @@ import { Search, Compass, Clock3 } from "lucide-react";
 import Layout from "@/components/Layout";
 import EssayCard from "@/components/essays/EssayCard";
 import { resolveDocCoverImage } from "@/lib/content/shared";
+import { isRouteEligibleNow } from "@/lib/content/publication-eligibility";
 import { selectFeaturedEssay } from "@/lib/blog/select-featured-post";
 import type { BlogSeries } from "@/lib/blog/series";
 
@@ -934,7 +935,7 @@ export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
     });
 
     const items: PostItem[] = all
-      .filter((doc: any) => !doc?.draft)
+      .filter((doc: any) => isRouteEligibleNow(doc))
       // Exclude blog series posts — they live at /blog/series/[seriesSlug]/[partSlug]
       .filter((doc: any) => !doc?.series)
       .map((doc: any) => {

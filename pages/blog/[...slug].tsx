@@ -13,6 +13,7 @@ import NextStepCTA from "@/components/content/NextStepCTA";
 
 import { normalizeSlug, joinHref } from "@/lib/content/shared";
 import { resolveDocCoverImage, sanitizeData } from "@/lib/content/client-utils";
+import { isRouteEligibleNow } from "@/lib/content/publication-eligibility";
 import { getRenderableBody } from "@/lib/content/render-body";
 import { decodeBodyCodePayload } from "@/lib/content/client-codec";
 
@@ -266,7 +267,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   const posts = (await getPublishedPosts()) || [];
 
   const paths = [...posts]
-    .filter((p: any) => !p?.draft)
+    .filter((p: any) => isRouteEligibleNow(p))
     // Exclude blog series posts — those are handled by /blog/series/[seriesSlug]/[partSlug]
     .filter((p: any) => !p?.series)
     .map((p: any) => {
@@ -341,7 +342,7 @@ export const getStaticProps: GetStaticProps<BlogSlugProps> = async ({ params }) 
       });
     }) || null;
 
-    if (!rawDoc || rawDoc?.draft) {
+    if (!rawDoc || !isRouteEligibleNow(rawDoc)) {
       return { notFound: true };
     }
 

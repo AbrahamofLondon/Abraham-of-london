@@ -228,8 +228,8 @@ const UniversalDispatchPage: NextPage<UniversalPageProps> = ({
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const { getAllPosts, getAllShorts } = await import("@/lib/content/server");
-  const allPosts = (getAllPosts() as any[]).filter((p) => !p.draft);
-  const allShorts = (getAllShorts() as any[]).filter((s) => !s.draft);
+  const allPosts = (getAllPosts() as any[]).filter((p) => isRouteEligibleNow(p));
+  const allShorts = (getAllShorts() as any[]).filter((s) => isRouteEligibleNow(s));
 
   // Cap prebuild to the 5 most recent items across BOTH types combined.
   // Runtime slug resolution still works via `fallback: "blocking"`.

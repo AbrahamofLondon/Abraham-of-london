@@ -8,6 +8,7 @@ import RegistryLayout from "@/components/layout/RegistryLayout";
 import { RegistryProvider } from "@/contexts/RegistryContext";
 
 import { normalizeSlug, resolveDocCoverImage } from "@/lib/content/shared";
+import { isRouteEligibleNow } from "@/lib/content/publication-eligibility";
 
 interface RegistryPageProps {
   initialDocs: any[];
@@ -73,7 +74,7 @@ export const getStaticProps: GetStaticProps<RegistryPageProps> = async () => {
   for (const load of streams) {
     const batch = (load() || []) as any[];
     for (const d of batch) {
-      if (d?.draft || d?.published === false) continue;
+      if (!isRouteEligibleNow(d)) continue;
       initialDocs.push({
         title: safeString(d?.title, "Untitled"),
         slug: safeSlug(d),

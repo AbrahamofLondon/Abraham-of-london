@@ -12,6 +12,7 @@ import Layout from "@/components/Layout";
 import AccessGate from "@/components/AccessGate";
 
 import { getDocKind, sanitizeData } from "@/lib/content/shared";
+import { isRouteEligibleNow } from "@/lib/content/publication-eligibility";
 import { requiredTierFromDoc } from "@/lib/access/tiers";
 import type { AccessTier } from "@/lib/access/tier-policy";
 import {
@@ -284,9 +285,8 @@ export const getStaticProps = async ({ params }: GetStaticPropsContext) => {
   const needle = norm(normalizeSlug(slug));
   const rawDoc = getDocBySlug(needle);
 
-  if (!rawDoc || isDraftContent(rawDoc) || !isPublished(rawDoc)) {
-    return { notFound: true };
-  }
+  if (!rawDoc) return { notFound: true };
+  if (!isRouteEligibleNow(rawDoc)) return { notFound: true, revalidate: 60 };
 
   const requiredTier = normalizeRequiredTier(requiredTierFromDoc(rawDoc));
   const staticHtml = requiredTier === "public" ? renderDocBodyToStaticHtml(rawDoc).html : "";

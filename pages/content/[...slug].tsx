@@ -80,7 +80,8 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     getDocBySlug(`content/${slug}`) ||
     getDocBySlug(slug);
 
-  if (!doc || !isRouteEligibleNow(doc)) return { notFound: true };
+  if (!doc) return { notFound: true };
+  if (!isRouteEligibleNow(doc)) return { notFound: true, revalidate: 60 };
 
   const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(doc));
   const isPublic = requiredTier === "public";
