@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import { getRenderableBody } from "@/lib/content/render-body";
+import { isRouteEligibleNow } from "@/lib/content/publication-eligibility";
 
 import {
   normalizeUserTier,
@@ -33,7 +34,12 @@ export default async function handler(
       getDocBySlug(slug) ||
       getDocBySlug(`content/${slug}`);
 
-    if (!doc || doc.draft) {
+    if (!doc || !isRouteEligibleNow(doc)) {
+      return res.status(404).json({ ok: false });
+    }
+
+    // Series chapters belong only at /blog/series/[seriesSlug]/[partSlug]
+    if (doc.series) {
       return res.status(404).json({ ok: false });
     }
 

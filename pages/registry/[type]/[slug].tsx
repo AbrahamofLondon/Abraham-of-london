@@ -11,6 +11,8 @@ const ClientOnlyMDXRenderer = dynamic(() => import("@/components/mdx/ClientOnlyM
 
 import { getDocBySlug } from "@/lib/content/unified-router";
 import { getRenderableBody } from "@/lib/content/render-body";
+import { isRouteEligibleNow } from "@/lib/content/publication-eligibility";
+import { getDocKind } from "@/lib/content/shared";
 
 import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
 import type { AccessTier } from "@/lib/access/tiers";
@@ -226,8 +228,8 @@ const UniversalDispatchPage: NextPage<UniversalPageProps> = ({
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const { getAllPosts, getAllShorts } = await import("@/lib/content/server");
-  const allPosts = (getAllPosts() as any[]).filter((p) => !p.draft);
-  const allShorts = (getAllShorts() as any[]).filter((s) => !s.draft);
+  const allPosts = (getAllPosts() as any[]).filter((p) => isRouteEligibleNow(p) && !p.series);
+  const allShorts = (getAllShorts() as any[]).filter((s) => isRouteEligibleNow(s));
 
   // Cap prebuild to the 5 most recent items across BOTH types combined.
   // Runtime slug resolution still works via `fallback: "blocking"`.
@@ -272,7 +274,22 @@ export const getStaticProps: GetStaticProps<UniversalPageProps> = async ({
   const docRaw: any =
     getDocBySlug(`${typeRaw}/${slugRaw}`) || getDocBySlug(slugRaw);
 
-  if (!docRaw || docRaw.draft) {
+  if (!docRaw || !isRouteEligibleNow(docRaw)) {
+    return { notFound: true, revalidate: 60 };
+  }
+
+  // Series chapters belong only at /blog/series/[seriesSlug]/[partSlug]
+  if (docRaw.series) {
+    return { notFound: true };
+  }
+
+  // Enforce registry family integrity using the canonical document kind resolver.
+  // /registry/dispatches/* accepts only blog posts (docKind="blog").
+  // /registry/shorts/* accepts only short documents (docKind="short").
+  // A blog article must not be accessible at /registry/dispatches/the-kings-shadow.
+  const docFamily = getDocKind(docRaw);
+  const expectedFamily = typeRaw === "shorts" ? "short" : "blog";
+  if (docFamily !== expectedFamily) {
     return { notFound: true, revalidate: 60 };
   }
 

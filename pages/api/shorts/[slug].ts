@@ -6,6 +6,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { getInnerCircleAccess } from "@/lib/inner-circle/access.server";
 import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
 import { getDocBySlug } from "@/lib/content/unified-router";
+import { isRouteEligibleNow } from "@/lib/content/publication-eligibility";
 
 type Ok = {
   ok: true;
@@ -71,7 +72,7 @@ export default async function handler(
   if (!slug) return res.status(400).json({ ok: false, reason: "BAD_SLUG" });
 
   const doc = getDocBySlug(`shorts/${slug}`) || getDocBySlug(slug);
-  if (!doc || (doc as { draft?: boolean }).draft) {
+  if (!doc || !isRouteEligibleNow(doc)) {
     return res.status(404).json({ ok: false, reason: "NOT_FOUND" });
   }
 

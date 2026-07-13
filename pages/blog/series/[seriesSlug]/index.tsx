@@ -295,15 +295,12 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
   if (!series) return { notFound: true };
 
-  const totalMinutes = series.parts
-    .filter((p) => p.status === "PUBLISHED")
+  const totalMinutes = (series.previewParts ?? series.parts)
     .reduce((sum, p) => sum + parseMins(p.readTime), 0);
 
   return {
     props: { series, totalMinutes },
-    // No revalidate — pages are built at deploy time and served as static HTML.
-    // Runtime re-generation fails because .contentlayer data is not in the
-    // serverless function bundle. New series require a new deploy.
+    revalidate: 60,
   };
 };
 

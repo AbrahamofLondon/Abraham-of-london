@@ -252,6 +252,14 @@ export function isSeriesPublic(seriesInfo: SeriesPublicationInfo): boolean {
 /**
  * Check if a series part should be publicly readable.
  */
+export function isRouteEligibleNow(
+  doc: unknown,
+  now: Date = getToday(),
+): boolean {
+  const state = classifyPublication(doc, now);
+  return state === "PUBLIC_READABLE_NOW" || state === "RESTRICTED";
+}
+
 export function isSeriesPartReadable(seriesInfo: SeriesPublicationInfo): boolean {
   return seriesInfo.publicNowParts > 0;
 }

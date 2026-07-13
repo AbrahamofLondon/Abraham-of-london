@@ -7,6 +7,7 @@ import { StaticMDXRenderer, renderDocBodyToStaticHtml } from "@/lib/mdx/static-m
 import ClientUnlockRenderer from "@/components/content/ClientUnlockRenderer";
 
 import { normalizeSlug } from "@/lib/content/shared";
+import { isRouteEligibleNow } from "@/lib/content/publication-eligibility";
 
 import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
 import type { AccessTier } from "@/lib/access/tiers";
@@ -79,7 +80,12 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     getDocBySlug(`content/${slug}`) ||
     getDocBySlug(slug);
 
-  if (!doc || doc.draft) return { notFound: true };
+  if (!doc) return { notFound: true };
+
+  // Series chapters belong only at /blog/series/[seriesSlug]/[partSlug]
+  if (doc.series) return { notFound: true };
+
+  if (!isRouteEligibleNow(doc)) return { notFound: true, revalidate: 60 };
 
   const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(doc));
   const isPublic = requiredTier === "public";

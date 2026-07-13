@@ -176,6 +176,8 @@ describe("Series Resolver", () => {
       const seriesA = result.find((s) => s.slug === "series-a");
       expect(seriesA).toBeDefined();
       expect(seriesA!.publishedPartCount).toBe(2);
+      // partCount includes published + scheduled preview parts
+      // Part 2 is draft=true → excluded from previewParts → partCount remains 2
       expect(seriesA!.partCount).toBe(2);
       const part2 = seriesA!.parts.find((p) => p.order === 2);
       expect(part2).toBeUndefined();
@@ -245,7 +247,79 @@ describe("Series Resolver", () => {
     });
   });
 
+
+  describe("the-truth-in-the-frame — 9-part series count", () => {
+    const ORIGINAL_TODAY = process.env.MDX_PUBLICATION_TODAY;
+
+    beforeEach(() => {
+      process.env.MDX_PUBLICATION_TODAY = "2026-07-12";
+    });
+
+    afterEach(() => {
+      if (ORIGINAL_TODAY === undefined) {
+        delete process.env.MDX_PUBLICATION_TODAY;
+      } else {
+        process.env.MDX_PUBLICATION_TODAY = ORIGINAL_TODAY;
+      }
+    });
+
+    it("reports partCount=9, publishedPartCount=1, previewParts=9, parts=1", () => {
+      // Part 1: 2026-07-07 is before 2026-07-12 → PUBLIC_READABLE_NOW
+      // Parts 2-9: 2026-07-14 through 2026-09-01 are after 2026-07-12 → SCHEDULED
+      const parts = [
+        { order: 1, slug: "before-the-word", date: "2026-07-07", draft: false },
+        { order: 2, slug: "the-kings-shadow", date: "2026-07-14", draft: false },
+        { order: 3, slug: "the-emperors-canvas", date: "2026-07-21", draft: false },
+        { order: 4, slug: "the-empire-in-the-frame", date: "2026-07-28", draft: false },
+        { order: 5, slug: "the-grain-is-abundant", date: "2026-08-04", draft: false },
+        { order: 6, slug: "the-camera-never-lies", date: "2026-08-11", draft: false },
+        { order: 7, slug: "the-algorithms-gallery", date: "2026-08-18", draft: false },
+        { order: 8, slug: "the-synthetic-truth", date: "2026-08-25", draft: false },
+        { order: 9, slug: "what-deserves-to-survive", date: "2026-09-01", draft: false },
+      ];
+
+      mockGetDocuments.mockReturnValue(
+        parts.map((p) =>
+          mockBlogPost({
+            series: "the-truth-in-the-frame",
+            seriesTitle: "The Truth in the Frame",
+            seriesDescription: "From cave paintings to deepfakes",
+            seriesOrder: p.order,
+            slug: p.slug,
+            date: p.date,
+            draft: p.draft,
+            published: true,
+            readTime: p.order === 1 ? "14 min read" : "16 min read",
+          }),
+        ),
+      );
+
+      const result = resolveAllSeries("blog");
+      const series = result.find((s) => s.slug === "the-truth-in-the-frame");
+      expect(series).toBeDefined();
+      expect(series!.partCount).toBe(9);
+      expect(series!.publishedPartCount).toBe(1);
+      expect(series!.parts).toHaveLength(1);
+      expect(series!.previewParts).toHaveLength(9);
+      expect(series!.parts[0]?.order).toBe(1);
+      expect(series!.previewParts.map((p) => p.order)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    });
+  });
+
   describe("scheduled / preview-visible editorial series", () => {
+    const ORIGINAL_TODAY = process.env.MDX_PUBLICATION_TODAY;
+
+    beforeEach(() => {
+      process.env.MDX_PUBLICATION_TODAY = "2026-07-12";
+    });
+
+    afterEach(() => {
+      if (ORIGINAL_TODAY === undefined) {
+        delete process.env.MDX_PUBLICATION_TODAY;
+      } else {
+        process.env.MDX_PUBLICATION_TODAY = ORIGINAL_TODAY;
+      }
+    });
     it("includes series when all parts are SCHEDULED with preview permission", () => {
       // Simulate six editorial-series parts, all future-dated with seriesVisibility:scheduled
       // Slug is derived from directory name: "outsourcing-our-sense-of-meaning-and-belonging"
@@ -331,7 +405,7 @@ describe("Series Resolver", () => {
           excerpt: "First excerpt",
           slug: "part-one",
           slugSafe: "part-one",
-          date: "2026-07-13", // future
+          date: "2027-01-13", // future
           draft: false,
           published: true,
           category: "Special Edition",
@@ -360,7 +434,7 @@ describe("Series Resolver", () => {
           excerpt: "Second excerpt",
           slug: "part-two",
           slugSafe: "part-two",
-          date: "2026-07-20", // future
+          date: "2027-01-20", // future
           draft: false,
           published: true,
           category: "Special Edition",
@@ -439,7 +513,7 @@ describe("Series Resolver", () => {
           excerpt: "Preview excerpt",
           slug: "preview-part",
           slugSafe: "preview-part",
-          date: "2026-07-13", // future
+          date: "2027-01-13", // future
           draft: false,
           published: true,
           category: "Special Edition",
@@ -467,6 +541,143 @@ describe("Series Resolver", () => {
       // No published parts — all scheduled
       expect(result!.publishedPartCount).toBe(0);
       expect(result!.previewParts).toHaveLength(1);
+    });
+  });
+
+  describe("release-boundary regression tests", () => {
+    const ORIGINAL_TODAY = process.env.MDX_PUBLICATION_TODAY;
+
+    function makeTruthParts() {
+      return [
+        { order: 1, slug: "before-the-word", date: "2026-07-07", draft: false },
+        { order: 2, slug: "the-kings-shadow", date: "2026-07-14", draft: false },
+        { order: 3, slug: "the-emperors-canvas", date: "2026-07-21", draft: false },
+        { order: 4, slug: "the-empire-in-the-frame", date: "2026-07-28", draft: false },
+        { order: 5, slug: "the-grain-is-abundant", date: "2026-08-04", draft: false },
+        { order: 6, slug: "the-camera-never-lies", date: "2026-08-11", draft: false },
+        { order: 7, slug: "the-algorithms-gallery", date: "2026-08-18", draft: false },
+        { order: 8, slug: "the-synthetic-truth", date: "2026-08-25", draft: false },
+        { order: 9, slug: "what-deserves-to-survive", date: "2026-09-01", draft: false },
+      ];
+    }
+
+    function mockTruthParts(parts: { order: number; slug: string; date: string; draft: boolean }[]) {
+      mockGetDocuments.mockReturnValue(
+        parts.map((p) =>
+          mockBlogPost({
+            series: "the-truth-in-the-frame",
+            seriesTitle: "The Truth in the Frame",
+            seriesDescription: "From cave paintings to deepfakes",
+            seriesOrder: p.order,
+            slug: p.slug,
+            date: p.date,
+            draft: p.draft,
+            published: true,
+            readTime: "14 min read",
+          }),
+        ),
+      );
+    }
+
+    beforeEach(() => {
+      process.env.MDX_PUBLICATION_TODAY = "2026-07-12";
+    });
+
+    afterEach(() => {
+      if (ORIGINAL_TODAY === undefined) {
+        delete process.env.MDX_PUBLICATION_TODAY;
+      } else {
+        process.env.MDX_PUBLICATION_TODAY = ORIGINAL_TODAY;
+      }
+    });
+
+    it("at 2026-07-12: partCount=9, publishedPartCount=1, parts=1, previewParts=9", () => {
+      process.env.MDX_PUBLICATION_TODAY = "2026-07-12";
+      mockTruthParts(makeTruthParts());
+      const result = resolveAllSeries("blog");
+      const series = result.find((s) => s.slug === "the-truth-in-the-frame");
+      expect(series).toBeDefined();
+      expect(series!.partCount).toBe(9);
+      expect(series!.publishedPartCount).toBe(1);
+      expect(series!.parts).toHaveLength(1);
+      expect(series!.previewParts).toHaveLength(9);
+      expect(series!.parts[0]?.order).toBe(1);
+    });
+
+    it("at 2026-07-13: partCount=9, publishedPartCount=1, Part Two still SCHEDULED", () => {
+      process.env.MDX_PUBLICATION_TODAY = "2026-07-13";
+      mockTruthParts(makeTruthParts());
+      const result = resolveAllSeries("blog");
+      const series = result.find((s) => s.slug === "the-truth-in-the-frame");
+      expect(series).toBeDefined();
+      expect(series!.partCount).toBe(9);
+      expect(series!.publishedPartCount).toBe(1);
+      expect(series!.parts).toHaveLength(1);
+      expect(series!.previewParts).toHaveLength(9);
+      // Part Two is still SCHEDULED (2026-07-14 > 2026-07-13)
+      expect(series!.previewParts[1]?.publicationState).toBe("SCHEDULED");
+    });
+
+    it("at 2026-07-14: partCount=9, publishedPartCount=2, Part Two now readable", () => {
+      process.env.MDX_PUBLICATION_TODAY = "2026-07-14";
+      mockTruthParts(makeTruthParts());
+      const result = resolveAllSeries("blog");
+      const series = result.find((s) => s.slug === "the-truth-in-the-frame");
+      expect(series).toBeDefined();
+      expect(series!.partCount).toBe(9);
+      expect(series!.publishedPartCount).toBe(2);
+      expect(series!.parts).toHaveLength(2);
+      expect(series!.previewParts).toHaveLength(9);
+      expect(series!.parts.map((p) => p.order)).toEqual([1, 2]);
+      // Part Two is now PUBLIC_READABLE_NOW
+      expect(series!.previewParts[1]?.publicationState).toBe("PUBLIC_READABLE_NOW");
+      // Part Three still SCHEDULED
+      expect(series!.previewParts[2]?.publicationState).toBe("SCHEDULED");
+    });
+
+    it("at 2026-07-21: partCount=9, publishedPartCount=3, Parts 1-3 readable", () => {
+      process.env.MDX_PUBLICATION_TODAY = "2026-07-21";
+      mockTruthParts(makeTruthParts());
+      const result = resolveAllSeries("blog");
+      const series = result.find((s) => s.slug === "the-truth-in-the-frame");
+      expect(series).toBeDefined();
+      expect(series!.partCount).toBe(9);
+      expect(series!.publishedPartCount).toBe(3);
+      expect(series!.parts).toHaveLength(3);
+      expect(series!.previewParts).toHaveLength(9);
+      expect(series!.parts.map((p) => p.order)).toEqual([1, 2, 3]);
+    });
+
+    it("after 2026-09-01: partCount=9, publishedPartCount=9, all parts readable", () => {
+      process.env.MDX_PUBLICATION_TODAY = "2026-09-02";
+      mockTruthParts(makeTruthParts());
+      const result = resolveAllSeries("blog");
+      const series = result.find((s) => s.slug === "the-truth-in-the-frame");
+      expect(series).toBeDefined();
+      expect(series!.partCount).toBe(9);
+      expect(series!.publishedPartCount).toBe(9);
+      expect(series!.parts).toHaveLength(9);
+      expect(series!.previewParts).toHaveLength(9);
+      expect(series!.status).toBe("PUBLISHED");
+    });
+
+    it("genuine internal draft does not increase partCount", () => {
+      process.env.MDX_PUBLICATION_TODAY = "2026-07-12";
+      const parts = makeTruthParts();
+      // Add a genuine internal draft (past date + draft:true)
+      parts.push({ order: 99, slug: "internal-draft", date: "2026-01-01", draft: true });
+      mockTruthParts(parts);
+      const result = resolveAllSeries("blog");
+      const series = result.find((s) => s.slug === "the-truth-in-the-frame");
+      expect(series).toBeDefined();
+      // Draft must not increase partCount
+      expect(series!.partCount).toBe(9);
+      expect(series!.publishedPartCount).toBe(1);
+      expect(series!.parts).toHaveLength(1);
+      expect(series!.previewParts).toHaveLength(9);
+      // Draft part must not appear in parts or previewParts
+      expect(series!.parts.find((p) => p.order === 99)).toBeUndefined();
+      expect(series!.previewParts.find((p) => p.order === 99)).toBeUndefined();
     });
   });
 });

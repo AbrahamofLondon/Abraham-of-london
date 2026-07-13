@@ -13,6 +13,7 @@ import NextStepCTA from "@/components/content/NextStepCTA";
 
 import { normalizeSlug, joinHref } from "@/lib/content/shared";
 import { resolveDocCoverImage, sanitizeData } from "@/lib/content/client-utils";
+import { isRouteEligibleNow } from "@/lib/content/publication-eligibility";
 import { getRenderableBody } from "@/lib/content/render-body";
 import { decodeBodyCodePayload } from "@/lib/content/client-codec";
 
@@ -261,12 +262,12 @@ const BlogSlugPage: NextPage<BlogSlugProps> = ({
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const { getPublishedPosts } = await import("@/lib/content/server");
+  const { getAllPosts } = await import("@/lib/content/server");
 
-  const posts = (await getPublishedPosts()) || [];
+  const posts = (getAllPosts()) || [];
 
   const paths = [...posts]
-    .filter((p: any) => !p?.draft)
+    .filter((p: any) => isRouteEligibleNow(p))
     // Exclude blog series posts — those are handled by /blog/series/[seriesSlug]/[partSlug]
     .filter((p: any) => !p?.series)
     .map((p: any) => {
@@ -299,20 +300,19 @@ export const getStaticProps: GetStaticProps<BlogSlugProps> = async ({ params }) 
     const bare = toBareBlogSlug(rawParam);
     if (!bare) return { notFound: true };
 
-    const { getPublishedPosts } = await import("@/lib/content/server");
-    const posts = (await getPublishedPosts()) || [];
+    const { getAllPosts } = await import("@/lib/content/server");
+    const posts = (getAllPosts()) || [];
 
     const wantBlog = `blog/${bare}`;
     const wantPosts = `posts/${bare}`;
 
     // Build a set of candidate patterns to match against every slug field on every post.
-    // This ensures that regardless of which field carries the canonical path, we find it.
     const candidates = [
-      wantBlog,                    // blog/the-meeting-was-never-the-problem
-      wantPosts,                   // posts/the-meeting-was-never-the-problem
-      bare,                        // the-meeting-was-never-the-problem
-      `blog/${bare}`,              // (redundant with wantBlog but explicit)
-      `posts/${bare}`,             // (redundant with wantPosts but explicit)
+      wantBlog,
+      wantPosts,
+      bare,
+      `blog/${bare}`,
+      `posts/${bare}`,
       `articles/${bare}`,
       `library/${bare}`,
       `content/${bare}`,
@@ -335,22 +335,36 @@ export const getStaticProps: GetStaticProps<BlogSlugProps> = async ({ params }) 
       return fields.some((field) => {
         if (!field) return false;
         const normalised = normalizeSlug(String(field));
-        // Strip .md / .mdx extension if present
         const withoutExt = normalised.replace(/\.(md|mdx)$/i, "");
         return candidates.includes(normalised) || candidates.includes(withoutExt);
       });
     }) || null;
 
-    if (!rawDoc || rawDoc?.draft) {
+    // A. Invalid or missing slug
+    if (!rawDoc) return { notFound: true };
+
+    // B. Blog-series documents belong only at /blog/series/[seriesSlug]/[partSlug]
+    if (rawDoc.series) return { notFound: true };
+
+    // Use classifyPublication for fine-grained distinction
+    const { classifyPublication } = await import("@/lib/content/publication-eligibility");
+    const pubState = classifyPublication(rawDoc);
+
+    // C. SCHEDULED — return revalidating 404
+    if (pubState === "SCHEDULED") {
+      return { notFound: true, revalidate: 60 };
+    }
+
+    // D. DRAFT, INTERNAL or UNKNOWN — permanent 404
+    if (pubState !== "PUBLIC_READABLE_NOW" && pubState !== "RESTRICTED") {
       return { notFound: true };
     }
 
+    // E. PUBLIC_READABLE_NOW or RESTRICTED — continue through access path
     const requiredTier = normalizeRequiredTier(requiredTierFromDoc(rawDoc));
     const renderBody = getRenderableBody(rawDoc);
     const code = requiredTier === "public" ? renderBody.code : "";
 
-    // Strip body before spreading — rawDoc.body.raw/code must not ride in
-    // __NEXT_DATA__ for locked posts (code="" above keeps the render correct).
     const { body: _body, ...safeRawDoc } = rawDoc as any;
 
     const doc = {

@@ -6,6 +6,7 @@ import Link from "next/link";
 import Layout from "@/components/Layout";
 import ArticleCoverImage from "@/components/content/ArticleCoverImage";
 import { StaticMDXRenderer, renderDocBodyToStaticHtml } from "@/lib/mdx/static-mdx-runtime";
+import { isRouteEligibleNow } from "@/lib/content/publication-eligibility";
 import {
   getBlogSeriesCatalogue,
   getBlogSeriesBySlug,
@@ -486,7 +487,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
       })),
   );
 
-  return { paths, fallback: false };
+  return { paths, fallback: "blocking" };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
@@ -496,12 +497,13 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const series = getBlogSeriesBySlug(seriesSlug);
   if (!series) return { notFound: true };
 
-  const part = getBlogSeriesPart(series, partSlug);
-  if (!part) return { notFound: true };
+  // Check if the slug exists in previewParts (published + scheduled)
+  const previewPart = series.previewParts.find((p) => p.slug === partSlug);
+  if (!previewPart) return { notFound: true };
 
-  // Load the MDX document via contentlayer posts
-  const { getPublishedPosts } = await import("@/lib/content/server");
-  const posts = getPublishedPosts();
+  // Load the MDX document from ALL posts (not just published)
+  const { getAllPosts } = await import("@/lib/content/server");
+  const posts = getAllPosts();
 
   const doc = posts.find((p: any) => {
     const slug = String(p?.slug || p?.slugSafe || "").toLowerCase().trim();
@@ -509,6 +511,14 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   });
 
   if (!doc) return { notFound: true };
+
+  // Date-aware publication check
+  if (!isRouteEligibleNow(doc)) {
+    return { notFound: true, revalidate: 60 };
+  }
+
+  const part = getBlogSeriesPart(series, partSlug);
+  if (!part) return { notFound: true };
 
   const { html: staticHtml } = renderDocBodyToStaticHtml(doc);
   const { previous, next } = getBlogSeriesPartNeighbors(series, part.order);
@@ -531,9 +541,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       previous,
       next,
     },
-    // No revalidate — pages are built at deploy time and served as static HTML.
-    // Runtime re-generation fails because .contentlayer data is not in the
-    // serverless function bundle. New content requires a new deploy.
+    revalidate: 60,
   };
 };
 
