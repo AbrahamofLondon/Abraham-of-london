@@ -1,0 +1,4 @@
+
+> abraham-of-london@1.0.0 typecheck C:\aol-check-visual
+> tsc --noEmit
+

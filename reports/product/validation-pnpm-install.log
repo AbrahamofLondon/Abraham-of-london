@@ -1,0 +1,48 @@
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 0, reused 1, downloaded 0, added 0
+Progress: resolved 0, reused 164, downloaded 0, added 0
+Progress: resolved 0, reused 165, downloaded 0, added 0
+Progress: resolved 0, reused 178, downloaded 0, added 0
+Progress: resolved 0, reused 201, downloaded 0, added 0
+Progress: resolved 0, reused 212, downloaded 0, added 0
+Packages: -240
+--------------------------------------------------------------------------------
+Progress: resolved 0, reused 215, downloaded 0, added 0
+Progress: resolved 0, reused 215, downloaded 0, added 0, done
+
+
+> abraham-of-london@1.0.0 postinstall C:\aol-check-visual
+> prisma generate
+
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
+
+✔ Generated Prisma Client (v6.6.0) to .\node_modules\.prisma\client in 2.02s
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Want to turn off tips and other hints? https://pris.ly/tip-4-nohints
+
+┌─────────────────────────────────────────────────────────┐
+│  Update available 6.6.0 -> 7.8.0                        │
+│                                                         │
+│  This is a major update - please follow the guide at    │
+│  https://pris.ly/d/major-version-upgrade                │
+│                                                         │
+│  Run the following to update                            │
+│    npm i --save-dev prisma@latest                       │
+│    npm i @prisma/client@latest                          │
+└─────────────────────────────────────────────────────────┘
+
+> abraham-of-london@1.0.0 prepare C:\aol-check-visual
+> husky install
+
+husky - install command is DEPRECATED
+╭ Warning ─────────────────────────────────────────────────────────────────────╮
+│                                                                              │
+│   Ignored build scripts: @sentry/cli@2.58.6.                                 │
+│   Run "pnpm approve-builds" to pick which dependencies should be allowed     │
+│   to run scripts.                                                            │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+Done in 47.5s using pnpm v10.33.0

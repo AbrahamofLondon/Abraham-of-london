@@ -1,0 +1,1782 @@
+
+> abraham-of-london@1.0.0 prebuild C:\aol-check-visual
+> pnpm pdf:audit && pnpm pdf:enforce && pnpm contentlayer2 build && node scripts/generate-briefs-registry.mjs && pnpm vault:sync
+
+
+> abraham-of-london@1.0.0 pdf:audit C:\aol-check-visual
+> pnpm pdf:registry && pnpm pdf:verify-links && pnpm pdf:duplicates && pnpm pdf:canonical && pnpm pdf:redirect-candidates && pnpm pdf:governance
+
+
+> abraham-of-london@1.0.0 pdf:registry C:\aol-check-visual
+> tsx scripts/audit/generate-pdf-asset-registry.ts
+
+[pdf:registry] wrote reports\pdf-asset-registry.json
+[pdf:registry] pdfs 85
+[pdf:registry] duplicate filename groups 1
+
+> abraham-of-london@1.0.0 pdf:verify-links C:\aol-check-visual
+> tsx scripts/audit/verify-hardcoded-pdf-links.ts
+
+No direct PDF links detected in primary UX sources.
+
+> abraham-of-london@1.0.0 pdf:duplicates C:\aol-check-visual
+> tsx scripts/audit/report-pdf-duplicates.ts
+
+[pdf:duplicates] wrote reports\pdf-duplicate-report.json
+[pdf:duplicates] wrote reports\pdf-duplicate-report.md
+[pdf:duplicates] duplicate groups 1
+[pdf:duplicates] classifications {"identical_duplicate":1}
+
+> abraham-of-london@1.0.0 pdf:canonical C:\aol-check-visual
+> tsx scripts/audit/generate-pdf-canonical-decisions.ts
+
+[pdf:canonical] wrote reports\pdf-canonical-decisions.json
+[pdf:canonical] wrote docs\program\pdf-manual-resolution.md
+[pdf:canonical] groups 84
+[pdf:canonical] unresolved 0
+[pdf:canonical] duplicate filename groups 1
+
+> abraham-of-london@1.0.0 pdf:redirect-candidates C:\aol-check-visual
+> tsx scripts/audit/generate-pdf-redirect-candidates.ts
+
+[pdf:redirect-candidates] wrote reports\pdf-redirect-candidates.json
+[pdf:redirect-candidates] wrote reports\pdf-redirect-candidates.toml
+[pdf:redirect-candidates] candidates 0
+
+> abraham-of-london@1.0.0 pdf:governance C:\aol-check-visual
+> tsx scripts/audit/verify-pdf-governance.ts
+
+[pdf:governance] wrote reports\pdf-governance-report.json
+[pdf:governance] added public PDFs 0
+[pdf:governance] duplicate filename groups 1
+[pdf:governance] warn duplicate_filename_threshold: 1 duplicate filename groups currently exist; resolve via docs/program/pdf-manual-resolution.md.
+
+> abraham-of-london@1.0.0 pdf:enforce C:\aol-check-visual
+> tsx scripts/audit/enforce-pdf-governance.ts
+
+[pdf:enforce] wrote reports\pdf-enforcement-report.json
+[pdf:enforce] failures 0
+[pdf:enforce] warnings 1
+[pdf:enforce] generated_pdf_inventory_outside_canonical_path: 1 generated PDF artifacts remain outside /assets/downloads/{slug}.pdf. Legacy inventory should be normalized, but it is not blocking release.
+Warning: Contentlayer might not work as expected on Windows
+successCallback C:/aol-check-visual/.contentlayer
+
+============================================================
+📊 CONTENTLAYER BUILD REPORT
+============================================================
+Environment: development
+Platform: win32 (Windows)
+Total documents: 838
+
+📑 By type:
+  Short          : 236
+  XOutbound      : 106
+  LinkedInOutbound: 91
+  Brief          : 83
+  Lexicon        : 63
+  Post           : 58
+  VaultBrief     : 38
+  Download       : 33
+  Resource       : 27
+  FacebookOutbound: 26
+  EditorialSeriesPart: 22
+  Canon          : 15
+  Intelligence   : 15
+  Playbook       : 8
+  Print          : 6
+  Book           : 5
+  Event          : 2
+  Strategy       : 2
+  Editorial      : 1
+  Vault          : 1
+
+🔒 By access tier:
+  public      : 779
+  member      : 30
+  restricted  : 29
+
+✅ Valid: 838
+❌ Invalid: 0
+
+============================================================
+
+Generated 838 documents in .contentlayer
+[generate-briefs-registry] Loaded 83 items from Brief
+[generate-briefs-registry] Loaded 38 items from VaultBrief
+[generate-briefs-registry] Removed 25 duplicate slug mirrors (vault entries superseded by canonical Brief entries)
+[generate-briefs-registry] Wrote 96 briefs to C:\aol-check-visual\public\system\briefs-registry.json
+
+> abraham-of-london@1.0.0 vault:sync C:\aol-check-visual
+> cross-env NODE_OPTIONS="--max-old-space-size=8192 --no-warnings" npx tsx scripts/vault-master.ts
+
+npm warn Unknown env config "node-linker". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "npm-globalconfig". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "verify-deps-before-run". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "_jsr-registry". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown project config "public-hoist-pattern". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown project config "node-linker". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown project config "symlink". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown global config "node-linker". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+◇ injected env (193) from .env // tip: ⌘ suppress logs { quiet: true }
+◇ injected env (26) from .env.local // tip: ⌘ override existing { override: true }
+🚀 [VAULT_MASTER]: Initiating Policy-Aligned Orchestration...
+✅ Found font: Inter-Regular.ttf
+✅ Found font: Inter-SemiBold.ttf
+✅ Found font: Inter_18pt-Italic.ttf
+✅ Found font: Inter_18pt-Bold.ttf
+✅ AoLInter font family registered successfully
+✅ AoLSerif font family registered successfully
+✅ Inter font family registered successfully
+✅ [VAULT_MASTER]: PDF fonts registered successfully (AoLInter + AoLSerif)
+📡 [VAULT_MASTER]: Syncing 83 metadata records...
+⚠️ [VAULT_MASTER]: Schema drift detected — enum "ContentType" does not exist in the database.
+   This is a local development environment issue. The ContentType enum exists in
+   prisma/schema.prisma but was never migrated to this database. To resolve:
+   1. Run: pnpm prisma migrate dev --name add_contenttype_enum
+   2. Or apply the initial schema: pnpm prisma db push
+   Skipping DB sync for 83 records. No data was lost.
+🖨️ [VAULT_MASTER]: Generating PDFs...
+
+--- 🛡️ VAULT MASTER HEALTH REPORT (3.78s) ---
+✅ PDFs Created: 0
+♻️ Cache Hits: 83
+📡 DB Records Synced: 0
+🌐 Online-Only (Shorts): 0
+🚫 Policy Exclusions: 0
+❌ System Failures: 83
+----------------------------------------------
+
+
+> abraham-of-london@1.0.0 build C:\aol-check-visual
+> next build --webpack
+
+▲ Next.js 16.2.0 (webpack)
+- Environments: .env.production.local, .env.local, .env
+- Experiments (use with caution):
+  · cpus: 2
+  · optimizePackageImports
+  · serverActions
+
+  Creating an optimized production build ...
+Warning: Contentlayer might not work as expected on Windows
+successCallback C:/aol-check-visual/.contentlayer
+
+============================================================
+📊 CONTENTLAYER BUILD REPORT
+============================================================
+Environment: production
+Platform: win32 (Windows)
+Total documents: 838
+
+📑 By type:
+  Short          : 236
+  XOutbound      : 106
+  LinkedInOutbound: 91
+  Brief          : 83
+  Lexicon        : 63
+  Post           : 58
+  VaultBrief     : 38
+  Download       : 33
+  Resource       : 27
+  FacebookOutbound: 26
+  EditorialSeriesPart: 22
+  Canon          : 15
+  Intelligence   : 15
+  Playbook       : 8
+  Print          : 6
+  Book           : 5
+  Event          : 2
+  Strategy       : 2
+  Editorial      : 1
+  Vault          : 1
+
+🔒 By access tier:
+  public      : 779
+  member      : 30
+  restricted  : 29
+
+✅ Valid: 838
+❌ Invalid: 0
+
+============================================================
+
+Generated 838 documents in .contentlayer
+⚠ Compiled with warnings in 7.8min
+
+./lib/product/derived-evidence-state.ts
+Module not found: Can't resolve 'fs' in 'C:\aol-check-visual\lib\product'
+
+Import trace for requested module:
+./lib/product/derived-evidence-state.ts
+./lib/product/product-qualification-backbone.ts
+./lib/product/resolve-product-authority.ts
+
+./lib/product/external-product-value-evidence.ts
+Module not found: Can't resolve 'fs' in 'C:\aol-check-visual\lib\product'
+
+Import trace for requested module:
+./lib/product/external-product-value-evidence.ts
+./lib/product/resolve-product-authority.ts
+
+./lib/product/generic-ai-comparison-engine.ts
+Module not found: Can't resolve 'fs' in 'C:\aol-check-visual\lib\product'
+
+Import trace for requested module:
+./lib/product/generic-ai-comparison-engine.ts
+./lib/product/product-qualification-backbone.ts
+./lib/product/resolve-product-authority.ts
+
+./lib/product/market-comparison-engine.ts
+Module not found: Can't resolve 'fs' in 'C:\aol-check-visual\lib\product'
+
+Import trace for requested module:
+./lib/product/market-comparison-engine.ts
+./lib/product/product-qualification-backbone.ts
+./lib/product/resolve-product-authority.ts
+
+  Skipping validation of types
+  Finished TypeScript config validation in 30ms ...
+  Collecting page data using 2 workers ...
+  Generating static pages using 2 workers (0/786) ...
+  Generating static pages using 2 workers (196/786) 
+Warning: data for page "/content" is 161 kB which exceeds the threshold of 128 kB, this amount of data can reduce performance.
+See more info here: https://nextjs.org/docs/messages/large-page-data
+🎨 Prints index: Loaded 7 prints, 0 featured
+Warning: data for page "/registry" is 147 kB which exceeds the threshold of 128 kB, this amount of data can reduce performance.
+See more info here: https://nextjs.org/docs/messages/large-page-data
+  Generating static pages using 2 workers (392/786) 
+  Generating static pages using 2 workers (589/786) 
+✓ Generating static pages using 2 workers (786/786) in 60s
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)
+┌ ○ /_not-found
+├ ○ /account/instruments
+├ ƒ /admin/access
+├ ƒ /admin/audit
+├ ƒ /admin/boardroom-delivery
+├ ƒ /admin/campaign
+├ ƒ /admin/campaigns
+├ ƒ /admin/campaigns/[id]
+├ ƒ /admin/campaigns/[id]/enterprise-report
+├ ƒ /admin/campaigns/[id]/report
+├ ƒ /admin/campaigns/new
+├ ƒ /admin/command
+├ ƒ /admin/commercial
+├ ƒ /admin/content
+├ ƒ /admin/content-vault
+├ ƒ /admin/decision-intelligence
+├ ƒ /admin/decision/contextual-efficacy
+├ ƒ /admin/decision/contextual-ranking
+├ ƒ /admin/decision/efficacy
+├ ƒ /admin/decision/governance
+├ ƒ /admin/decision/metadata-audit
+├ ƒ /admin/decision/performance
+├ ƒ /admin/enterprise
+├ ƒ /admin/intelligence-foundry
+├ ƒ /admin/intelligence-foundry/brief-orders
+├ ƒ /admin/intelligence-foundry/chaos
+├ ƒ /admin/intelligence-foundry/content
+├ ƒ /admin/intelligence-foundry/data-poisoning
+├ ƒ /admin/intelligence-foundry/debug
+├ ƒ /admin/intelligence-foundry/engines
+├ ƒ /admin/intelligence-foundry/executive-summary
+├ ƒ /admin/intelligence-foundry/health
+├ ƒ /admin/intelligence-foundry/living-case-fulfilment
+├ ƒ /admin/intelligence-foundry/market
+├ ƒ /admin/intelligence-foundry/outbound
+├ ƒ /admin/intelligence-foundry/performance
+├ ƒ /admin/intelligence-foundry/product-health
+├ ƒ /admin/intelligence-foundry/promotion
+├ ƒ /admin/intelligence-foundry/promotion/dashboard
+├ ƒ /admin/intelligence-foundry/qa-bench
+├ ƒ /admin/intelligence-foundry/red-team/content
+├ ƒ /admin/intelligence-foundry/red-team/security
+├ ƒ /admin/intelligence-foundry/reference
+├ ƒ /admin/intelligence-foundry/runs
+├ ƒ /admin/intelligence-foundry/runs/[id]
+├ ƒ /admin/intelligence-foundry/scenario
+├ ƒ /admin/intelligence-foundry/simulation/boardroom-mode
+├ ƒ /admin/intelligence-foundry/simulation/constitutional-diagnostic
+├ ƒ /admin/intelligence-foundry/simulation/executive-report-boardroom-bridge
+├ ƒ /admin/intelligence-foundry/simulation/executive-reporting
+├ ƒ /admin/intelligence-foundry/simulation/fast-diagnostic
+├ ƒ /admin/intelligence-foundry/simulation/report-lineage
+├ ƒ /admin/intelligence-foundry/simulation/strategy-room
+├ ƒ /admin/intelligence-foundry/trash-day
+├ ƒ /admin/organisations
+├ ƒ /admin/organisations/[id]
+├ ƒ /admin/organisations/[id]/campaigns/new
+├ ƒ /admin/organisations/[id]/dashboard
+├ ƒ /admin/organisations/[id]/report
+├ ƒ /admin/organisations/new
+├ ƒ /admin/product-estate
+├ ƒ /admin/reporting/executive
+├ ƒ /admin/reporting/executive/[...slug]
+├ ƒ /admin/reporting/executive/[id]
+├ ƒ /admin/reporting/lineage
+├ ƒ /admin/reports
+├ ƒ /admin/research
+├ ƒ /admin/snapshot
+├ ƒ /admin/strategy-room
+├ ƒ /admin/users
+├ ƒ /api/admin/boardroom-delivery
+├ ƒ /api/admin/boardroom-delivery/delivery-log
+├ ƒ /api/admin/boardroom-delivery/generate
+├ ƒ /api/admin/boardroom-delivery/generate-link
+├ ƒ /api/admin/boardroom-delivery/grant-access
+├ ƒ /api/admin/boardroom-delivery/resend-link
+├ ƒ /api/admin/boardroom-delivery/revoke-access
+├ ƒ /api/admin/boardroom-delivery/revoke-link
+├ ƒ /api/admin/boardroom-delivery/tokens/[dossierId]
+├ ƒ /api/admin/campaigns
+├ ƒ /api/admin/campaigns/[id]
+├ ƒ /api/admin/campaigns/[id]/report
+├ ƒ /api/admin/campaigns/[id]/report-data
+├ ƒ /api/admin/campaigns/[id]/report/export-json
+├ ƒ /api/admin/campaigns/[id]/report/pdf
+├ ƒ /api/admin/commercial
+├ ƒ /api/admin/decision-instrument-runs
+├ ƒ /api/admin/decision-intelligence
+├ ƒ /api/admin/decision/contextual-efficacy
+├ ƒ /api/admin/decision/contextual-ranking
+├ ƒ /api/admin/decision/efficacy
+├ ƒ /api/admin/decision/governance
+├ ƒ /api/admin/decision/performance
+├ ƒ /api/admin/decision/rebuild-contextual-efficacy
+├ ƒ /api/admin/decision/rebuild-efficacy
+├ ƒ /api/admin/decision/rebuild-governance-alerts
+├ ƒ /api/admin/decision/rebuild-performance
+├ ƒ /api/admin/decision/signal-registry
+├ ƒ /api/admin/dev-login
+├ ƒ /api/admin/enterprise-foundation
+├ ƒ /api/admin/executive-report-delivery/resend-link
+├ ƒ /api/admin/executive-report-delivery/revoke-link
+├ ƒ /api/admin/intelligence-foundry/brief-orders
+├ ƒ /api/admin/intelligence-foundry/brief-orders/[id]
+├ ƒ /api/admin/intelligence-foundry/brief-orders/[id]/generate-draft
+├ ƒ /api/admin/intelligence-foundry/chaos/run
+├ ƒ /api/admin/intelligence-foundry/ci-gate
+├ ƒ /api/admin/intelligence-foundry/content/analyze
+├ ƒ /api/admin/intelligence-foundry/data-poisoning/run
+├ ƒ /api/admin/intelligence-foundry/debug
+├ ƒ /api/admin/intelligence-foundry/engines
+├ ƒ /api/admin/intelligence-foundry/engines/boardroom-mode/run
+├ ƒ /api/admin/intelligence-foundry/engines/constitutional-diagnostic/run
+├ ƒ /api/admin/intelligence-foundry/engines/executive-report-boardroom-bridge/run
+├ ƒ /api/admin/intelligence-foundry/engines/executive-reporting/run
+├ ƒ /api/admin/intelligence-foundry/engines/fast-diagnostic/run
+├ ƒ /api/admin/intelligence-foundry/engines/request-adapter
+├ ƒ /api/admin/intelligence-foundry/engines/strategy-room/run
+├ ƒ /api/admin/intelligence-foundry/feedback
+├ ƒ /api/admin/intelligence-foundry/health
+├ ƒ /api/admin/intelligence-foundry/lineage/simulate
+├ ƒ /api/admin/intelligence-foundry/living-case-fulfilment
+├ ƒ /api/admin/intelligence-foundry/living-case-fulfilment/[id]
+├ ƒ /api/admin/intelligence-foundry/market/analyze
+├ ƒ /api/admin/intelligence-foundry/modules
+├ ƒ /api/admin/intelligence-foundry/outbound/analyze
+├ ƒ /api/admin/intelligence-foundry/performance/baseline
+├ ƒ /api/admin/intelligence-foundry/performance/run
+├ ƒ /api/admin/intelligence-foundry/product-health
+├ ƒ /api/admin/intelligence-foundry/promotion
+├ ƒ /api/admin/intelligence-foundry/promotion/[id]/rollback
+├ ƒ /api/admin/intelligence-foundry/red-team/content/run
+├ ƒ /api/admin/intelligence-foundry/red-team/security/run
+├ ƒ /api/admin/intelligence-foundry/runs
+├ ƒ /api/admin/intelligence-foundry/runs/[id]
+├ ƒ /api/admin/intelligence-foundry/runs/[id]/archive
+├ ƒ /api/admin/intelligence-foundry/runs/[id]/defer
+├ ƒ /api/admin/intelligence-foundry/runs/[id]/export-brief
+├ ƒ /api/admin/intelligence-foundry/runs/[id]/implement
+├ ƒ /api/admin/intelligence-foundry/runs/[id]/replay
+├ ƒ /api/admin/intelligence-foundry/runs/[id]/resurrect
+├ ƒ /api/admin/intelligence-foundry/trash-day
+├ ƒ /api/admin/positioning
+├ ƒ /api/admin/retainer/oversight-cycles
+├ ƒ /api/admin/retainer/oversight-cycles/[id]
+├ ƒ /api/admin/retainer/oversight-cycles/[id]/intervention
+├ ƒ /api/admin/retainer/readiness
+├ ƒ /api/admin/retainer/review-queue/[id]
+├ ƒ /api/alignment/enterprise
+├ ƒ /api/alignment/enterprise/assessments
+├ ƒ /api/alignment/enterprise/campaigns
+├ ƒ /api/alignment/enterprise/campaigns/[id]
+├ ƒ /api/alignment/enterprise/campaigns/[id]/aggregate
+├ ƒ /api/alignment/enterprise/campaigns/[id]/close
+├ ƒ /api/alignment/enterprise/campaigns/[id]/invite
+├ ƒ /api/alignment/enterprise/campaigns/[id]/notify
+├ ƒ /api/alignment/enterprise/campaigns/[id]/nudge
+├ ƒ /api/alignment/enterprise/campaigns/[id]/report
+├ ƒ /api/alignment/enterprise/organisations
+├ ƒ /api/alignment/enterprise/respond/[token]
+├ ƒ /api/analytics/executive-report
+├ ƒ /api/analytics/journey
+├ ƒ /api/assessments/enterprise/run
+├ ƒ /api/assessments/team/run
+├ ƒ /api/audit/[id]/submit
+├ ƒ /api/audit/[id]/success
+├ ƒ /api/audit/log
+├ ƒ /api/audit/submit
+├ ƒ /api/auth/sovereign
+├ ƒ /api/boardroom/dossier
+├ ƒ /api/boardroom/dossier/[dossierId]
+├ ƒ /api/boardroom/dossier/pdf
+├ ƒ /api/calibration/ingest
+├ ƒ /api/campaigns/[id]/invite
+├ ƒ /api/campaigns/[id]/nudge
+├ ƒ /api/campaigns/[id]/report
+├ ƒ /api/campaigns/[id]/report/json
+├ ƒ /api/campaigns/[id]/report/pdf
+├ ƒ /api/campaigns/[id]/report/pdf-file
+├ ƒ /api/checkout
+├ ƒ /api/checkout/living-case
+├ ƒ /api/checkout/living-case-confirm
+├ ƒ /api/client-portal/actions
+├ ƒ /api/client-portal/deliverables
+├ ƒ /api/client-portal/dossier-redirect
+├ ƒ /api/client-portal/send-link
+├ ƒ /api/client-portal/verify
+├ ƒ /api/client/actions/[actionId]
+├ ƒ /api/client/portal
+├ ƒ /api/client/reports/[reportId]
+├ ƒ /api/constitutional/appeal
+├ ƒ /api/constitutional/audit
+├ ƒ /api/constitutional/export
+├ ƒ /api/contracts/verify
+├ ƒ /api/cron/calibration
+├ ƒ /api/cron/decision-state
+├ ƒ /api/cron/escalation
+├ ƒ /api/cron/snapshot
+├ ƒ /api/decision/credit-score
+├ ƒ /api/decision/guidance
+├ ƒ /api/decision/metadata-audit
+├ ƒ /api/decisions/return-brief
+├ ƒ /api/demo/governed-decision
+├ ƒ /api/diagnostics/campaigns/[id]/aggregate
+├ ƒ /api/diagnostics/evidence
+├ ƒ /api/diagnostics/longitudinal
+├ ƒ /api/diagnostics/multi-stakeholder
+├ ƒ /api/diagnostics/outcome
+├ ƒ /api/diagnostics/outcomes/verify
+├ ƒ /api/diagnostics/reentry
+├ ƒ /api/diagnostics/upgrade-trigger
+├ ƒ /api/download/[token]
+├ ƒ /api/downloads/[slug]
+├ ƒ /api/editorials/[slug]
+├ ƒ /api/enterprise-foundation/dependencies
+├ ƒ /api/enterprise-foundation/playbooks
+├ ƒ /api/enterprise-foundation/stakeholders
+├ ƒ /api/enterprise/enquiry
+├ ƒ /api/entitlements
+├ ƒ /api/evidence/case-draft
+├ ƒ /api/evidence/eligibility
+├ ƒ /api/executive-reporting/entitlements
+├ ƒ /api/executive-reporting/export/boardroom-pdf
+├ ƒ /api/executive-reporting/export/intervention
+├ ƒ /api/executive-reporting/export/pdf
+├ ƒ /api/executive-reporting/run
+├ ƒ /api/executive/snapshot
+├ ƒ /api/gmi/board-pulse
+├ ƒ /api/gmi/calls
+├ ƒ /api/gmi/editions
+├ ƒ /api/gmi/falsification
+├ ƒ /api/gmi/performance
+├ ƒ /api/inner-circle/admin/export
+├ ƒ /api/inner-circle/issue
+├ ƒ /api/inner-circle/verify
+├ ƒ /api/instruments/[slug]/artifact
+├ ƒ /api/instruments/[slug]/run
+├ ƒ /api/instruments/runs/me
+├ ƒ /api/interactions/toggle
+├ ƒ /api/interpret
+├ ƒ /api/leads/fuse
+├ ƒ /api/library/download
+├ ƒ /api/live/constitutional-posture
+├ ƒ /api/predictive/insights/[campaignId]
+├ ƒ /api/premium/forensics/attribution
+├ ƒ /api/pulse/submit
+├ ƒ /api/purpose-alignment/assessments
+├ ƒ /api/purpose-alignment/capture
+├ ƒ /api/purpose-alignment/reminders/preferences
+├ ƒ /api/purpose-alignment/reminders/preferences/run
+├ ƒ /api/purpose-alignment/report
+├ ƒ /api/purpose-alignment/report/[assessmentId]
+├ ƒ /api/retainer/oversight/client-status
+├ ƒ /api/retainer/review-queue
+├ ƒ /api/retainers/contracts
+├ ƒ /api/retainers/decisions
+├ ƒ /api/retainers/enforcement-cycles
+├ ƒ /api/retainers/surface
+├ ƒ /api/root
+├ ƒ /api/search
+├ ƒ /api/sovereign/auth
+├ ƒ /api/sovereign/cohort
+├ ƒ /api/sovereign/commons/benchmark
+├ ƒ /api/sovereign/commons/record
+├ ƒ /api/sovereign/forensics
+├ ƒ /api/sovereign/history
+├ ƒ /api/sovereign/logout
+├ ƒ /api/sovereign/memory
+├ ƒ /api/sovereign/report
+├ ƒ /api/sovereign/signals
+├ ƒ /api/stats
+├ ƒ /api/strategy-room/briefing/return/[sessionId]
+├ ƒ /api/strategy-room/briefing/scan
+├ ƒ /api/strategy-room/conversion
+├ ƒ /api/strategy-room/execution
+├ ƒ /api/strategy-room/execution-record
+├ ƒ /api/strategy-room/execution/[id]
+├ ƒ /api/strategy-room/execution/[id]/decisions
+├ ƒ /api/strategy-room/execution/[id]/state
+├ ƒ /api/strategy-room/execution/locked-record
+├ ƒ /api/strategy-room/results
+├ ƒ /api/strategy-room/session/click
+├ ƒ /api/strategy-room/session/conversion
+├ ƒ /api/strategy-room/session/followup
+├ ƒ /api/strategy-room/session/impression
+├ ƒ /api/strategy-room/session/init
+├ ƒ /api/stripe/webhook
+├ ƒ /api/team-assessment/campaign/[id]/aggregate
+├ ƒ /api/team-assessment/campaign/[id]/close
+├ ƒ /api/team-assessment/campaign/[id]/invites
+├ ƒ /api/team-assessment/campaign/[id]/status
+├ ƒ /api/team-assessment/campaign/create
+├ ƒ /api/team-assessment/respond/[token]
+├ ƒ /api/team/respondents/[token]
+├ ƒ /api/telemetry/global
+├ ƒ /api/telemetry/resonance
+├ ƒ /api/user/delete
+├ ƒ /api/user/unsubscribe
+├ ƒ /api/v2/health
+├ ƒ /api/v2/users
+├ ƒ /api/vault/[...slug]
+├ ƒ /api/vault/status
+├ ƒ /assessment/[token]
+├ ƒ /assessment/success
+├ ƒ /audit/[id]
+├ ƒ /audit/[id]/success
+├ ƒ /boardroom/dossier/[dossierId]
+├ ƒ /client
+├ ƒ /client/actions
+├ ƒ /client/dossiers
+├ ƒ /client/reports
+├ ƒ /client/reports/[reportId]
+├ ƒ /dashboard/pdf-analytics
+├ ƒ /downloads/vault
+├ ƒ /enterprise/alignment/campaigns/[campaignId]
+├ ○ /foundry/case/success
+├ ƒ /pdf-dashboard
+├ ƒ /portal
+├ ƒ /portfolio
+├ ƒ /purpose-alignment
+├ ƒ /registry/[...slug]
+├ ƒ /render/pdf/[id]
+├ ƒ /restricted
+├ ƒ /settings/integrations
+├ ƒ /strategy-room/results
+├ ƒ /strategy-room/success
+└ ƒ /testing/lab
+
+Route (pages)                                                                                             Revalidate  Expire
+┌ ● / (672 ms)
+├   /_app
+├ ● /[slug]
+├ ƒ /[type]-sitemap.xml
+├ ○ /404 (596 ms)
+├ ○ /500 (592 ms)
+├ ○ /about (592 ms)
+├ ƒ /about/founder
+├ ƒ /access
+├ ƒ /access/accept
+├ ƒ /access/redeem
+├ ○ /accessibility (592 ms)
+├ ○ /accessibility-statement (792 ms)
+├ ƒ /account/organisation
+├ ƒ /account/proof-pack
+├ ƒ /admin
+├ ƒ /admin/access-diagnostics
+├ ƒ /admin/access-keys
+├ ƒ /admin/access-revoke
+├ ƒ /admin/advisory-queue
+├ ƒ /admin/analytics
+├ ƒ /admin/artifacts
+├ ƒ /admin/assets
+├ ƒ /admin/authority-center
+├ ƒ /admin/billing
+├ ƒ /admin/boardroom-archive
+├ ƒ /admin/boardroom/orders
+├ ƒ /admin/boardroom/orders/[id]
+├ ƒ /admin/briefs
+├ ƒ /admin/calibration
+├ ƒ /admin/case-studies
+├ ƒ /admin/case-studies/[id]
+├ ƒ /admin/command-centre
+├ ƒ /admin/command-wall
+├ ƒ /admin/conversion-dashboard
+├ ƒ /admin/counsel-review
+├ ƒ /admin/decision-instrument-runs
+├ ƒ /admin/delivery-queue
+├ ƒ /admin/demo-conversion
+├ ƒ /admin/dev/session
+├ ƒ /admin/enterprise-foundation
+├ ƒ /admin/enterprise-pipeline
+├ ƒ /admin/events
+├ ƒ /admin/feedback
+├ ƒ /admin/fulfilment
+├ ƒ /admin/inner-circle
+├ ƒ /admin/institutional-analytics
+├ ƒ /admin/intelligence
+├ ƒ /admin/intelligence/gmi-call-review
+├ ƒ /admin/intelligence/gmi-control-plane
+├ ƒ /admin/intelligence/gmi-event-log
+├ ƒ /admin/intelligence/gmi-falsification
+├ ƒ /admin/intelligence/gmi-red-team
+├ ƒ /admin/intelligence/gmi-release-console
+├ ƒ /admin/intelligence/gmi-signal-monitor
+├ ƒ /admin/intelligence/gmi/batch-score
+├ ƒ /admin/intelligence/gmi/publication-readiness
+├ ƒ /admin/intelligence/gmi/source-workbench
+├ ƒ /admin/launch-dashboard
+├ ƒ /admin/living-state
+├ ƒ /admin/login
+├ ƒ /admin/operations
+├ ƒ /admin/operator
+├ ƒ /admin/operator-command-centre
+├ ƒ /admin/operator-pilot
+├ ƒ /admin/outbound
+├ ƒ /admin/outbound/facebook
+├ ƒ /admin/outbound/linkedin
+├ ƒ /admin/outbound/linkedin/campaigns/[campaign]
+├ ƒ /admin/outbound/scheduler
+├ ƒ /admin/outbound/x
+├ ƒ /admin/outcome-ledger
+├ ƒ /admin/outcome-verification
+├ ƒ /admin/oversight-review
+├ ƒ /admin/pdf-dashboard
+├ ƒ /admin/pdf-status
+├ ƒ /admin/product-authority
+├ ƒ /admin/product-fulfilment
+├ ƒ /admin/product-surfaces
+├ ƒ /admin/proof
+├ ƒ /admin/provenance-chain
+├ ƒ /admin/redis
+├ ƒ /admin/report-state
+├ ƒ /admin/retained-cadence
+├ ƒ /admin/retainer-readiness
+├ ƒ /admin/retainers
+├ ƒ /admin/security-assurance-requests
+├ ƒ /admin/suppression-ledger
+├ ƒ /admin/validation
+├ ƒ /api/access/accept-invite
+├ ƒ /api/access/check
+├ ƒ /api/access/clear
+├ ƒ /api/access/download
+├ ƒ /api/access/logout
+├ ƒ /api/access/me
+├ ƒ /api/access/redeem
+├ ƒ /api/access/serve
+├ ƒ /api/access/verify
+├ ƒ /api/admin-client
+├ ƒ /api/admin/access-keys
+├ ƒ /api/admin/access-keys/[id]/revoke
+├ ƒ /api/admin/access-keys/[id]/uses
+├ ƒ /api/admin/access-keys/create
+├ ƒ /api/admin/advisory-queue/action
+├ ƒ /api/admin/advisory-queue/boardroom-delivery
+├ ƒ /api/admin/advisory-queue/boardroom-orders
+├ ƒ /api/admin/advisory-queue/export
+├ ƒ /api/admin/audit-logs
+├ ƒ /api/admin/audit/logs
+├ ƒ /api/admin/auth/reset-rate-limit
+├ ƒ /api/admin/auth/send-link
+├ ƒ /api/admin/auth/verify
+├ ƒ /api/admin/boardroom/orders
+├ ƒ /api/admin/boardroom/orders/[id]
+├ ƒ /api/admin/boardroom/orders/[id]/approve
+├ ƒ /api/admin/boardroom/orders/[id]/customer-access
+├ ƒ /api/admin/boardroom/orders/[id]/deliver
+├ ƒ /api/admin/boardroom/orders/[id]/generate-dossier
+├ ƒ /api/admin/boardroom/orders/[id]/reconcile
+├ ƒ /api/admin/case-studies
+├ ƒ /api/admin/case-studies/[id]
+├ ƒ /api/admin/case-studies/boardroom-order
+├ ƒ /api/admin/client-safe-provenance
+├ ƒ /api/admin/constitutional-health
+├ ƒ /api/admin/deal-flow-stats
+├ ƒ /api/admin/delivery-queue
+├ ƒ /api/admin/delivery-queue/send
+├ ƒ /api/admin/diagnostics/artifacts
+├ ƒ /api/admin/diagnostics/grants/revoke
+├ ƒ /api/admin/diagnostics/jobs/process
+├ ƒ /api/admin/diagnostics/records
+├ ƒ /api/admin/diagnostics/regenerate
+├ ƒ /api/admin/diagnostics/retention/run
+├ ƒ /api/admin/diagnostics/revoke
+├ ƒ /api/admin/diagnostics/summary
+├ ƒ /api/admin/diagnostics/telemetry
+├ ƒ /api/admin/export-audit
+├ ƒ /api/admin/export-vips
+├ ƒ /api/admin/feedback/retainer-readiness
+├ ƒ /api/admin/foundry-health
+├ ƒ /api/admin/fulfilment/queue
+├ ƒ /api/admin/governed-cases/stale
+├ ƒ /api/admin/identity-audit
+├ ƒ /api/admin/inner-circle/export
+├ ƒ /api/admin/inner-circle/export/route
+├ ƒ /api/admin/inner-circle/issue
+├ ƒ /api/admin/inner-circle/revoke
+├ ƒ /api/admin/institutional-analytics
+├ ƒ /api/admin/intelligence/gmi/batch-score
+├ ƒ /api/admin/intelligence/gmi/digest
+├ ƒ /api/admin/intelligence/gmi/events
+├ ƒ /api/admin/intelligence/gmi/falsification-rule
+├ ƒ /api/admin/intelligence/gmi/generate-board-pack
+├ ƒ /api/admin/intelligence/gmi/publish
+├ ƒ /api/admin/intelligence/gmi/record-event
+├ ƒ /api/admin/intelligence/gmi/red-team
+├ ƒ /api/admin/intelligence/gmi/snapshot
+├ ƒ /api/admin/intelligence/gmi/source-workbench
+├ ƒ /api/admin/invites
+├ ƒ /api/admin/invites/[id]/revoke
+├ ƒ /api/admin/invites/create
+├ ƒ /api/admin/jobs/dead-letter
+├ ƒ /api/admin/jobs/dead-letter/replay
+├ ƒ /api/admin/jobs/process
+├ ƒ /api/admin/launch-events
+├ ƒ /api/admin/members/keys
+├ ƒ /api/admin/members/list
+├ ƒ /api/admin/members/revoke
+├ ƒ /api/admin/members/upgrade
+├ ƒ /api/admin/onboard-principal
+├ ƒ /api/admin/operator-pilot
+├ ƒ /api/admin/outbound/facebook/diagnostics
+├ ƒ /api/admin/outbound/facebook/oauth/callback
+├ ƒ /api/admin/outbound/facebook/oauth/start
+├ ƒ /api/admin/outbound/facebook/publish
+├ ƒ /api/admin/outbound/facebook/queue
+├ ƒ /api/admin/outbound/linkedin
+├ ƒ /api/admin/outbound/linkedin/callback
+├ ƒ /api/admin/outbound/linkedin/campaigns/validate
+├ ƒ /api/admin/outbound/linkedin/connect
+├ ƒ /api/admin/outbound/linkedin/diagnostics
+├ ƒ /api/admin/outbound/linkedin/mark-posted
+├ ƒ /api/admin/outbound/linkedin/oauth/callback
+├ ƒ /api/admin/outbound/linkedin/oauth/revoke
+├ ƒ /api/admin/outbound/linkedin/oauth/start
+├ ƒ /api/admin/outbound/linkedin/organizations
+├ ƒ /api/admin/outbound/linkedin/publish
+├ ƒ /api/admin/outbound/linkedin/queue
+├ ƒ /api/admin/outbound/linkedin/status
+├ ƒ /api/admin/outbound/linkedin/update-status
+├ ƒ /api/admin/outbound/scheduler/pause
+├ ƒ /api/admin/outbound/scheduler/run
+├ ƒ /api/admin/outbound/scheduler/status
+├ ƒ /api/admin/outbound/x/diagnostics
+├ ƒ /api/admin/outbound/x/oauth/callback
+├ ƒ /api/admin/outbound/x/oauth/start
+├ ƒ /api/admin/outbound/x/publish
+├ ƒ /api/admin/outbound/x/queue
+├ ƒ /api/admin/outbound/x/reconcile
+├ ƒ /api/admin/outcome-verification
+├ ƒ /api/admin/oversight-batch
+├ ƒ /api/admin/oversight-provenance
+├ ƒ /api/admin/pdf-analytics
+├ ƒ /api/admin/pdf-status
+├ ƒ /api/admin/product-fulfilment/matrix
+├ ƒ /api/admin/proof/evidence
+├ ƒ /api/admin/proof/evidence/[id]
+├ ƒ /api/admin/provenance/count-leaves
+├ ƒ /api/admin/provenance/create-anchor
+├ ƒ /api/admin/provenance/publish-root
+├ ƒ /api/admin/provenance/query
+├ ƒ /api/admin/provenance/verify
+├ ƒ /api/admin/provenance/verify-anchor
+├ ƒ /api/admin/provenance/verify-chain
+├ ƒ /api/admin/reporting/lineage/[resourceId]
+├ ƒ /api/admin/reports
+├ ƒ /api/admin/reports/[id]
+├ ƒ /api/admin/reports/[id]/deliver
+├ ƒ /api/admin/retained-cadence/action
+├ ƒ /api/admin/retained-cadence/create-cycle
+├ ƒ /api/admin/retained-cadence/list
+├ ƒ /api/admin/retained-cadence/run-now
+├ ƒ /api/admin/retained-cadence/update
+├ ƒ /api/admin/retainers
+├ ƒ /api/admin/retainers/[id]
+├ ƒ /api/admin/security-assurance-requests/update
+├ ƒ /api/admin/security/appeal
+├ ƒ /api/admin/security/deny
+├ ƒ /api/admin/security/events
+├ ƒ /api/admin/security/resolve-appeal
+├ ƒ /api/admin/security/toggle-lock
+├ ƒ /api/admin/status-report
+├ ƒ /api/admin/suppression-ledger
+├ ƒ /api/admin/sync-fix
+├ ƒ /api/admin/system-health
+├ ƒ /api/admin/system/upstash-health
+├ ƒ /api/admin/users/upgrade
+├ ƒ /api/admin/validation
+├ ƒ /api/analytics/downloads/summary
+├ ƒ /api/analytics/event
+├ ƒ /api/analytics/launch-event
+├ ƒ /api/artifacts/global-market-intelligence-q1-2026-boardroom-pdf
+├ ƒ /api/assets/retrieve
+├ ƒ /api/assets/serve-pdf
+├ ƒ /api/auth/[...nextauth]
+├ ƒ /api/auth/identity
+├ ƒ /api/auth/me
+├ ƒ /api/auth/mint
+├ ƒ /api/auth/session
+├ ƒ /api/auth/sovereign-login
+├ ƒ /api/billing/checkout
+├ ƒ /api/billing/webhook
+├ ƒ /api/blog/[slug]
+├ ƒ /api/books/[slug]
+├ ƒ /api/briefs/[slug]
+├ ƒ /api/canon/[slug]
+├ ƒ /api/case-studies
+├ ƒ /api/case-studies/[slug]
+├ ƒ /api/cases/[caseId]
+├ ƒ /api/cases/benchmark-context
+├ ƒ /api/cases/contribute-outcome
+├ ƒ /api/cases/outcome-signal
+├ ƒ /api/cases/return-brief
+├ ƒ /api/cases/share
+├ ƒ /api/cases/share/export
+├ ƒ /api/cases/share/revoke
+├ ƒ /api/cases/share/verify
+├ ƒ /api/checkout/decision-failure-brief
+├ ƒ /api/checkout/decision-failure-brief-confirm
+├ ƒ /api/checkpoints/respond
+├ ƒ /api/client-safe-provenance
+├ ƒ /api/constitution/assess
+├ ƒ /api/constitution/command-centre
+├ ƒ /api/constitution/interventions
+├ ƒ /api/contact
+├ ƒ /api/content/[...slug]
+├ ƒ /api/content/initialize
+├ ƒ /api/contracts/[id]
+├ ƒ /api/contracts/[id]/checkpoint
+├ ƒ /api/contracts/[id]/verify
+├ ƒ /api/contracts/create
+├ ƒ /api/corridor/recommendation-context
+├ ƒ /api/counsel/intake
+├ ƒ /api/cron/clean-keys
+├ ƒ /api/cron/cleanup-download-security
+├ ƒ /api/cron/cleanup-download-token
+├ ƒ /api/cron/outbound-scheduler
+├ ƒ /api/cron/prune-rate-limits
+├ ƒ /api/cron/security-sweep
+├ ƒ /api/cron/stale-case-notify
+├ ƒ /api/dashboard/boardroom-funnel
+├ ƒ /api/dashboard/feedback-health
+├ ƒ /api/dashboard/fulfilment-state
+├ ƒ /api/dashboard/metrics
+├ ƒ /api/dashboard/my-reports
+├ ƒ /api/dashboard/operational-summary
+├ ƒ /api/dashboard/outcome-distribution
+├ ƒ /api/dashboard/oversight-reviews
+├ ƒ /api/dashboard/pressure-trend
+├ ƒ /api/dashboard/recent-activity
+├ ƒ /api/dashboard/retainer-health
+├ ƒ /api/dashboard/risk-suppression
+├ ƒ /api/dashboard/snapshot
+├ ƒ /api/deal-flow/qualify
+├ ƒ /api/debug/contentlayer-exports
+├ ƒ /api/debug/contentlayer-registry
+├ ƒ /api/debug/ssot-health
+├ ƒ /api/decision-centre/cases
+├ ƒ /api/decision-centre/save-session-case
+├ ƒ /api/decision-instruments/results
+├ ƒ /api/decision-instruments/send-purchase-email
+├ ƒ /api/demo/funnel-event
+├ ƒ /api/demo/signal-consent-continuation
+├ ƒ /api/diagnostics/[ref]
+├ ƒ /api/diagnostics/capture
+├ ƒ /api/diagnostics/challenge
+├ ƒ /api/diagnostics/constitutional-handoff/[stage]
+├ ƒ /api/diagnostics/constitutional-intake/report
+├ ƒ /api/diagnostics/create-report-checkout
+├ ƒ /api/diagnostics/directional-integrity
+├ ƒ /api/diagnostics/enterprise
+├ ƒ /api/diagnostics/executive-reporting
+├ ƒ /api/diagnostics/list
+├ ƒ /api/diagnostics/report
+├ ƒ /api/diagnostics/report/[id]
+├ ƒ /api/diagnostics/report/generate
+├ ƒ /api/diagnostics/report/history
+├ ƒ /api/diagnostics/report/pdf
+├ ƒ /api/diagnostics/report/signed-url
+├ ƒ /api/diagnostics/report/unlock
+├ ƒ /api/diagnostics/reports/download
+├ ƒ /api/diagnostics/reports/issue
+├ ƒ /api/diagnostics/score
+├ ƒ /api/diagnostics/spine/load
+├ ƒ /api/diagnostics/spine/persist
+├ ƒ /api/diagnostics/submit
+├ ƒ /api/diagnostics/team-alignment
+├ ƒ /api/diagnostics/telemetry
+├ ƒ /api/dispatches/[slug]
+├ ƒ /api/dl/[token]
+├ ƒ /api/downloads/instrument-pdf
+├ ƒ /api/downloads/mdx
+├ ƒ /api/downloads/resolve/[slug]
+├ ƒ /api/downloads/resolve/[slug]/[...rest]
+├ ƒ /api/editorials/citation/[slug]
+├ ƒ /api/editorials/preview/[slug]
+├ ƒ /api/endpoint
+├ ƒ /api/engagements/operator-pilot
+├ ƒ /api/engagements/operator-pilot-status
+├ ƒ /api/engagements/operator-pilot-status-session
+├ ƒ /api/enterprise/campaigns/[id]
+├ ƒ /api/enterprise/report/[campaignId]
+├ ƒ /api/events/[slug]
+├ ƒ /api/events/checkout
+├ ƒ /api/feedback/submit
+├ ƒ /api/follow-up/process
+├ ƒ /api/follow-up/register
+├ ƒ /api/foundry/interest
+├ ƒ /api/frameworks/surrender/[slug]
+├ ƒ /api/frameworks/surrender/[slug]/protected
+├ ƒ /api/generate-all-pdfs
+├ ƒ /api/generate-pdf
+├ ƒ /api/generate-pdfs/batch
+├ ƒ /api/gmi/board-pack
+├ ƒ /api/gmi/red-team
+├ ƒ /api/health
+├ ƒ /api/inner-circle/boardroom-bridge
+├ ƒ /api/inner-circle/council-request
+├ ƒ /api/inner-circle/email-trigger
+├ ƒ /api/inner-circle/generate-link
+├ ƒ /api/inner-circle/lexicon
+├ ƒ /api/inner-circle/register
+├ ƒ /api/inner-circle/resend
+├ ƒ /api/inner-circle/retrieve/[briefId]
+├ ƒ /api/inner-circle/rise-decay-scorecard
+├ ƒ /api/inner-circle/self-revoke
+├ ƒ /api/inner-circle/unlock
+├ ƒ /api/inner-circle/worksheet-action
+├ ƒ /api/institutional-case/attach
+├ ƒ /api/institutional-case/resolve
+├ ƒ /api/integrations/disconnect
+├ ƒ /api/integrations/google/callback
+├ ƒ /api/integrations/google/connect
+├ ƒ /api/integrations/signals
+├ ƒ /api/integrations/slack/callback
+├ ƒ /api/integrations/slack/connect
+├ ƒ /api/integrations/status
+├ ƒ /api/internal/governed-automation/tick
+├ ƒ /api/internal/living-action-feedback/update
+├ ƒ /api/internal/oversight/brief-preview
+├ ƒ /api/internal/oversight/client-safe-preview
+├ ƒ /api/internal/oversight/counsel-action
+├ ƒ /api/internal/oversight/counsel-assignment
+├ ƒ /api/internal/oversight/counsel-submit-review
+├ ƒ /api/internal/oversight/delivery-action
+├ ƒ /api/internal/oversight/notify-client
+├ ƒ /api/internal/oversight/review-cycle-preview
+├ ƒ /api/internal/oversight/scheduler-run
+├ ƒ /api/internal/oversight/send
+├ ƒ /api/internal/retained-cadence/tick
+├ ƒ /api/internal/return-brief/send
+├ ƒ /api/kernel/live-session
+├ ƒ /api/kernel/live-session-stream
+├ ƒ /api/keys/verify
+├ ƒ /api/legal/accept-terms
+├ ƒ /api/library/[slug]
+├ ƒ /api/living-action-feedback/user-update
+├ ƒ /api/market-intelligence/dii
+├ ƒ /api/members/strategies
+├ ƒ /api/middleware-health
+├ ƒ /api/newsletter
+├ ƒ /api/og/short
+├ ƒ /api/ogr/simulate
+├ ƒ /api/organisation/accept-invite
+├ ƒ /api/organisation/create
+├ ƒ /api/organisation/invite
+├ ƒ /api/organisation/list
+├ ƒ /api/organisation/remove-member
+├ ƒ /api/outcomes/verify
+├ ƒ /api/oversight/brief/[cycleId]
+├ ƒ /api/pdf-data
+├ ƒ /api/pdf/decision-instrument-dossier
+├ ƒ /api/pdf/oversight-brief
+├ ƒ /api/pdf/proof-pack
+├ ƒ /api/pdfs/[id]
+├ ƒ /api/pdfs/[id]/delete
+├ ƒ /api/pdfs/[id]/duplicate
+├ ƒ /api/pdfs/[id]/generate
+├ ƒ /api/pdfs/[id]/metadata
+├ ƒ /api/pdfs/[id]/rename
+├ ƒ /api/pdfs/generate
+├ ƒ /api/pdfs/generate-all
+├ ƒ /api/pdfs/list
+├ ƒ /api/playbooks/[slug]/run
+├ ƒ /api/premium/admin/cleanup-expired-tokens
+├ ƒ /api/premium/admin/download-anomalies
+├ ƒ /api/premium/admin/download-ledger
+├ ƒ /api/premium/admin/revoke-by-content
+├ ƒ /api/premium/admin/revoke-by-user
+├ ƒ /api/premium/admin/revoke-token
+├ ƒ /api/premium/admin/verify-watermark
+├ ƒ /api/premium/content
+├ ƒ /api/premium/content/download/[id]
+├ ƒ /api/premium/dashboard
+├ ƒ /api/pressure/signal
+├ ƒ /api/private/frameworks/[slug]
+├ ƒ /api/private/vault/[...path]
+├ ƒ /api/product-release-governance/[productCode]
+├ ƒ /api/proof/evidence
+├ ƒ /api/proof/public
+├ ƒ /api/protected-content
+├ ƒ /api/provenance/demo-verify
+├ ƒ /api/provenance/public-verify
+├ ƒ /api/provenance/verify-case
+├ ƒ /api/public/content
+├ ƒ /api/public/kernel-signal
+├ ƒ /api/rate-limit/stats
+├ ƒ /api/report/[reportId]
+├ ƒ /api/reports/mine
+├ ƒ /api/reports/request
+├ ƒ /api/reports/webhook
+├ ƒ /api/resources/[...slug]
+├ ƒ /api/resources/mdx
+├ ƒ /api/resources/strategic-frameworks
+├ ƒ /api/resources/strategic-frameworks/[...slug]
+├ ƒ /api/retainer/intake
+├ ƒ /api/retainers/readiness
+├ ƒ /api/retainers/status/[token]
+├ ƒ /api/security-assurance/request
+├ ƒ /api/shorts/[slug]
+├ ƒ /api/shorts/[slug]/interactions
+├ ƒ /api/shorts/[slug]/like
+├ ƒ /api/shorts/[slug]/save
+├ ƒ /api/sitemaps/[category]
+├ ƒ /api/sovereign/mandates
+├ ƒ /api/strategy-room/analyze
+├ ƒ /api/strategy-room/analyze/route
+├ ƒ /api/strategy-room/confirm-action
+├ ƒ /api/strategy-room/enrol
+├ ƒ /api/strategy-room/export/[slug]
+├ ƒ /api/strategy-room/intake
+├ ƒ /api/strategy-room/submit
+├ ƒ /api/strategy-room/submit/route
+├ ƒ /api/stripe/diagnostic-report-webhook
+├ ƒ /api/subscribe
+├ ƒ /api/surrender/download/[id]
+├ ƒ /api/system/health
+├ ƒ /api/system/lock-status
+├ ƒ /api/system/maintenance
+├ ƒ /api/teaser
+├ ƒ /api/tools/send-to-self
+├ ƒ /api/trial/resolve-expiry
+├ ƒ /api/trial/start
+├ ƒ /api/trial/status
+├ ƒ /api/user/data-export
+├ ƒ /api/users
+├ ƒ /api/v1/cases
+├ ƒ /api/v1/cases/[caseId]/provenance
+├ ƒ /api/v1/cases/[caseId]/summary
+├ ƒ /api/verify
+├ ƒ /api/verify-newsletter
+├ ƒ /api/webhooks/resend
+├ ƒ /api/webhooks/stripe
+├ ○ /artifacts (790 ms)
+├ ƒ /artifacts/[id]
+├ ƒ /artifacts/global-market-outlook-q1-2026-public
+├ ƒ /auth/access-denied
+├ ƒ /auth/error
+├ ƒ /auth/signin
+├ ○ /benchmark-context (589 ms)
+├ ● /blog (3723 ms)                                                                                               1m      1y
+├ ƒ /blog-sitemap.xml
+├ ● /blog/[...slug] (33730 ms)                                                                                   30m      1y
+│ ├ /blog/when-the-foundation-is-destroyed (5599 ms)
+│ ├ /blog/when-the-system-breaks-you (5598 ms)
+│ ├ /blog/when-gods-sovereignty-collides-with-our-pain (5590 ms)
+│ ├ /blog/eden-mandate-civilisations-rise-fall (983 ms)
+│ ├ /blog/fathering-without-fear-teaser (983 ms)
+│ ├ /blog/fathering-principles (982 ms)
+│ ├ /blog/fathering-without-fear (982 ms)
+│ └ [+19 more paths] (avg 685 ms)
+├ ● /blog/series/[seriesSlug] (9981 ms)                                                                           1m      1y
+│ ├ /blog/series/the-truth-in-the-frame (2755 ms)
+│ ├ /blog/series/the-science-of-inherited-selves (2755 ms)
+│ ├ /blog/series/the-burden-changes-hands (2755 ms)
+│ └ /blog/series/what-survived (1716 ms)
+├ ● /blog/series/[seriesSlug]/[partSlug] (106892 ms)                                                              1m      1y
+│ ├ /blog/series/the-science-of-inherited-selves/when-biology-becomes-biography (8663 ms)
+│ ├ /blog/series/the-science-of-inherited-selves/the-generation-that-refuses-to-pass-it-on (8663 ms)
+│ ├ /blog/series/the-science-of-inherited-selves/love-loss-and-the-familiar-wound (8596 ms)
+│ ├ /blog/series/the-science-of-inherited-selves/choose-the-ancestral-landscape (8595 ms)
+│ ├ /blog/series/the-burden-changes-hands/knowledge-can-wait-the-question-is-whether-it-should (8594 ms)
+│ ├ /blog/series/the-burden-changes-hands/what-the-tablet-cannot-tell-you (8573 ms)
+│ ├ /blog/series/the-burden-changes-hands/who-holds-the-stylus (8542 ms)
+│ └ [+9 more paths] (avg 5185 ms)
+├ ƒ /board/c
+├ ƒ /board/dashboard
+├ ƒ /board/intelligence
+├ ƒ /boardroom
+├ ○ /boardroom-brief (789 ms)
+├ ƒ /boardroom-brief/confirmation
+├ ○ /boardroom-mode (812 ms)
+├ ƒ /boardroom/[sessionId]
+├ ● /books (3723 ms)
+├ ƒ /books-sitemap.xml
+├ ● /books/[slug] (16976 ms)                                                                                     30m      1y
+│ ├ /books/fathering-without-fear (3465 ms)
+│ ├ /books/the-architecture-of-human-purpose (3379 ms)
+│ ├ /books/the-builders-catechism (3378 ms)
+│ ├ /books/architecture-of-ascension (3377 ms)
+│ └ /books/the-fiction-adaptation (3377 ms)
+├ ● /books/the-architecture-of-human-purpose-landing (3583 ms)                                                    1h      1y
+├ ○ /brands (811 ms)
+├ ƒ /briefing/return/[sessionKey]
+├ ● /briefs (3723 ms)                                                                                            30m      1y
+├ ● /briefs/[slug] (2935 ms)
+│ ├ /briefs/institutional-alpha-why-executive-summaries-mislead (394 ms)
+│ ├ /briefs/institutional-alpha-the-hidden-cost-of-flattering-data (393 ms)
+│ ├ /briefs/institutional-alpha-when-the-board-sees-a-different-company (392 ms)
+│ ├ /briefs/institutional-alpha-why-leaders-stop-hearing-reality (361 ms)
+│ ├ /briefs/sovereign-intelligence-dependence-disguised-as-partnership (352 ms)
+│ ├ /briefs/sovereign-intelligence-the-vulnerability-of-narrative-capture (352 ms)
+│ ├ /briefs/sovereign-intelligence-alignment-without-sovereignty (351 ms)
+│ └ /briefs/sovereign-intelligence-why-power-concentrates-around-the-decisive (340 ms)
+├ ● /briefs/institutional-alpha (3721 ms)                                                                        30m      1y
+├ ● /briefs/sovereign-intelligence (3587 ms)                                                                     30m      1y
+├ ● /canon (3719 ms)                                                                                              1m      1y
+├ ● /canon-campaign (3720 ms)                                                                                     1m      1y
+├ ● /canon/[slug] (13784 ms)                                                                                      1h      1y
+│ ├ /canon/execution-breaks-long-before-strategy-does (2757 ms)
+│ ├ /canon/the-hidden-cost-of-organisational-drift (2757 ms)
+│ ├ /canon/why-most-consulting-fails-before-it-begins (2757 ms)
+│ ├ /canon/canon-master-index-preview (2757 ms)
+│ └ /canon/canon-campaign (2756 ms)
+├ ○ /canon/glossary (810 ms)
+├ ƒ /canons-sitemap.xml
+├ ƒ /case-studies
+├ ƒ /case-studies/[slug]
+├ ƒ /case/shared/[token]
+├ ○ /changelog (811 ms)
+├ ○ /chatham-rooms (809 ms)
+├ ○ /checkout/personal-decision-audit (809 ms)
+├ ƒ /client/dashboard
+├ ƒ /constitution/command-centre
+├ ƒ /consulting
+├ ○ /consulting/interventions (1056 ms)
+├ ƒ /consulting/strategy-room
+├ ○ /contact (807 ms)
+├ ƒ /contact/success
+├ ● /content (1345 ms)                                                                                           30m      1y
+├ ● /content/[...slug]
+├ ○ /content/simple (515 ms)
+├ ○ /continuity (538 ms)
+├ ○ /controls (687 ms)
+├ ○ /cookie-policy (536 ms)
+├ ○ /cookies (536 ms)
+├ ƒ /corridor
+├ ƒ /counsel
+├ ƒ /counsel/intake
+├ ƒ /counsel/status
+├ ƒ /dashboard
+├ ○ /dashboard/diagnostics (533 ms)
+├ ● /debug/content (1295 ms)
+├ ○ /decision-centre (536 ms)
+├ ○ /decision-centre/case/[caseId] (537 ms)
+├ ○ /decision-instruments (498 ms)
+├ ƒ /decision-instruments/[slug]
+├ ○ /decision-instruments/board-brief-builder/run (507 ms)
+├ ƒ /decision-instruments/board-brief-template/run
+├ ○ /decision-instruments/decision-exposure-instrument/run (638 ms)
+├ ○ /decision-instruments/decision-exposure-instrument/start (499 ms)
+├ ○ /decision-instruments/escalation-readiness-scorecard/run (521 ms)
+├ ○ /decision-instruments/execution-risk-index/run (505 ms)
+├ ○ /decision-instruments/governance-drift-detector/run (493 ms)
+├ ○ /decision-instruments/history (493 ms)
+├ ○ /decision-instruments/intervention-path-selector/run (406 ms)
+├ ○ /decision-instruments/intervention-path-selector/start (406 ms)
+├ ○ /decision-instruments/mandate-clarity-framework/run (405 ms)
+├ ○ /decision-instruments/mandate-clarity-framework/start (405 ms)
+├ ○ /decision-instruments/operator-decision-pack/run (404 ms)
+├ ○ /decision-instruments/operator-decision-pack/start (403 ms)
+├ ○ /decision-instruments/signal (402 ms)
+├ ○ /decision-instruments/strategic-priority-stack-builder/run (403 ms)
+├ ○ /decision-instruments/structural-failure-diagnostic-canvas/run (681 ms)
+├ ○ /decision-instruments/team-alignment-gap-map/run (680 ms)
+├ ○ /decision-paths (765 ms)
+├ ○ /decision-pathway (789 ms)
+├ ○ /decision-pressure (789 ms)
+├ ○ /design-partners (789 ms)
+├ ƒ /dev/dashboard
+├ ○ /developers (788 ms)
+├ ○ /diagnostic (789 ms)
+├ ○ /diagnostics (515 ms)
+├ ○ /diagnostics/board-summary (525 ms)
+├ ƒ /diagnostics/constitutional-diagnostic
+├ ƒ /diagnostics/directional-integrity
+├ ƒ /diagnostics/enterprise
+├ ƒ /diagnostics/enterprise-assessment
+├ ƒ /diagnostics/executive-reporting
+├ ƒ /diagnostics/executive-reporting/run
+├ ○ /diagnostics/fast (515 ms)
+├ ○ /diagnostics/purpose-alignment (501 ms)
+├ ƒ /diagnostics/team-alignment
+├ ƒ /diagnostics/team-assessment
+├ ƒ /diagnostics/watch
+├ ƒ /directorate/dossier/[id]
+├ ƒ /directorate/oversight
+├ ● /downloads (1296 ms)                                                                                         30m      1y
+├ ƒ /downloads-sitemap.xml
+├ ƒ /downloads/[...slug]
+├ ● /editorials (1274 ms)                                                                                        30m      1y
+├ ● /editorials/[slug] (1718 ms)                                                                                 30m      1y
+│ └ /editorials/ultimate-purpose-of-man (1718 ms)
+├ ● /editorials/catalogue (1253 ms)
+├ ○ /editorials/discovery (500 ms)
+├ ○ /editorials/intelligence-briefs (497 ms)
+├ ● /editorials/series/[seriesSlug] (3487 ms)
+│ ├ /editorials/series/outsourcing-our-sense-of-meaning-and-belonging (1163 ms)
+│ ├ /editorials/series/the-minds-clay (1163 ms)
+│ └ /editorials/series/the-minds-clay-2 (1161 ms)
+├ ● /editorials/series/[seriesSlug]/[partSlug] (16414 ms)
+│ ├ /editorials/series/the-minds-clay/the-hand-that-thinks (1777 ms)
+│ ├ /editorials/series/the-minds-clay/the-first-external-hard-drive (1776 ms)
+│ ├ /editorials/series/the-minds-clay/the-locked-room (1776 ms)
+│ ├ /editorials/series/outsourcing-our-sense-of-meaning-and-belonging/the-logic-of-the-scroll (1773 ms)
+│ ├ /editorials/series/the-minds-clay/the-living-basket (1737 ms)
+│ ├ /editorials/series/outsourcing-our-sense-of-meaning-and-belonging/what-your-eyes-are-worth (1725 ms)
+│ ├ /editorials/series/the-minds-clay/the-loud-silence (1190 ms)
+│ └ [+4 more paths] (avg 1165 ms)
+├ ○ /education-research (497 ms)
+├ ○ /engagements (492 ms)
+├ ○ /engagements/operator-pilot (679 ms)
+├ ○ /engagements/operator-pilot-status (679 ms)
+├ ○ /engagements/retained-oversight (679 ms)
+├ ○ /engagements/selective-pilot (679 ms)
+├ ○ /enterprise (696 ms)
+├ ○ /enterprise-decision-authority (679 ms)
+├ ○ /enterprise-decision-scan (674 ms)
+├ ○ /enterprise/preview (673 ms)
+├ ● /events (1275 ms)                                                                                            30m      1y
+├ ƒ /events-sitemap.xml
+├ ● /events/[slug] (783 ms)                                                                                      30m      1y
+│ ├ /events/founders-salon (437 ms)
+│ └ /events/leadership-workshop (346 ms)
+├ ○ /events/success (703 ms)
+├ ○ /evidence (695 ms)
+├ ● /evidence/[slug] (1038 ms)
+│ ├ /evidence/tariff-shock-growth-break (346 ms)
+│ ├ /evidence/team-alignment-illusion (346 ms)
+│ └ /evidence/escalation-denied-case (346 ms)
+├ ○ /evidence/seals (695 ms)
+├ ● /evidence/standards (1273 ms)
+├ ○ /fatherhood (703 ms)
+├ ○ /foundations (664 ms)
+├ ○ /founders (634 ms)
+├ ○ /foundry (349 ms)
+├ ○ /foundry/brief/sample (640 ms)
+├ ○ /foundry/brief/success (616 ms)
+├ ○ /foundry/decision-test (350 ms)
+├ ○ /foundry/demo (357 ms)
+├ ○ /foundry/market-signal-test (350 ms)
+├ ○ /foundry/release-risk-test (349 ms)
+├ ○ /foundry/start (349 ms)
+├ ○ /foundry/value (346 ms)
+├ ● /frameworks (1273 ms)                                                                                        30m      1y
+├ ƒ /inner-circle
+├ ○ /inner-circle-portal (346 ms)
+├ ƒ /inner-circle-sitemap.xml
+├ ƒ /inner-circle/account
+├ ƒ /inner-circle/admin
+├ ƒ /inner-circle/admin/artifacts
+├ ○ /inner-circle/admin/dashboard (575 ms)
+├ ƒ /inner-circle/admin/reports
+├ ƒ /inner-circle/admin/reports/[id]
+├ ƒ /inner-circle/briefings
+├ ƒ /inner-circle/briefs
+├ ƒ /inner-circle/briefs/[...slug]
+├ ƒ /inner-circle/council-request
+├ ƒ /inner-circle/dashboard
+├ ƒ /inner-circle/insufficient-clearance
+├ ○ /inner-circle/locked (571 ms)
+├ ƒ /inner-circle/login
+├ ƒ /inner-circle/reports
+├ ƒ /inner-circle/reports/[ref]
+├ ƒ /inner-circle/resend
+├ ƒ /inner-circle/tools/rise-decay-scorecard
+├ ƒ /inner-circle/unlock
+├ ○ /institutional (571 ms)
+├ ● /intelligence (616 ms)                                                                                       30m      1y
+├ ● /intelligence/[slug] (2496 ms)                                                                                5m      1y
+│ ├ /intelligence/decision-delay-governance-cost (632 ms)
+│ ├ /intelligence/intelligence (624 ms)
+│ ├ /intelligence/global-market-intelligence-q1-2026 (620 ms)
+│ └ /intelligence/global-market-intelligence-q2-2026 (620 ms)
+├ ● /intelligence/contradictions (660 ms)
+├ ● /intelligence/gmi (2594 ms)                                                                                  30m      1y
+├ ● /intelligence/gmi/board-pulse (2690 ms)                                                                      30m      1y
+├ ● /intelligence/gmi/calls (2689 ms)                                                                            30m      1y
+├ ● /intelligence/gmi/falsification (2687 ms)                                                                    30m      1y
+├ ○ /intelligence/gmi/methodology (572 ms)
+├ ● /intelligence/gmi/operator-brief (2720 ms)                                                                   30m      1y
+├ ● /intelligence/gmi/performance (2720 ms)                                                                      30m      1y
+├ ● /intelligence/gmi/post-mortem (695 ms)                                                                       30m      1y
+├ ● /intelligence/gmi/q2-2026 (688 ms)                                                                           30m      1y
+├ ● /intelligence/gmi/red-team (686 ms)                                                                          30m      1y
+├ ○ /intelligence/gmi/use-cases (572 ms)
+├ ● /intelligence/market (616 ms)                                                                                30m      1y
+├ ○ /intelligence/memory (569 ms)
+├ ○ /intelligence/reports (568 ms)
+├ ○ /invite (568 ms)
+├ ƒ /kernel/signal
+├ ○ /lab/living-case (350 ms)
+├ ○ /leadership (351 ms)
+├ ● /lexicon (617 ms)                                                                                             1h      1y
+├ ● /lexicon/[slug] (25551 ms)                                                                                    1h      1y
+│ ├ /lexicon/trust (639 ms)
+│ ├ /lexicon/value (637 ms)
+│ ├ /lexicon/truth (630 ms)
+│ ├ /lexicon/vision (625 ms)
+│ ├ /lexicon/formation (536 ms)
+│ ├ /lexicon/assumption (496 ms)
+│ ├ /lexicon/sisterhood (480 ms)
+│ └ [+56 more paths] (avg 384 ms)
+├ ● /library (678 ms)                                                                                            30m      1y
+├ ● /library/[slug] (35209 ms)                                                                                   15m      1y
+│ ├ /library/vault-purpose-pyramid-fillable (1242 ms)
+│ ├ /library/decision-exposure-instrument (1239 ms)
+│ ├ /library/mandate-clarity-framework (1238 ms)
+│ ├ /library/intervention-path-selector (1238 ms)
+│ ├ /library/vault-lib-brotherhood-leader (1073 ms)
+│ ├ /library/vault-lib-family-court-pack (1072 ms)
+│ ├ /library/vault-lib-brotherhood-starter (1071 ms)
+│ └ [+66 more paths] (avg 410 ms)
+├ ƒ /market-intelligence/cross-edition-review
+├ ƒ /market-intelligence/dii
+├ ƒ /market-intelligence/learning-log
+├ ○ /media (351 ms)
+├ ƒ /membership/success
+├ ○ /method (351 ms)
+├ ○ /my-access (350 ms)
+├ ○ /my-instruments (352 ms)
+├ ○ /newsletter (350 ms)
+├ ○ /offers/enterprise-assessment-advisory-review (565 ms)
+├ ○ /offers/fast-diagnostic-decision-support (350 ms)
+├ ƒ /offers/global-market-intelligence-q2
+├ ○ /offline (565 ms)
+├ ƒ /outbound/linkedin
+├ ƒ /outcome/check
+├ ƒ /oversight
+├ ƒ /oversight/brief/[cycleId]
+├ ƒ /oversight/portfolio
+├ ● /playbooks (678 ms)                                                                                          30m      1y
+├ ● /playbooks/[slug] (5551 ms)                                                                                   1h      1y
+│ ├ /playbooks/intervention-path-public (856 ms)
+│ ├ /playbooks/decision-exposure-public (800 ms)
+│ ├ /playbooks/execution-integrity-public (799 ms)
+│ ├ /playbooks/execution-integrity-protocol (798 ms)
+│ ├ /playbooks/century-firm-playbook (796 ms)
+│ ├ /playbooks/mandate-clarity-public (556 ms)
+│ ├ /playbooks/the-alignment-audit-playbook (492 ms)
+│ └ /playbooks/the-drift-detection-framework (454 ms)
+├ ● /playbooks/[slug]/run (2620 ms)
+│ ├ /playbooks/execution-integrity-protocol/run (875 ms)
+│ ├ /playbooks/the-alignment-audit-playbook/run (873 ms)
+│ └ /playbooks/the-drift-detection-framework/run (872 ms)
+├ ƒ /premium/library
+├ ○ /pressure (565 ms)
+├ ○ /pricing (565 ms)
+├ ● /prints (1068 ms)                                                                                            30m      1y
+├ ● /prints/[slug] (2247 ms)                                                                                      1h      1y
+│ ├ /prints/prints%2Ffatherhood-standards-card (454 ms)
+│ ├ /prints/prints%2Fleadership-playbook (453 ms)
+│ ├ /prints/prints%2Fmentorship-starter-kit (453 ms)
+│ ├ /prints/prints%2Fentrepreneur-operating-pack (444 ms)
+│ └ /prints/prints%2Fstandards-brief (443 ms)
+├ ○ /privacy (590 ms)
+├ ○ /private-clients (564 ms)
+├ ○ /private/admin/premium-downloads (589 ms)
+├ ƒ /private/frameworks/[slug]
+├ ○ /products (589 ms)
+├ ○ /professionals (426 ms)
+├ ƒ /provenance/anchor-log
+├ ƒ /provenance/case/[subjectType]/[subjectId]
+├ ○ /provenance/demo (382 ms)
+├ ○ /provenance/explained (407 ms)
+├ ○ /provenance/sample-export (404 ms)
+├ ○ /quick-check (407 ms)
+├ ○ /refund-policy (403 ms)
+├ ● /registry (1018 ms)                                                                                           1h      1y
+├ ● /registry/[type]/[slug] (3055 ms)                                                                            30m      1y
+│ ├ /registry/shorts/when-you-own-both-your-scars-and-your-power (636 ms)
+│ ├ /registry/shorts/when-you-become-the-ancestor-you-needed (635 ms)
+│ ├ /registry/shorts/when-you-stop-explaining-healthy-distance (635 ms)
+│ ├ /registry/shorts/when-you-see-gods-kindness-in-the-detours (633 ms)
+│ └ /registry/shorts/when-you-finally-feel-whole-not-just-functional (516 ms)
+├ ○ /report/[reportId] (402 ms)
+├ ○ /reporting/custom (400 ms)
+├ ● /resources (1002 ms)                                                                                         30m      1y
+├ ƒ /resources-sitemap.xml
+├ ● /resources/[...slug] (14192 ms)                                                                               1h      1y
+│ ├ /resources/institutional-health-scorecard (722 ms)
+│ ├ /resources/canon-council-table-agenda (684 ms)
+│ ├ /resources/canon-household-charter-template (684 ms)
+│ ├ /resources/canon-household-charter (682 ms)
+│ ├ /resources/canon-reading-plan-year-one (682 ms)
+│ ├ /resources/destiny-mapping-worksheet (679 ms)
+│ ├ /resources/fatherhood-impact-framework (678 ms)
+│ └ [+18 more paths] (avg 521 ms)
+├ ƒ /resources/board-decision-log-template
+├ ● /resources/strategic-frameworks (1002 ms)                                                                     1h      1y
+├ ● /resources/strategic-frameworks/[slug] (4242 ms)                                                              1h      1y
+│ ├ /resources/strategic-frameworks/governance-pressure-ladder (670 ms)
+│ ├ /resources/strategic-frameworks/institutional-drift-map (638 ms)
+│ ├ /resources/strategic-frameworks/execution-integrity-grid (635 ms)
+│ ├ /resources/strategic-frameworks/board-accountability-loop (635 ms)
+│ ├ /resources/strategic-frameworks/succession-readiness-model (635 ms)
+│ ├ /resources/strategic-frameworks/sovereignty-index (515 ms)
+│ └ /resources/strategic-frameworks/decision-authority-matrix (514 ms)
+├ ● /resources/surrender-framework (1002 ms)                                                                      1h      1y
+├ ● /resources/surrender-framework/[slug] (632 ms)                                                                1h      1y
+│ └ /resources/surrender-framework/surrender-operational-framework (632 ms)
+├ ƒ /retainer
+├ ƒ /retainer/intake
+├ ○ /retainers (424 ms)
+├ ○ /retainers/readiness (421 ms)
+├ ƒ /retainers/status/[token]
+├ ○ /return-brief (413 ms)
+├ ○ /return-brief/[caseId] (410 ms)
+├ ○ /scenario-stress-test (412 ms)
+├ ○ /security (411 ms)
+├ ○ /security-policy (412 ms)
+├ ○ /security-review (411 ms)
+├ ○ /security/disclosure (577 ms)
+├ ● /shorts (1002 ms)                                                                                             1h      1y
+├ ƒ /shorts-sitemap.xml
+├ ● /shorts/[...slug] (252945 ms)                                                                                30m      1y
+│ ├ /shorts/when-youre-always-the-strong-one (1718 ms)
+│ ├ /shorts/when-youre-attracted-to-potential-not-reality (1709 ms)
+│ ├ /shorts/when-youre-done-fixing-adults (1620 ms)
+│ ├ /shorts/when-youre-exhausted-but-still-available (1620 ms)
+│ ├ /shorts/when-youre-building-someone-elses-legacy (1619 ms)
+│ ├ /shorts/when-youre-keeping-faith-out-of-habit (1607 ms)
+│ ├ /shorts/when-youre-living-for-weekends (1606 ms)
+│ └ [+223 more paths] (avg 1083 ms)
+├ ○ /sovereign/authorize (726 ms)
+├ ○ /speaking (577 ms)
+├ ƒ /strategies-sitemap.xml
+├ ○ /strategy (582 ms)
+├ ƒ /strategy-room
+├ ƒ /strategy-room/session/[id]
+├ ● /strategy/[...slug] (1240 ms)                                                                                30m      1y
+│ ├ /strategy/sample-strategy (431 ms)
+│ ├ /strategy/institutional-governance (431 ms)
+│ └ /strategy/extremism-shield (378 ms)
+├ ○ /subscribe (581 ms)
+├ ○ /system (581 ms)
+├ ○ /terms (616 ms)
+├ ○ /terms-of-service (616 ms)
+├ ƒ /test-readers
+├ ○ /test-your-decision (395 ms)
+├ ● /toolkits (1055 ms)
+├ ● /toolkits/[slug] (4310 ms)
+│ ├ /toolkits/renewal-reform (826 ms)
+│ ├ /toolkits/succession-engineering (826 ms)
+│ ├ /toolkits/crisis-leadership (826 ms)
+│ ├ /toolkits/institutional-diagnostics (705 ms)
+│ ├ /toolkits/culture-shaping (389 ms)
+│ ├ /toolkits/leadership-formation (373 ms)
+│ └ /toolkits/board-governance (365 ms)
+├ ○ /tools/decision-delay-exposure (382 ms)
+├ ○ /trust (377 ms)
+├ ƒ /trust-centre
+├ ● /vault (1032 ms)                                                                                              5m      1y
+├ ƒ /vault-sitemap.xml
+├ ● /vault/[...slug] (326 ms)                                                                                     1h      1y
+│ └ /vault/indices/rise-decay-index (326 ms)
+├ ● /vault/briefs (941 ms)                                                                                       30m      1y
+├ ● /vault/briefs/[slug] (136590 ms)
+│ ├ /vault/briefs/frontier-resilience-institutions-that-cannot-say-no (4595 ms)
+│ ├ /vault/briefs/frontier-resilience-decision-latency-as-hidden-risk (4586 ms)
+│ ├ /vault/briefs/frontier-resilience-drift-in-the-second-line (4586 ms)
+│ ├ /vault/briefs/frontier-resilience-drift-inside-the-winning-season (4586 ms)
+│ ├ /vault/briefs/frontier-resilience-fatigue-at-the-top (4586 ms)
+│ ├ /vault/briefs/frontier-resilience-founder-endurance-is-not-a-plan (4586 ms)
+│ ├ /vault/briefs/frontier-resilience-fragility-of-unowned-decisions (4586 ms)
+│ └ [+31 more paths] (avg 3370 ms)
+├ ○ /ventures (376 ms)
+├ ● /ventures/[slug] (6239 ms)                                                                                    1h      1y
+│ ├ /ventures/endureluxe (2958 ms)
+│ ├ /ventures/innovatehub (2928 ms)
+│ └ /ventures/alomarada (353 ms)
+├ ○ /verification (376 ms)
+├ ○ /verify (375 ms)
+├ ○ /why-not-ai (374 ms)
+└ ○ /works-in-progress (374 ms)
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses generateStaticParams)
+ƒ  (Dynamic)  server-rendered on demand
+
+
+> abraham-of-london@1.0.0 postbuild C:\aol-check-visual
+> next-sitemap --config next-sitemap.config.mjs && node scripts/fix-sitemap-future-urls.mjs && node scripts/build-mdx-route-manifest.mjs && node scripts/check-public-link-integrity.mjs
+
+✨ [next-sitemap] Loading next-sitemap config: file:///C:/aol-check-visual/next-sitemap.config.mjs
+✅ [next-sitemap] Generation completed
+┌───────────────┬────────┐
+│ (index)       │ Values │
+├───────────────┼────────┤
+│ indexSitemaps │ 1      │
+│ sitemaps      │ 1      │
+└───────────────┴────────┘
+-----------------------------------------------------
+ SITEMAP INDICES 
+-----------------------------------------------------
+
+   ○ https://www.abrahamoflondon.org/sitemap.xml
+
+
+-----------------------------------------------------
+ SITEMAPS 
+-----------------------------------------------------
+
+   ○ https://www.abrahamoflondon.org/sitemap-0.xml
+
+
+
+============================================
+SITEMAP FUTURE URL FIX
+============================================
+Today: 2026-07-18
+  [Post] Non-public: /blog/leadership-begins-at-home (DRAFT, date: 2026-06-01)
+  [Post] Non-public: /blog/series/the-science-of-inherited-selves/the-house-that-teaches-the-nervous-system (DRAFT, date: 2026-06-07)
+  [Post] Non-public: /blog/series/the-truth-in-the-frame/the-algorithms-gallery (SCHEDULED, date: 2026-08-18)
+  [Post] Non-public: /blog/series/the-truth-in-the-frame/the-camera-never-lies (SCHEDULED, date: 2026-08-11)
+  [Post] Non-public: /blog/series/the-truth-in-the-frame/the-emperors-canvas (SCHEDULED, date: 2026-07-21)
+  [Post] Non-public: /blog/series/the-truth-in-the-frame/the-empire-in-the-frame (SCHEDULED, date: 2026-07-28)
+  [Post] Non-public: /blog/series/the-truth-in-the-frame/the-grain-is-abundant (SCHEDULED, date: 2026-08-04)
+  [Post] Non-public: /blog/series/the-truth-in-the-frame/the-synthetic-truth (SCHEDULED, date: 2026-08-25)
+  [Post] Non-public: /blog/series/the-truth-in-the-frame/what-deserves-to-survive (SCHEDULED, date: 2026-09-01)
+  [Post] Non-public: /blog/series/what-survived/four-hundred-years-without-paper (SCHEDULED, date: 2026-11-17)
+  [Post] Non-public: /blog/series/what-survived/the-library-that-cannot-tell-us (SCHEDULED, date: 2026-12-01)
+  [Post] Non-public: /blog/series/what-survived/the-living-archive (SCHEDULED, date: 2026-11-10)
+  [Post] Non-public: /blog/series/what-survived/the-man-who-was-not-there (SCHEDULED, date: 2026-11-24)
+  [Post] Non-public: /blog/series/what-survived/the-paintings-that-waited (SCHEDULED, date: 2026-11-03)
+  [Post] Non-public: /blog/series/what-survived/the-tapestry-the-winners-made (SCHEDULED, date: 2026-12-08)
+  [Post] Non-public: /blog/series/what-survived/what-we-are-losing-right-now (SCHEDULED, date: 2026-12-15)
+  → 16 non-public Post URL(s) queued for removal
+  [Short] Non-public: /shorts/when-faith-looks-less-like-performance-and-more-like-breathing (SCHEDULED, date: 2026-07-22)
+  [Short] Non-public: /shorts/when-gratitude-becomes-your-default-atmosphere (SCHEDULED, date: 2026-07-25)
+  [Short] Non-public: /shorts/when-memory-outlives-meaning (SCHEDULED, date: 2026-07-19)
+  [Short] Non-public: /shorts/when-prompting-is-not-authorship (DRAFT, date: 2026-07-10)
+  [Short] Non-public: /shorts/when-the-archive-needs-a-living-mind (DRAFT, date: 2026-07-16)
+  [Short] Non-public: /shorts/when-the-author-leaves-the-room (DRAFT, date: 2026-07-13)
+  [Short] Non-public: /shorts/when-the-burden-changes-address (DRAFT, date: 2026-05-29)
+  [Short] Non-public: /shorts/when-the-burden-never-disappears (SCHEDULED, date: 2026-07-22)
+  [Short] Non-public: /shorts/when-you-admit-what-you-can-no-longer-carry (SCHEDULED, date: 2026-08-12)
+  [Short] Non-public: /shorts/when-you-can-be-still-without-needing-to-escape (SCHEDULED, date: 2026-08-06)
+  [Short] Non-public: /shorts/when-you-can-say-god-has-been-good-without-explaining-the-pain-away (SCHEDULED, date: 2026-07-29)
+  [Short] Non-public: /shorts/when-you-decide-who-gets-access-to-your-inner-world (SCHEDULED, date: 2026-08-09)
+  [Short] Non-public: /shorts/when-you-let-yourself-want-what-you-actually-want (SCHEDULED, date: 2026-07-31)
+  [Short] Non-public: /shorts/when-you-live-as-if-your-story-matters (SCHEDULED, date: 2026-07-30)
+  [Short] Non-public: /shorts/when-you-live-from-conviction-not-crowd-control (SCHEDULED, date: 2026-07-19)
+  [Short] Non-public: /shorts/when-you-no-longer-need-to-prove-you-deserve-to-be-here (SCHEDULED, date: 2026-07-26)
+  [Short] Non-public: /shorts/when-you-realise-god-is-not-in-a-hurry (SCHEDULED, date: 2026-08-03)
+  [Short] Non-public: /shorts/when-you-realise-you-survived-the-thing-that-was-supposed-to-break-you (SCHEDULED, date: 2026-07-24)
+  [Short] Non-public: /shorts/when-you-realise-your-life-is-a-prayer (SCHEDULED, date: 2026-08-10)
+  [Short] Non-public: /shorts/when-you-start-trusting-your-own-instincts-again (SCHEDULED, date: 2026-08-07)
+  [Short] Non-public: /shorts/when-you-stop-building-and-start-stewarding (SCHEDULED, date: 2026-08-11)
+  [Short] Non-public: /shorts/when-you-stop-carrying-relationships-alone (SCHEDULED, date: 2026-08-02)
+  [Short] Non-public: /shorts/when-you-stop-waiting-for-permission-to-begin (SCHEDULED, date: 2026-08-04)
+  [Short] Non-public: /shorts/when-you-wake-up-and-notice-the-light (SCHEDULED, date: 2026-08-13)
+  [Short] Non-public: /shorts/when-you-walk-in-the-authority-of-a-healed-person (SCHEDULED, date: 2026-07-23)
+  [Short] Non-public: /shorts/when-your-environment-stops-determining-your-mood (SCHEDULED, date: 2026-08-01)
+  [Short] Non-public: /shorts/when-your-life-finally-looks-like-your-values (SCHEDULED, date: 2026-07-27)
+  [Short] Non-public: /shorts/when-your-presence-becomes-more-valuable-than-your-output (SCHEDULED, date: 2026-08-08)
+  [Short] Non-public: /shorts/when-your-relationships-are-built-on-truth-not-convenience (SCHEDULED, date: 2026-07-21)
+  [Short] Non-public: /shorts/when-your-weakness-becomes-your-teacher (SCHEDULED, date: 2026-08-05)
+  [Short] Non-public: /shorts/when-your-work-becomes-aligned-with-your-calling (SCHEDULED, date: 2026-07-20)
+  [Short] Non-public: /shorts/when-youre-surrounded-by-people-who-actually-see-you (SCHEDULED, date: 2026-07-28)
+  → 32 non-public Short URL(s) queued for removal
+  [Book] Non-public: /books/the-builders-catechism (RESTRICTED, date: 2025-12-01)
+  → 1 non-public Book URL(s) queued for removal
+  [Canon] Non-public: /canon/canon-master-index-preview (RESTRICTED, date: 2026-02-12)
+  [Canon] Non-public: /canon/volume-i-foundations-of-purpose (RESTRICTED, date: 2026-02-12)
+  [Canon] Non-public: /canon/volume-i-teaching-edition (RESTRICTED, date: 2026-02-12)
+  [Canon] Non-public: /canon/volume-ii-governance-and-formation (RESTRICTED, date: 2026-02-12)
+  [Canon] Non-public: /canon/volume-ii-teaching-edition (RESTRICTED, date: 2026-02-12)
+  [Canon] Non-public: /canon/volume-iii-teaching-edition (RESTRICTED, date: 2026-02-12)
+  [Canon] Non-public: /canon/volume-iv-teaching-edition (RESTRICTED, date: 2026-02-12)
+  [Canon] Non-public: /canon/volume-x-the-arc-of-future-civilisation (RESTRICTED, date: 2026-02-12)
+  → 8 non-public Canon URL(s) queued for removal
+  [Resource] Non-public: /resources/canon-household-charter-template (RESTRICTED, date: 2026-03-01)
+  [Resource] Non-public: /resources/vault-index (RESTRICTED, date: 2026-02-04)
+  [Resource] Non-public: /resources/strategic-frameworks/board-accountability-loop (RESTRICTED, date: 2026-04-26)
+  [Resource] Non-public: /resources/strategic-frameworks/decision-authority-matrix (RESTRICTED, date: 2026-04-26)
+  [Resource] Non-public: /resources/strategic-frameworks/execution-integrity-grid (RESTRICTED, date: 2026-04-26)
+  [Resource] Non-public: /resources/strategic-frameworks/governance-pressure-ladder (RESTRICTED, date: 2026-04-26)
+  [Resource] Non-public: /resources/strategic-frameworks/institutional-drift-map (RESTRICTED, date: 2026-04-26)
+  [Resource] Non-public: /resources/strategic-frameworks/sovereignty-index (RESTRICTED, date: 2026-04-26)
+  [Resource] Non-public: /resources/strategic-frameworks/succession-readiness-model (RESTRICTED, date: 2026-04-26)
+  → 9 non-public Resource URL(s) queued for removal
+  [Download] Non-public: /downloads/board-decision-log-template (RESTRICTED, date: 2026-02-12)
+  [Download] Non-public: /downloads/decision-matrix-scorecard (RESTRICTED, date: 2026-02-12)
+  [Download] Non-public: /downloads/download-legacy-architecture-canvas (RESTRICTED, date: 2026-02-12)
+  [Download] Non-public: /downloads/global-market-intelligence-board-deck-q1-2026 (RESTRICTED, date: 2026-01-20)
+  [Download] Non-public: /downloads/global-market-intelligence-report-q1-2026 (RESTRICTED, date: 2026-04-08)
+  [Download] Non-public: /downloads/legacy-canvas (RESTRICTED, date: 2026-02-12)
+  [Download] Non-public: /downloads/operating-cadence-pack (RESTRICTED, date: 2026-02-12)
+  [Download] Non-public: /downloads/the-builders-catechism-founders-illuminated-edition (RESTRICTED, date: 2026-03-02)
+  [Download] Non-public: /downloads/the-builders-catechism (RESTRICTED, date: 2026-03-02)
+  → 9 non-public Download URL(s) queued for removal
+  [Event] Non-public: /events/founders-salon (SCHEDULED, date: 2026-11-11)
+  [Event] Non-public: /events/leadership-workshop (SCHEDULED, date: 2026-09-12)
+  → 2 non-public Event URL(s) queued for removal
+  [EditorialSeriesPart] Non-public: /editorial-series/outsourcing-our-sense-of-meaning-and-belonging/from-handprints-to-machine-answers (SCHEDULED, date: 2026-08-03)
+  [EditorialSeriesPart] Non-public: /editorial-series/outsourcing-our-sense-of-meaning-and-belonging/together-alone (SCHEDULED, date: 2026-07-27)
+  [EditorialSeriesPart] Non-public: /editorial-series/outsourcing-our-sense-of-meaning-and-belonging/what-your-attention-is-for (SCHEDULED, date: 2026-08-10)
+  [EditorialSeriesPart] Non-public: /editorial-series/outsourcing-our-sense-of-meaning-and-belonging/why-we-ignore-the-ones-who-stay (SCHEDULED, date: 2026-07-20)
+  [EditorialSeriesPart] Non-public: /editorial-series/the-minds-clay-2/the-attention-landscape (SCHEDULED, date: 2027-03-02)
+  [EditorialSeriesPart] Non-public: /editorial-series/the-minds-clay-2/the-feed-and-the-truth (SCHEDULED, date: 2027-03-09)
+  [EditorialSeriesPart] Non-public: /editorial-series/the-minds-clay-2/the-interface-and-the-question (SCHEDULED, date: 2027-03-16)
+  [EditorialSeriesPart] Non-public: /editorial-series/the-minds-clay-2/the-judgment-that-is-not-yours (SCHEDULED, date: 2027-04-06)
+  [EditorialSeriesPart] Non-public: /editorial-series/the-minds-clay-2/the-kind-of-mind (SCHEDULED, date: 2027-04-13)
+  [EditorialSeriesPart] Non-public: /editorial-series/the-minds-clay-2/the-memory-that-does-not-need-to-remember (SCHEDULED, date: 2027-03-30)
+  [EditorialSeriesPart] Non-public: /editorial-series/the-minds-clay-2/the-sentence-that-writes-itself (SCHEDULED, date: 2027-03-23)
+  → 11 non-public EditorialSeriesPart URL(s) queued for removal
+  [VaultBrief] Non-public: /vault/briefs/brief-001-modern-household (RESTRICTED, date: 2026-02-24)
+  [VaultBrief] Non-public: /vault/briefs/brief-002-economic-fortress (RESTRICTED, date: 2026-02-24)
+  [VaultBrief] Non-public: /vault/briefs/brief-003-education-of-heirs (RESTRICTED, date: 2026-02-24)
+  [VaultBrief] Non-public: /vault/briefs/brief-004-parallel-estate (RESTRICTED, date: 2026-02-24)
+  [VaultBrief] Non-public: /vault/briefs/brief-005-brotherhood-protocol (RESTRICTED, date: 2026-02-24)
+  [VaultBrief] Non-public: /vault/briefs/brief-006-sisterhood-and-hearth (RESTRICTED, date: 2026-02-24)
+  [VaultBrief] Non-public: /vault/briefs/brief-007-covenantal-oath (RESTRICTED, date: 2026-02-24)
+  [VaultBrief] Non-public: /vault/briefs/brief-008-ledger-of-legacy (RESTRICTED, date: 2026-02-24)
+  [VaultBrief] Non-public: /vault/briefs/brief-009-sovereignty-of-time (RESTRICTED, date: 2026-02-24)
+  [VaultBrief] Non-public: /vault/briefs/brief-010-geometry-of-inner-circle (RESTRICTED, date: 2026-02-24)
+  [VaultBrief] Non-public: /vault/briefs/brief-011-geography-of-estate (RESTRICTED, date: 2026-02-24)
+  [VaultBrief] Non-public: /vault/briefs/brief-012-aesthetics-of-order (RESTRICTED, date: 2026-02-24)
+  → 12 non-public VaultBrief URL(s) queued for removal
+
+Total non-public URLs to remove: 100
+
+Removed: 51 URL(s)
+Kept:    751 line(s)
+
+✅ Sitemap fixed — 51 non-public URL(s) removed
+
+✅ All 1 regression URL(s) confirmed absent
+[build-mdx-route-manifest] Wrote 838 documents to C:\aol-check-visual\reports\mdx-route-manifest.json
+[build-mdx-route-manifest]   Expected public routes: 421
+[build-mdx-route-manifest]   Draft: 40, Published: 628
+[build-mdx-route-manifest]   With body: 838, Empty body: 0
+[build-mdx-route-manifest]   Internal: 223
+
+============================================
+PUBLIC LINK INTEGRITY CHECK
+============================================
+Today: 2026-07-18
+
+--- Regression case: /shorts/when-the-burden-changes-address ---
+  Document found: "When the Burden Changes Address"
+  Route path in manifest: /shorts/when-the-burden-changes-address
+  Classification: DRAFT
+  Expected public route: false
+  Is future-dated: true
+  Date: 2026-05-29
+  Draft: true
+  Published: true
+  ✅ Correctly classified as DRAFT — not publicly linked
+
+--- Regression case: /editorials/series/the-minds-clay-series-2 ---
+  ✅ Known Pages Router route — not an MDX document
+
+--- Regression case: /editorials/series/outsourcing-our-sense-of-meaning-and-belonging ---
+  ✅ Known Pages Router route — not an MDX document
+
+--- Regression case: /blog/series/the-burden-changes-hands ---
+  ✅ Known Pages Router route — not an MDX document
+
+--- Regression case: /blog/series/the-science-of-inherited-selves ---
+  ✅ Known Pages Router route — not an MDX document
+
+--- Series part link integrity ---
+
+  Series: The Burden Changes Hands (the-burden-changes-hands)
+    Part 1: "The Accountant in Uruk" — PUBLIC_READABLE_NOW ✅
+    Part 2: "Knowledge Can Wait. The Question Is Whether It Should." — PUBLIC_READABLE_NOW ✅
+    Part 3: "What the Tablet Cannot Tell You" — PUBLIC_READABLE_NOW ✅
+    Part 4: "Who Holds the Stylus" — PUBLIC_READABLE_NOW ✅
+    Part 5: "The Slow Intelligence" — PUBLIC_READABLE_NOW ✅
+    Part 6: "The Author Who Left the Room" — PUBLIC_READABLE_NOW ✅
+    Part 7: "The Enduring Archive" — PUBLIC_READABLE_NOW ✅
+
+  Series: The Science of Inherited Selves (the-science-of-inherited-selves)
+    Part 1: "What We Carry: The Science of Inherited Selves" — PUBLIC_READABLE_NOW ✅
+    Part 2: "The Child Before the Story" — PUBLIC_READABLE_NOW ✅
+    Part 3: "The House That Teaches the Nervous System" — DRAFT ⏳
+    Part 4: "What Silence Gives to the Next Generation" — PUBLIC_READABLE_NOW ✅
+    Part 5: "When Biology Becomes Biography" — PUBLIC_READABLE_NOW ✅
+    Part 6: "The Generation That Refuses to Pass It On" — PUBLIC_READABLE_NOW ✅
+    Part 7: "Love, Loss, and the Familiar Wound" — PUBLIC_READABLE_NOW ✅
+    Part 8: "Choose the Ancestral Landscape" — PUBLIC_READABLE_NOW ✅
+
+  Series: The Truth in the Frame (the-truth-in-the-frame)
+    Part 1: "Before the Word: What the Cave Walls Remember" — PUBLIC_READABLE_NOW ✅
+    Part 2: "The King's Shadow: How Writing and Monumental Art Created Official Memory" — PUBLIC_READABLE_NOW ✅
+    Part 3: "The Emperor's Canvas: Napoleon and the Invention of Modern Propaganda" — SCHEDULED ⏳
+    Part 4: "The Empire in the Frame: How Britain Painted Its Colonies" — SCHEDULED ⏳
+    Part 5: "The Grain Is Abundant: Socialist Realism and the Manufacture of Utopia" — SCHEDULED ⏳
+    Part 6: "The Camera Never Lies (But the Photographer Can)" — SCHEDULED ⏳
+    Part 7: "The Algorithm's Gallery: The Handprint That No One Pressed" — SCHEDULED ⏳
+    Part 8: "The Synthetic Truth: When Seeing Is No Longer Believing" — SCHEDULED ⏳
+    Part 9: "What Deserves to Survive" — SCHEDULED ⏳
+
+  Series: What Survived (what-survived)
+    Part 1: "The Paintings That Waited Thirty-Six Thousand Years" — SCHEDULED ⏳
+    Part 2: "The Living Archive: What the Griot Kept" — SCHEDULED ⏳
+    Part 3: "Four Hundred Years Without Paper: The Iliad Remembers" — SCHEDULED ⏳
+    Part 4: "The Man Who Was Not There: Stalin Erases Yezhov" — SCHEDULED ⏳
+    Part 5: "The Library That Cannot Tell Us What It Lost" — SCHEDULED ⏳
+    Part 6: "The Tapestry the Winners Made" — SCHEDULED ⏳
+    Part 7: "What We Are Losing Right Now" — SCHEDULED ⏳
+
+--- Series hub CTA integrity ---
+    The Burden Changes Hands: First part is PUBLIC_READABLE_NOW — "Begin" CTA is active ✅
+    The Science of Inherited Selves: First part is PUBLIC_READABLE_NOW — "Begin" CTA is active ✅
+      Part 3: "The House That Teaches the Nervous System" — Coming Soon (correct) ✅
+    The Truth in the Frame: First part is PUBLIC_READABLE_NOW — "Begin" CTA is active ✅
+      Part 3: "The Emperor's Canvas: Napoleon and the Invention of Modern Propaganda" — Coming Soon (correct) ✅
+      Part 4: "The Empire in the Frame: How Britain Painted Its Colonies" — Coming Soon (correct) ✅
+      Part 5: "The Grain Is Abundant: Socialist Realism and the Manufacture of Utopia" — Coming Soon (correct) ✅
+      Part 6: "The Camera Never Lies (But the Photographer Can)" — Coming Soon (correct) ✅
+      Part 7: "The Algorithm's Gallery: The Handprint That No One Pressed" — Coming Soon (correct) ✅
+      Part 8: "The Synthetic Truth: When Seeing Is No Longer Believing" — Coming Soon (correct) ✅
+      Part 9: "What Deserves to Survive" — Coming Soon (correct) ✅
+    What Survived: First part is SCHEDULED — "Begin" CTA should be disabled ✅
+      Part 1: "The Paintings That Waited Thirty-Six Thousand Years" — Coming Soon (correct) ✅
+      Part 2: "The Living Archive: What the Griot Kept" — Coming Soon (correct) ✅
+      Part 3: "Four Hundred Years Without Paper: The Iliad Remembers" — Coming Soon (correct) ✅
+      Part 4: "The Man Who Was Not There: Stalin Erases Yezhov" — Coming Soon (correct) ✅
+      Part 5: "The Library That Cannot Tell Us What It Lost" — Coming Soon (correct) ✅
+      Part 6: "The Tapestry the Winners Made" — Coming Soon (correct) ✅
+      Part 7: "What We Are Losing Right Now" — Coming Soon (correct) ✅
+
+--- Sitemap audit ---
+  Found 20 series URLs in sitemap
+
+--- Blog index series shelf audit ---
+    The Burden Changes Hands: 7 published parts — "Begin" CTA points to "The Accountant in Uruk" ✅
+    The Science of Inherited Selves: 7 published parts — "Begin" CTA points to "What We Carry: The Science of Inherited Selves" ✅
+    The Truth in the Frame: 2 published parts — "Begin" CTA points to "Before the Word: What the Cave Walls Remember" ✅
+    What Survived: 0 published parts — no "Begin" CTA expected ✅
+
+============================================
+✅ All public link integrity checks pass
+
+Report written to C:\aol-check-visual\reports\public-link-integrity-report.json

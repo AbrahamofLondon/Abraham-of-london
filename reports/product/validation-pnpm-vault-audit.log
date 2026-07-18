@@ -1,0 +1,183 @@
+
+> abraham-of-london@1.0.0 vault:audit C:\aol-check-visual
+> node scripts/institutional-audit.mjs
+
+
+🛡️  [INSTITUTIONAL_AUDIT]: Verifying Intelligence Architecture...
+
+🚨 [PATH_REGRESSION] intelligence\decision-delay-governance-cost.mdx
+    Link "/tools/decision-delay-exposure" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\decision-delay-governance-cost.mdx
+    Link "/diagnostics/fast" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\index.mdx
+    Link "/tools/decision-delay-exposure" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\index.mdx
+    Link "/diagnostics/fast" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\index.mdx
+    Link "/tools/decision-delay-exposure" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\index.mdx
+    Link "/diagnostics/fast" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\index.mdx
+    Link "/provenance/demo" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\index.mdx
+    Link "/trust" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\index.mdx
+    Link "/library" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\strategic-autonomy-001.mdx
+    Link "/intelligence/strategic-autonomy-002" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\strategic-autonomy-002.mdx
+    Link "/intelligence" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\strategic-autonomy-003.mdx
+    Link "/intelligence/strategic-autonomy-002" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\strategic-autonomy-003.mdx
+    Link "/intelligence/strategic-autonomy-004" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\strategic-autonomy-003.mdx
+    Link "/intelligence/strategic-autonomy-002" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\strategic-autonomy-004.mdx
+    Link "/intelligence/strategic-autonomy-003" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\strategic-autonomy-004.mdx
+    Link "/intelligence/strategic-autonomy-005" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\strategic-autonomy-004.mdx
+    Link "/intelligence/strategic-autonomy-002" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\strategic-autonomy-004.mdx
+    Link "/intelligence/strategic-autonomy-003" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\strategic-autonomy-005.mdx
+    Link "/intelligence/strategic-autonomy-004" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\strategic-autonomy-005.mdx
+    Link "/intelligence/strategic-autonomy-006" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\strategic-autonomy-006.mdx
+    Link "/intelligence/strategic-autonomy-005" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\strategic-autonomy-006.mdx
+    Link "/intelligence/strategic-autonomy-007" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\strategic-autonomy-007.mdx
+    Link "/intelligence/strategic-autonomy-001" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\strategic-autonomy-007.mdx
+    Link "/intelligence/strategic-autonomy-002" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\strategic-autonomy-007.mdx
+    Link "/intelligence/strategic-autonomy-003" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\strategic-autonomy-007.mdx
+    Link "/intelligence/strategic-autonomy-004" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\strategic-autonomy-007.mdx
+    Link "/intelligence/strategic-autonomy-005" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\strategic-autonomy-007.mdx
+    Link "/intelligence/strategic-autonomy-006" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\strategic-autonomy-007.mdx
+    Link "/intelligence/strategic-autonomy-006" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\strategic-autonomy-007.mdx
+    Link "/intelligence" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\strategic-autonomy-007.mdx
+    Link "/intelligence/strategic-autonomy-006" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\strategic-autonomy-008.mdx
+    Link "/intelligence/strategic-autonomy-007" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\strategic-autonomy-008.mdx
+    Link "/intelligence/strategic-autonomy-009" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\strategic-autonomy-009.mdx
+    Link "/intelligence/strategic-autonomy-008" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\strategic-autonomy-009.mdx
+    Link "/intelligence/strategic-autonomy-010" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\strategic-autonomy-010.mdx
+    Link "/intelligence/strategic-autonomy-009" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\strategic-autonomy-010.mdx
+    Link "/intelligence/strategic-autonomy-011" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\strategic-autonomy-011.mdx
+    Link "/intelligence/strategic-autonomy-010" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] intelligence\strategic-autonomy-011.mdx
+    Link "/intelligence/strategic-autonomy-012" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] playbooks\decision-exposure-public.mdx
+    Link "/playbooks/execution-integrity-public" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] playbooks\decision-exposure-public.mdx
+    Link "/playbooks/mandate-clarity-public" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] playbooks\execution-integrity-public.mdx
+    Link "/playbooks/decision-exposure-public" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] playbooks\execution-integrity-public.mdx
+    Link "/playbooks/mandate-clarity-public" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] playbooks\intervention-path-public.mdx
+    Link "/decision-instruments/intervention-path-selector" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] playbooks\intervention-path-public.mdx
+    Link "/decision-instruments/decision-exposure-instrument" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] playbooks\mandate-clarity-public.mdx
+    Link "/playbooks/execution-integrity-public" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] playbooks\mandate-clarity-public.mdx
+    Link "/playbooks/decision-exposure-public" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] resources\canon-household-charter.mdx
+    Link "/toolkits/succession-engineering" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] resources\canon-household-charter.mdx
+    Link "/toolkits/leadership-formation" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] resources\getting-started.mdx
+    Link "/diagnostics/fast" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] resources\getting-started.mdx
+    Link "/toolkits/institutional-diagnostics" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] resources\getting-started.mdx
+    Link "/decision-instruments/decision-exposure-instrument" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] resources\getting-started.mdx
+    Link "/diagnostics/fast" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] resources\purpose-alignment-checklist.mdx
+    Link "/toolkits/culture-shaping" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] resources\purpose-alignment-checklist.mdx
+    Link "/toolkits/leadership-formation" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+🚨 [PATH_REGRESSION] resources\purpose-alignment-checklist.mdx
+    Link "/diagnostics/purpose-alignment" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.
+
+--- 📊 AUDIT REPORT ---
+Files Scanned:       1027
+Links Validated:     1445
+Briefs Verified:    26
+
+❌ REJECTED: 56 link regressions found.
+System alignment failed. Fix the links above or authorize the paths in the audit script.
+ ELIFECYCLE  Command failed with exit code 1.

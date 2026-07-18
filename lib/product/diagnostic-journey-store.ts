@@ -40,7 +40,13 @@ const memoryStore = new Map<string, DiagnosticJourneyRecord>()
 // Prisma helpers
 // ---------------------------------------------------------------------------
 
+function shouldUsePrismaStore(): boolean {
+  return process.env.NODE_ENV !== 'test' || process.env.DIAGNOSTIC_JOURNEY_PRISMA === '1'
+}
+
 async function getPrisma() {
+  if (!shouldUsePrismaStore()) return null
+
   try {
     const mod = await import('@/lib/prisma')
     return mod.default
@@ -154,6 +160,48 @@ function mapJourneyStatus(status: string | null): DiagnosticJourneyRecord['statu
 /**
  * Persist an engine event to Prisma as a DiagnosticEvidenceNode with kind='engine_event'.
  */
+async function createJourneyInPrisma(params: {
+  caseId: string
+  email?: string | null
+  accountId?: string | null
+  surface: DiagnosticJourneySurface
+}): Promise<boolean> {
+  const prisma = await getPrisma()
+  if (!prisma) return false
+
+  try {
+    const existing = await prisma.diagnosticJourney.findFirst({
+      where: {
+        OR: [
+          { journeyKey: params.caseId },
+          { id: params.caseId },
+        ],
+      },
+      select: { id: true },
+    })
+
+    if (existing) return true
+
+    await prisma.diagnosticJourney.create({
+      data: {
+        journeyKey: params.caseId,
+        subjectKey: params.accountId ?? params.email ?? `anonymous:${params.caseId}`,
+        email: params.email ?? null,
+        organisationKey: params.accountId ?? null,
+        diagnosticType: params.surface,
+        status: 'active',
+        routeDecisions: {
+          source: 'public_safe_signal_persistence',
+          rawInputStored: false,
+        },
+      },
+    })
+
+    return true
+  } catch {
+    return false
+  }
+}
 async function persistEventToPrisma(
   journeyKey: string,
   event: DiagnosticJourneyEvent,
@@ -236,7 +284,7 @@ export async function getOrCreateDiagnosticJourney(params: {
     return fromPrisma
   }
 
-  // Create new in-memory record
+  // Create new in-memory record, then attempt durable Prisma creation.
   const record = createDiagnosticJourneyRecord({
     caseId: params.caseId,
     surface: params.surface,
@@ -244,6 +292,12 @@ export async function getOrCreateDiagnosticJourney(params: {
     accountId: params.accountId,
   })
   memoryStore.set(params.caseId, record)
+  await createJourneyInPrisma({
+    caseId: params.caseId,
+    surface: params.surface,
+    email: params.email,
+    accountId: params.accountId,
+  })
   return record
 }
 

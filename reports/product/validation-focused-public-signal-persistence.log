@@ -1,0 +1,9 @@
+
+ RUN  v4.1.2 C:/aol-check-visual
+
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  13:52:35
+   Duration  2.60s (transform 773ms, setup 0ms, import 1.47s, tests 155ms, environment 0ms)
+

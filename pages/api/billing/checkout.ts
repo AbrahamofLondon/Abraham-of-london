@@ -201,8 +201,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // ── Metadata (attached to Stripe session, used by webhooks) ──
   const entitlementSlugs = resolveEntitlementSlugs(code);
   const metadata: Record<string, string> = {
-    productCode: product.entitlementSlug,
-    priceCode: code,
+    productCode: product.code,
+    entitlementSlug: product.entitlementSlug,
+    priceCode: product.stripePriceId || "",
+    stripePriceId: product.stripePriceId || "",
+    catalogCode: product.code,
     tier: product.tier,
     email: String(email).trim().toLowerCase(),
     originPath: origin,

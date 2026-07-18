@@ -1,0 +1,37 @@
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 0, reused 1, downloaded 0, added 0
+Progress: resolved 0, reused 18, downloaded 0, added 0
+Progress: resolved 0, reused 44, downloaded 0, added 0
+Progress: resolved 0, reused 58, downloaded 0, added 0
+Progress: resolved 0, reused 86, downloaded 0, added 0
+Packages: -240
+--------------------------------------------------------------------------------
+Progress: resolved 0, reused 215, downloaded 0, added 0
+Progress: resolved 0, reused 215, downloaded 0, added 0, done
+
+
+> abraham-of-london@1.0.0 postinstall C:\aol-check-visual
+> prisma generate
+
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
+
+✔ Generated Prisma Client (v6.6.0) to .\node_modules\.prisma\client in 2.01s
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Easily identify and fix slow SQL queries in your app. Optimize helps you enhance your visibility: https://pris.ly/--optimize
+
+
+> abraham-of-london@1.0.0 prepare C:\aol-check-visual
+> husky install
+
+husky - install command is DEPRECATED
+╭ Warning ─────────────────────────────────────────────────────────────────────╮
+│                                                                              │
+│   Ignored build scripts: @sentry/cli@2.58.6.                                 │
+│   Run "pnpm approve-builds" to pick which dependencies should be allowed     │
+│   to run scripts.                                                            │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+Done in 19.7s using pnpm v10.33.0

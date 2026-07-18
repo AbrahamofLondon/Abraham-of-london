@@ -30,7 +30,7 @@ export default defineConfig({
   ],
   webServer: {
     command: "pnpm exec next dev --webpack",
-    url: "http://localhost:3000",
+    url: "http://127.0.0.1:3000/api/system/health",
     reuseExistingServer: true,
     timeout: 120_000,
   },

@@ -1,0 +1,594 @@
+{
+  "generatedAt": "2026-07-18T00:00:00Z",
+  "repository": "C:/aol-check-visual",
+  "allowedStatuses": [
+    "UNASSESSED",
+    "CONFIRMED_GAP",
+    "IMPLEMENTING",
+    "LOCALLY_PROVED",
+    "CI_PROVED",
+    "PREVIEW_PROVED",
+    "PRODUCTION_PROVED",
+    "CLOSED"
+  ],
+  "closureRule": "A gap cannot move directly from IMPLEMENTING to CLOSED.",
+  "consumerMatrix": "reports/product/decision-authority-consumer-matrix.json",
+  "gaps": [
+    {
+      "gapId": "COMMERCIAL-IDENTITY",
+      "businessConsequence": "Paid checkout can grant the wrong entitlement or quarantine a valid payment if catalogue code, entitlement slug and Stripe identifiers disagree.",
+      "affectedCustomerJourney": "Paid report and governed product checkout",
+      "authoritativeSource": "lib/commercial/catalog.ts; pages/api/billing/checkout.ts; lib/commercial/payment-event-processor.ts",
+      "allConsumers": "See consumer matrix filtered by productCode, entitlementSlug, stripePriceId, priceCode, resolvePaymentIdentity, grantEntitlement.",
+      "failureModes": [
+        "unknown Stripe price",
+        "forged metadata",
+        "mismatched product code and entitlement slug",
+        "legacy metadata conflict"
+      ],
+      "currentImplementationState": "Checkout metadata normalization and resolver compatibility are locally implemented and tested.",
+      "requiredTests": [
+        "commercial identity contract tests",
+        "forged metadata tests",
+        "legacy metadata tests",
+        "webhook route tests"
+      ],
+      "telemetryRequirement": [
+        "payment_identity_resolved",
+        "payment_identity_rejected",
+        "legacy_payment_metadata_used"
+      ],
+      "rollbackMethod": "Revert commit fix(commercial): normalise payment and entitlement identity.",
+      "owner": "Product engineering",
+      "finalEvidence": [
+        "tests/commercial/payment-event-processor.test.ts",
+        "typecheck",
+        "CI",
+        "preview",
+        "production Stripe test-mode purchase"
+      ],
+      "status": "LOCALLY_PROVED"
+    },
+    {
+      "gapId": "COMMERCIAL-WEBHOOK-IDEMPOTENCY",
+      "businessConsequence": "Duplicate or out-of-order Stripe events can duplicate entitlement or fulfilment records.",
+      "affectedCustomerJourney": "Paid checkout webhook processing",
+      "authoritativeSource": "lib/commercial/payment-event-processor.ts; pages/api/billing/webhook.ts; pages/api/webhooks/stripe.ts; app/api/stripe/webhook/route.ts",
+      "allConsumers": "See consumer matrix filtered by processCheckoutCompleted, resolvePaymentIdentity, checkoutSessionId, stripeSessionId.",
+      "failureModes": [
+        "duplicate webhook",
+        "out-of-order webhook",
+        "retry after partial failure",
+        "processed event replay"
+      ],
+      "currentImplementationState": "Existing idempotency records and upserts exist, but adversarial route-level duplicate/out-of-order proof is incomplete.",
+      "requiredTests": [
+        "duplicate webhook route test",
+        "out-of-order event test",
+        "partial failure retry test"
+      ],
+      "telemetryRequirement": [
+        "duplicate_signal_suppressed",
+        "entitlement_granted",
+        "entitlement_grant_failed"
+      ],
+      "rollbackMethod": "Disable affected webhook handler through route-level maintenance gate and process event manually from Stripe dashboard.",
+      "owner": "Product engineering",
+      "finalEvidence": [
+        "route tests",
+        "database row count assertions",
+        "CI",
+        "Stripe replay proof"
+      ],
+      "status": "CONFIRMED_GAP"
+    },
+    {
+      "gapId": "COMMERCIAL-FULFILMENT-TERMINAL",
+      "businessConsequence": "A customer may pay and receive access before required delivery operations are complete, or fulfilment may be marked complete prematurely.",
+      "affectedCustomerJourney": "Paid report fulfilment, Boardroom Brief, Executive Reporting, Strategy Room",
+      "authoritativeSource": "lib/commercial/payment-event-processor.ts; lib/product/product-fulfilment-contract.ts; lib/product/fulfilment-readiness-validator.ts",
+      "allConsumers": "See consumer matrix filtered by fulfilment, fulfillment, productCode, entitlementSlug.",
+      "failureModes": [
+        "entitlement write failure",
+        "fulfilment failure after payment",
+        "customer access before fulfilment",
+        "customer access after recovery"
+      ],
+      "currentImplementationState": "Some products have durable fulfilment, others are manual or stubbed; terminal-state invariant is not globally enforced.",
+      "requiredTests": [
+        "fulfilment terminal-state tests",
+        "access before fulfilment denial",
+        "recovery single delivery proof"
+      ],
+      "telemetryRequirement": [
+        "fulfilment_started",
+        "fulfilment_failed",
+        "fulfilment_recovered"
+      ],
+      "rollbackMethod": "Block checkout for affected products with commercial governance state and fulfil manually.",
+      "owner": "Product engineering",
+      "finalEvidence": [
+        "fulfilment contract tests",
+        "route E2E",
+        "admin delivery proof",
+        "preview"
+      ],
+      "status": "CONFIRMED_GAP"
+    },
+    {
+      "gapId": "PUBLIC-APERTURE",
+      "businessConsequence": "Public free signal could leak paid dossier fields, internal graph data or checkout controls.",
+      "affectedCustomerJourney": "Free diagnostic and Foundry public tests",
+      "authoritativeSource": "pages/api/public/kernel-signal.ts; tests/product/public-aperture.spec.ts; scripts/check-public-route-integrity.mjs",
+      "allConsumers": "See consumer matrix filtered by kernel-signal and runDecisionIntelligence.",
+      "failureModes": [
+        "paid field leak",
+        "direct internal kernel import",
+        "checkout control leak",
+        "error response leak"
+      ],
+      "currentImplementationState": "Route-level static contract guards and integrity script are locally passing.",
+      "requiredTests": [
+        "runtime response body tests",
+        "error response tests",
+        "network-visible field tests",
+        "database payload tests"
+      ],
+      "telemetryRequirement": [
+        "public_response_contract_violation"
+      ],
+      "rollbackMethod": "Revert public route changes and disable new public persistence adapter.",
+      "owner": "Product engineering",
+      "finalEvidence": [
+        "public aperture tests",
+        "route integrity script",
+        "E2E free diagnostic"
+      ],
+      "status": "LOCALLY_PROVED"
+    },
+    {
+      "gapId": "PERSISTENCE-DURABILITY",
+      "businessConsequence": "The business may believe a public signal was durably stored when it only exists in memory.",
+      "affectedCustomerJourney": "Free diagnostic persistence and repeat-session continuity",
+      "authoritativeSource": "lib/product/public-signal-persistence.ts; lib/product/diagnostic-journey-store.ts; prisma/schema.prisma",
+      "allConsumers": "See consumer matrix filtered by DiagnosticJourney, DiagnosticJourneyEvent, caseId, persistJourney.",
+      "failureModes": [
+        "database unavailable",
+        "database write timeout",
+        "journey creation fails",
+        "event append fails",
+        "memory-only fallback reported as durable success"
+      ],
+      "currentImplementationState": "Public-safe adapter exists and store attempts Prisma creation; durable-vs-memory success semantics still need explicit runtime contract and database integration proof.",
+      "requiredTests": [
+        "real Prisma integration",
+        "process restart",
+        "database unavailable",
+        "memory fallback not durable",
+        "event write failure"
+      ],
+      "telemetryRequirement": [
+        "public_signal_persisted",
+        "public_signal_memory_fallback",
+        "public_signal_persistence_failed"
+      ],
+      "rollbackMethod": "Set public persistence to no-op and preserve free signal response path.",
+      "owner": "Product engineering",
+      "finalEvidence": [
+        "database integration tests",
+        "restart proof",
+        "CI with database service"
+      ],
+      "status": "IMPLEMENTING"
+    },
+    {
+      "gapId": "PERSISTENCE-ISOLATION",
+      "businessConsequence": "One anonymous case or user could read another case's events.",
+      "affectedCustomerJourney": "Repeat public diagnostic and future accumulated-depth reads",
+      "authoritativeSource": "lib/product/diagnostic-journey-store.ts; lib/product/public-signal-persistence.ts",
+      "allConsumers": "See consumer matrix filtered by caseId and DiagnosticJourney.",
+      "failureModes": [
+        "same case ID with different identity",
+        "different case IDs same anonymous session",
+        "forged accumulated-depth input"
+      ],
+      "currentImplementationState": "No graph accumulation has started; isolation tests are still required before any read path is added.",
+      "requiredTests": [
+        "case isolation rejection",
+        "same case different identity",
+        "malformed prior event",
+        "forged depth input"
+      ],
+      "telemetryRequirement": [
+        "case_isolation_rejected"
+      ],
+      "rollbackMethod": "Disable cross-request memory reads and serve single-request signal only.",
+      "owner": "Product engineering",
+      "finalEvidence": [
+        "isolation tests",
+        "route E2E",
+        "security review"
+      ],
+      "status": "CONFIRMED_GAP"
+    },
+    {
+      "gapId": "GRAPH-ACCUMULATION",
+      "businessConsequence": "The compounding decision authority claim remains weak if accumulated depth is not derived from authorised safe events.",
+      "affectedCustomerJourney": "Repeat free diagnostic and paid upgrade qualification",
+      "authoritativeSource": "lib/decision/kernel.ts; lib/engine/contradiction-graph.ts; public-safe DiagnosticJourney events",
+      "allConsumers": "See consumer matrix filtered by DiagnosticJourney, caseId, kernel-signal, runDecisionIntelligence.",
+      "failureModes": [
+        "raw graph node exposure",
+        "unauthorised event use",
+        "forged depth",
+        "cross-case contamination"
+      ],
+      "currentImplementationState": "Not started by instruction. Public-safe event base now exists for future implementation.",
+      "requiredTests": [
+        "second submission accumulation",
+        "redacted graph snapshot",
+        "no raw nodes",
+        "authorised events only"
+      ],
+      "telemetryRequirement": [
+        "public_signal_persisted",
+        "case_isolation_rejected"
+      ],
+      "rollbackMethod": "Remove accumulated-depth field and ignore historical events.",
+      "owner": "Product engineering",
+      "finalEvidence": [
+        "Phase 2 adapter tests",
+        "public aperture tests",
+        "E2E free diagnostic repeat path"
+      ],
+      "status": "CONFIRMED_GAP"
+    },
+    {
+      "gapId": "OUTCOME-LOOP",
+      "businessConsequence": "The product cannot prove efficacy or calibrate predictions without verified outcomes tied to exact decision/action/deadline.",
+      "affectedCustomerJourney": "Post-diagnostic follow-up and return diagnostic",
+      "authoritativeSource": "lib/product/outcome-verification-service.ts; lib/outcomes/evidence.ts; components/outcomes/OutcomeVerificationPanel.tsx",
+      "allConsumers": "See consumer matrix filtered by OutcomeVerification and outcome verification.",
+      "failureModes": [
+        "outcome not tied to owner",
+        "deadline missing",
+        "wrong decision linked",
+        "unauthorised outcome facts read"
+      ],
+      "currentImplementationState": "Outcome infrastructure exists but public signal route does not yet capture outcome verification.",
+      "requiredTests": [
+        "outcome submit route",
+        "deadline reached path",
+        "authorised outcome read",
+        "calibration idempotency"
+      ],
+      "telemetryRequirement": [
+        "outcome_verification_recorded"
+      ],
+      "rollbackMethod": "Disable public outcome capture while preserving existing paid outcome services.",
+      "owner": "Product engineering",
+      "finalEvidence": [
+        "Outcome loop E2E",
+        "database records",
+        "calibration tests"
+      ],
+      "status": "CONFIRMED_GAP"
+    },
+    {
+      "gapId": "ROUTING-CANONICAL",
+      "businessConsequence": "Split Pages/App route ownership creates inconsistent behaviour and unclear external webhook registration.",
+      "affectedCustomerJourney": "Public diagnostics, checkout, webhooks, Foundry, Strategy Room",
+      "authoritativeSource": "docs/architecture/api-surface-rationalisation-ledger.md; docs/security/router-governance.md",
+      "allConsumers": "See consumer matrix routeOrWorker fields for pages_api_route and app_api_route.",
+      "failureModes": [
+        "duplicate canonical route",
+        "legacy route drift",
+        "webhook dashboard mismatch"
+      ],
+      "currentImplementationState": "Router migration is deferred by instruction. Canonical billing route remains Pages Router.",
+      "requiredTests": [
+        "route inventory",
+        "compatibility tests",
+        "external dashboard verification"
+      ],
+      "telemetryRequirement": [
+        "public_response_contract_violation",
+        "payment_identity_rejected"
+      ],
+      "rollbackMethod": "Keep legacy shim and revert single-domain migration commit.",
+      "owner": "Product engineering",
+      "finalEvidence": [
+        "route ledger update",
+        "preview proof",
+        "manual external dashboard check"
+      ],
+      "status": "CONFIRMED_GAP"
+    },
+    {
+      "gapId": "PRIVACY-RETENTION",
+      "businessConsequence": "Public-safe records may outlive policy or fail deletion across linked tables.",
+      "affectedCustomerJourney": "All public diagnostic users",
+      "authoritativeSource": "DiagnosticJourney, DiagnosticEvidenceNode, public signal persistence policy",
+      "allConsumers": "See consumer matrix filtered by DiagnosticJourney, caseId, OutcomeVerification.",
+      "failureModes": [
+        "retention missing",
+        "delete misses linked evidence",
+        "raw text scan failure"
+      ],
+      "currentImplementationState": "No retention/deletion policy implementation is proven for public-safe signal records.",
+      "requiredTests": [
+        "retention delete",
+        "linked evidence delete",
+        "raw leakage scan after delete"
+      ],
+      "telemetryRequirement": [
+        "public_signal_persistence_failed"
+      ],
+      "rollbackMethod": "Suspend durable public persistence and delete affected public-safe journeys manually.",
+      "owner": "Product engineering",
+      "finalEvidence": [
+        "retention tests",
+        "database inspection",
+        "privacy review"
+      ],
+      "status": "CONFIRMED_GAP"
+    },
+    {
+      "gapId": "OBSERVABILITY-RELEASE-GATES",
+      "businessConsequence": "Failures can recur silently without structured events, alerts, and release gates.",
+      "affectedCustomerJourney": "All public and paid paths",
+      "authoritativeSource": "runtime logs, scripts/check-public-route-integrity.mjs, validation commands",
+      "allConsumers": "See consumer matrix for payment, persistence, outcome and fulfilment terms.",
+      "failureModes": [
+        "paid event without entitlement",
+        "entitlement without fulfilment",
+        "memory fallback spike",
+        "identity conflict",
+        "duplicate fulfilment"
+      ],
+      "currentImplementationState": "Telemetry names and alert requirements are defined in this ledger; implementation not complete.",
+      "requiredTests": [
+        "structured event tests",
+        "alert condition tests",
+        "release gate script"
+      ],
+      "telemetryRequirement": [
+        "all events listed in programme section 7"
+      ],
+      "rollbackMethod": "Disable affected product checkout or public persistence via governance gate.",
+      "owner": "Product engineering",
+      "finalEvidence": [
+        "observability tests",
+        "CI gate",
+        "preview logs",
+        "production logs"
+      ],
+      "status": "CONFIRMED_GAP"
+    },
+    {
+      "gapId": "E2E-GOLDEN-PATHS",
+      "businessConsequence": "Internal unit tests may pass while real route boundaries fail.",
+      "affectedCustomerJourney": "Free diagnostic, paid report, failure recovery, outcome loop",
+      "authoritativeSource": "Playwright E2E and route-level integration suites",
+      "allConsumers": "See consumer matrix route consumers and tests.",
+      "failureModes": [
+        "route-only failure",
+        "session/cookie mismatch",
+        "webhook route mismatch",
+        "auth access mismatch"
+      ],
+      "currentImplementationState": "Focused local suites pass; required E2E golden paths are not yet implemented.",
+      "requiredTests": [
+        "free diagnostic E2E",
+        "paid report E2E",
+        "failure recovery E2E",
+        "outcome loop E2E"
+      ],
+      "telemetryRequirement": [
+        "payment_identity_resolved",
+        "public_signal_persisted",
+        "fulfilment_recovered",
+        "outcome_verification_recorded"
+      ],
+      "rollbackMethod": "Block release until E2E failures are resolved or scoped exception is approved.",
+      "owner": "Product engineering",
+      "finalEvidence": [
+        "pnpm test:e2e results",
+        "preview manual proof",
+        "CI artifacts"
+      ],
+      "status": "CONFIRMED_GAP"
+    },
+    {
+      "status": "CONFIRMED_GAP",
+      "telemetryRequirement": [
+        "decision_engine_invoked",
+        "decision_authority_reconciled"
+      ],
+      "finalEvidence": [
+        "docs/program/decision-engine-authority-decision.md",
+        "reports/product/decision-engine-authority-matrix.json"
+      ],
+      "failureModes": [
+        "engine selected by name not authority",
+        "public adapter wires wrong evaluator",
+        "conflicting customer-visible facts"
+      ],
+      "gapId": "ARCH-01",
+      "businessConsequence": "Teams cannot know which engine owns decision authority, making claims, tests and rollout sequencing unsafe.",
+      "affectedCustomerJourney": "All decision-processing journeys",
+      "rollbackMethod": "Revert Phase 1.5 authority contract/report commit.",
+      "owner": "Product engineering",
+      "requiredTests": [
+        "engine authority matrix test",
+        "public route boundary test",
+        "single-record contract test"
+      ],
+      "currentImplementationState": "Confirmed ambiguity; target layered architecture selected but not implemented.",
+      "allConsumers": "All consumers in decision-engine authority matrix",
+      "authoritativeSource": "reports/product/decision-engine-authority-matrix.json"
+    },
+    {
+      "status": "CONFIRMED_GAP",
+      "telemetryRequirement": [
+        "canonical_decision_record_created",
+        "decision_record_duplicate_rejected"
+      ],
+      "finalEvidence": [
+        "lib/product/decision-authority-runtime-contract.ts"
+      ],
+      "failureModes": [
+        "DecisionIntelligenceKernel persists living case while public-safe event path persists separate journey",
+        "duplicate canonical record",
+        "unreconciled judgement"
+      ],
+      "gapId": "ARCH-02",
+      "businessConsequence": "A request may create parallel decision records that disagree or cannot be reconciled.",
+      "affectedCustomerJourney": "Public Free Signal and paid diagnostic escalation",
+      "rollbackMethod": "Disable new public adapter work and keep free-signal persistence only.",
+      "owner": "Product engineering",
+      "requiredTests": [
+        "two authorities without reconciliation fails",
+        "duplicate decision record prevention"
+      ],
+      "currentImplementationState": "Confirmed risk in public route; single-record contract added, enforcement incomplete.",
+      "allConsumers": "Public signal route and persistence adapter",
+      "authoritativeSource": "pages/api/public/kernel-signal.ts"
+    },
+    {
+      "status": "CONFIRMED_GAP",
+      "telemetryRequirement": [
+        "decision_kernel_one_off_evaluation",
+        "decision_kernel_accumulated_evaluation"
+      ],
+      "finalEvidence": [
+        "reports/product/decision-engine-authority-matrix.json"
+      ],
+      "failureModes": [
+        "graph depth claimed without authorised prior state",
+        "existingGraph omitted silently",
+        "one-off output marketed as compounding memory"
+      ],
+      "gapId": "ARCH-03",
+      "businessConsequence": "One-off kernel calls may be mistaken for accumulated graph operation.",
+      "affectedCustomerJourney": "Executive reporting, Strategy Room, instruments, future public graph",
+      "rollbackMethod": "Keep graph accumulation disabled.",
+      "owner": "Product engineering",
+      "requiredTests": [
+        "existingGraph provenance required before accumulated-depth claims",
+        "no forged accumulated-depth input"
+      ],
+      "currentImplementationState": "Confirmed; graph accumulation explicitly not started.",
+      "allConsumers": "evaluateDecision callers in authority matrix",
+      "authoritativeSource": "lib/decision/kernel.ts callers"
+    },
+    {
+      "status": "CONFIRMED_GAP",
+      "telemetryRequirement": [
+        "router_policy_violation"
+      ],
+      "finalEvidence": [
+        "reports/product/router-consistency-matrix.json"
+      ],
+      "failureModes": [
+        "missing no-store",
+        "missing explicit body limit",
+        "missing rate limit",
+        "different auth/session semantics"
+      ],
+      "gapId": "ARCH-04",
+      "businessConsequence": "Pages/App Router divergence can create security, cache, privacy or behavioural inconsistencies.",
+      "affectedCustomerJourney": "Public signal, diagnostics, executive reporting, Strategy Room",
+      "rollbackMethod": "Repair route-local guards without migration.",
+      "owner": "Platform engineering",
+      "requiredTests": [
+        "router consistency matrix test",
+        "public signal no-store/rate-limit/body-limit tests"
+      ],
+      "currentImplementationState": "Router audit complete with zero UNKNOWN; customer-critical behavioural gaps remain.",
+      "allConsumers": "Pages Router and App Router API routes",
+      "authoritativeSource": "reports/product/router-consistency-matrix.json"
+    },
+    {
+      "status": "CONFIRMED_GAP",
+      "telemetryRequirement": [
+        "memory_bridge_promotion_attempted",
+        "memory_bridge_promotion_blocked"
+      ],
+      "finalEvidence": [
+        "reports/product/shared-memory-bridge-authority.json"
+      ],
+      "failureModes": [
+        "policy helper treated as durable store",
+        "consent bypass",
+        "raw preview leakage"
+      ],
+      "gapId": "ARCH-05",
+      "businessConsequence": "SharedMemoryBridge could be wired as authority without persistence, tenancy or deletion proof.",
+      "affectedCustomerJourney": "Memory progression and future graph accumulation",
+      "rollbackMethod": "Leave bridge unused until authoritative store contract exists.",
+      "owner": "Product engineering",
+      "requiredTests": [
+        "bridge caller inventory",
+        "consent/no raw storage tests before use"
+      ],
+      "currentImplementationState": "Classified UNUSED; do not wire merely because it exists.",
+      "allConsumers": "No runtime callers found",
+      "authoritativeSource": "lib/shared-memory-bridge/shared-memory-bridge.ts"
+    },
+    {
+      "status": "CONFIRMED_GAP",
+      "telemetryRequirement": [
+        "cache_reconstructed",
+        "durable_write_acknowledged"
+      ],
+      "finalEvidence": [
+        "reports/product/shared-memory-bridge-authority.json"
+      ],
+      "failureModes": [
+        "Redis becomes unique decision truth",
+        "dual write required for durable acknowledgement",
+        "cache loss loses graph"
+      ],
+      "gapId": "ARCH-06",
+      "businessConsequence": "Introducing hot-state storage prematurely can create dual-write truth and cache-loss data loss.",
+      "affectedCustomerJourney": "Idempotency, rate limiting, graph accumulation, public signal persistence",
+      "rollbackMethod": "Do not introduce Redis in Phase 1.5.",
+      "owner": "Platform engineering",
+      "requiredTests": [
+        "Prisma latency/durability benchmark before Redis",
+        "cache reconstructability tests if introduced"
+      ],
+      "currentImplementationState": "Redis need not proven; Prisma remains proposed durable authority.",
+      "allConsumers": "Future Redis/cache consumers",
+      "authoritativeSource": "Phase 1.5 persistence decision"
+    },
+    {
+      "status": "CONFIRMED_GAP",
+      "telemetryRequirement": [
+        "product_automation_blocked",
+        "product_automation_eligible"
+      ],
+      "finalEvidence": [
+        "reports/product/product-automation-eligibility-ledger.json"
+      ],
+      "failureModes": [
+        "single-use contracts obscure runtime path",
+        "automation based on price instead of deterministic fulfilment",
+        "cross-sell uses stale catalogue truth"
+      ],
+      "gapId": "ARCH-07",
+      "businessConsequence": "Duplicate abstractions make features slower and can create parallel product truth.",
+      "affectedCustomerJourney": "Paid product fulfilment and diagnostic surfaces",
+      "rollbackMethod": "Keep founder review until eligibility gates pass.",
+      "owner": "Commercial/product engineering",
+      "requiredTests": [
+        "automation eligibility tests",
+        "catalogue-to-fulfilment E2E tests"
+      ],
+      "currentImplementationState": "Confirmed risk; automation eligibility ledger added.",
+      "allConsumers": "Product catalogue, surface registry, fulfilment, gold composers",
+      "authoritativeSource": "product automation and consumer ledgers"
+    }
+  ]
+}

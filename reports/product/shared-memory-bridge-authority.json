@@ -1,0 +1,23 @@
+{
+  "generatedAt": "2026-07-18T00:00:00+01:00",
+  "component": "lib/shared-memory-bridge/shared-memory-bridge.ts",
+  "classification": "UNUSED",
+  "callers": [],
+  "persistenceMechanism": "none; pure static factory/evaluator methods return records and decisions to caller",
+  "tenancy": "record fields include caseId and organisationId; no store-level tenancy enforcement because there is no store",
+  "consent": "explicit consent gates are encoded in eligibility/promotion methods",
+  "ttl": "none",
+  "deletion": "none because no persistence is performed",
+  "encryption": "hashing only for submitted content and actor hash; no encryption because no payload is stored",
+  "rawTextHandling": "submittedContent is hashed; sanitizedPreview can contain caller-supplied preview truncated in audit entries",
+  "restartBehaviour": "all returned objects are caller-owned; bridge itself has no state to survive restart",
+  "authorityDecision": "Do not wire. It is a policy helper, not authoritative memory.",
+  "redisNeed": "NOT_PROVEN",
+  "redisGuardrailsIfLaterIntroduced": [
+    "Prisma remains authoritative",
+    "Redis stores no unique decision truth",
+    "cache loss cannot lose canonical graph",
+    "every cache value is reconstructable",
+    "dual-write success is never required for durable acknowledgement"
+  ]
+}

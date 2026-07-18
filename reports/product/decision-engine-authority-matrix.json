@@ -1,0 +1,181 @@
+{
+  "generatedAt": "2026-07-18T00:00:00+01:00",
+  "branch": "fix/decision-authority-gap-closure-2026",
+  "status": "PHASE_1_5_RUNTIME_AUTHORITY_MATRIX",
+  "allowedClassifications": ["INTAKE_TRANSFORM", "EVALUATION_AUTHORITY", "JUDGEMENT_COMPOSER", "WORKFLOW_ORCHESTRATOR", "ADAPTER", "LEGACY", "DEAD_CODE", "UNKNOWN"],
+  "unknownExportCount": 0,
+  "engines": [
+    {
+      "file": "lib/decision/kernel.ts",
+      "exports": [
+        {
+          "name": "evaluateDecision",
+          "classification": "EVALUATION_AUTHORITY",
+          "directCallers": [
+            "app/api/executive-reporting/run/route.ts",
+            "app/api/strategy-room/execution/[id]/state/route.ts",
+            "lib/server/strategy-room/return-brief.server.ts",
+            "lib/alignment/enterprise-pipeline.ts",
+            "lib/product/institutional-case-intelligence-composer.ts",
+            "lib/instruments/*/engine.ts"
+          ],
+          "indirectRouteCallers": [
+            "/api/executive-reporting/run",
+            "/api/strategy-room/execution/[id]/state",
+            "Strategy Room return brief server path",
+            "enterprise/alignment pipeline consumers",
+            "decision instrument public/paid surfaces"
+          ],
+          "inputContract": "KernelInput: id, source, condition, decisionRequired, evidenceChain, internalContradictions, scores, signalStrength, sources, optional existingGraph and expectedOutcome.",
+          "outputContract": "DecisionKernelOutput: contradictionGraph, decision block, simulation, signal, constraint, verification, crossAssessmentInterference, graphMetrics.",
+          "readsPriorState": "YES_OPTIONAL_existingGraph",
+          "writesState": "NO",
+          "persistenceDestination": "None inside kernel; caller owns persistence.",
+          "authorityLevel": "authoritative evaluator for governed App Router, Strategy Room, executive reporting and instrument paths during compatibility period",
+          "customerVisible": true,
+          "overlapWithOtherEngines": ["runDecisionIntelligence derives contradiction/simulation/authority facts for public diagnostic surfaces"],
+          "notes": "Claims all flows route through it, but runtime evidence disproves that for public Free Signal. Do not wire public adapter until reconciliation contract exists."
+        }
+      ]
+    },
+    {
+      "file": "lib/intelligence/decision-intelligence-kernel.ts",
+      "exports": [
+        {
+          "name": "DecisionIntelligenceKernel",
+          "classification": "INTAKE_TRANSFORM",
+          "directCallers": ["pages/api/public/kernel-signal.ts", "lib/intelligence/admin-fulfilment.ts", "tests/product/*.spec.ts"],
+          "indirectRouteCallers": ["/api/public/kernel-signal"],
+          "inputContract": "KernelInput from lib/intelligence/types: caseId, caseReference, rawScenario, aperture, requestedTier, clarifications, creator/org context.",
+          "outputContract": "KernelResult: status, translation, classification, livingCase, tiered output, quality failures or clarification questions.",
+          "readsPriorState": "NO",
+          "writesState": "YES via LivingCasePersistence.save and LivingCaseEventLedger in normal completed path",
+          "persistenceDestination": "LivingCasePersistence implementation; event ledger in memory/process-local unless adapter persists elsewhere.",
+          "authorityLevel": "public intake/tiered disclosure compatibility kernel; not selected as final evaluation authority",
+          "customerVisible": true,
+          "overlapWithOtherEngines": ["runDecisionIntelligence also translates, classifies, detects contradictions and synthesizes next move in the same public request"],
+          "notes": "Public route currently invokes this before runDecisionIntelligence, creating ARCH-02 parallel decision-record risk."
+        }
+      ]
+    },
+    {
+      "file": "lib/engine/orchestrator.ts",
+      "exports": [
+        {
+          "name": "runConstitutionalOrchestration",
+          "classification": "WORKFLOW_ORCHESTRATOR",
+          "directCallers": ["pages/api/diagnostics/constitutional-intake/report.ts", "lib/server/decision/orchestrator.server.ts", "tests/intelligence/constitutional-orchestrator-adapter.test.ts"],
+          "indirectRouteCallers": ["/api/diagnostics/constitutional-intake/report"],
+          "inputContract": "answers, EngineContext, optional telemetry, optional upstream evidence context.",
+          "outputContract": "bundle, bridge, evidenceBridge, internal.decision.",
+          "readsPriorState": "YES_OPTIONAL upstream evidence context supplied by caller",
+          "writesState": "NO",
+          "persistenceDestination": "None inside orchestrator; diagnostic route/store owns persistence.",
+          "authorityLevel": "constitutional workflow orchestrator and adapter source, not canonical decision-state authority",
+          "customerVisible": true,
+          "overlapWithOtherEngines": ["runDecisionIntelligence can adapt constitutional output and derive route/readiness facts"],
+          "notes": "Routes constitutional signal packets; must not become source of truth."
+        }
+      ]
+    },
+    {
+      "file": "lib/judgement/compose-case-derived-judgement.ts",
+      "exports": [
+        {
+          "name": "composeCaseDerivedJudgement",
+          "classification": "JUDGEMENT_COMPOSER",
+          "directCallers": [
+            "pages/api/public/kernel-signal.ts",
+            "lib/product/free-signal-gold-composer.ts",
+            "lib/product/fast-diagnostic-gold-composer.ts",
+            "lib/product/team-assessment-gold-composer.ts",
+            "lib/product/enterprise-assessment-gold-composer.ts",
+            "lib/product/strategy-room-session-gold-composer.ts",
+            "lib/product/decision-instrument-gold-composer.ts"
+          ],
+          "indirectRouteCallers": ["/api/public/kernel-signal", "gold output composers for diagnostic/product surfaces"],
+          "inputContract": "DecisionCaseInput: decisionDescription, constraint, stakeholders, deadline, consequenceOfDelay, desiredOutcome and matched signals.",
+          "outputContract": "CaseDerivedJudgementResult: judged with classification/judgement or insufficient_pattern_evidence.",
+          "readsPriorState": "NO",
+          "writesState": "NO",
+          "persistenceDestination": "None; caller owns any record.",
+          "authorityLevel": "derived judgement only; must reference authoritative state version in future contract",
+          "customerVisible": true,
+          "overlapWithOtherEngines": ["Can restate diagnosis, consequence and next move also derived by evaluation engines"],
+          "notes": "May not silently recalculate evaluation facts; Phase 1.5 contract requires reference to authoritative state version."
+        }
+      ]
+    }
+  ],
+  "routeCallChains": [
+    {
+      "journey": "public Free Signal",
+      "route": "pages/api/public/kernel-signal.ts",
+      "controller": "handler(req,res)",
+      "orchestrator": "runDecisionIntelligence({ surface: 'fast_diagnostic', persistJourney: false })",
+      "kernelOrEvaluator": "DecisionIntelligenceKernel.process() and runDecisionIntelligence(); main evaluateDecision is not imported",
+      "judgementComposer": "composeCaseDerivedJudgement() via buildPublicCaseDerivedJudgement",
+      "persistence": "persistPublicSignalFromDecisionIntelligence() writes public-safe DiagnosticJourney events; DecisionIntelligenceKernel also calls LivingCasePersistence.save on completed path",
+      "response": "KernelSignalResponse free-signal body",
+      "runtimeProof": "Route source contains direct call expressions for kernel.process, runDecisionIntelligence, persistPublicSignalFromDecisionIntelligence and composeCaseDerivedJudgement."
+    },
+    {
+      "journey": "executive reporting",
+      "route": "app/api/executive-reporting/run/route.ts",
+      "controller": "POST route handler",
+      "orchestrator": "route-local assembly plus reporting DTO builders",
+      "kernelOrEvaluator": "evaluateDecision() from lib/decision/kernel.ts",
+      "judgementComposer": "none in route",
+      "persistence": "Prisma diagnostic journey/stage/checkpoint/reporting records via imported stores and prisma.server",
+      "response": "ExecutiveReportingRunResponse with ExecutiveReportingPublicResult",
+      "runtimeProof": "Route source contains direct evaluateDecision call and Prisma imports."
+    },
+    {
+      "journey": "Strategy Room",
+      "route": "app/api/strategy-room/execution/[id]/state/route.ts",
+      "controller": "GET route handler",
+      "orchestrator": "evaluateStateTransition, computeDynamicConsequence, strategy room access guard",
+      "kernelOrEvaluator": "evaluateDecision() from lib/decision/kernel.ts",
+      "judgementComposer": "none in route",
+      "persistence": "Reads Prisma StrategyRoomExecutionSession, decisions, DiagnosticDecisionObject and retained decision status",
+      "response": "Decision surface payload / no-store JSON response",
+      "runtimeProof": "Route source contains direct evaluateDecision call after loading session decisions."
+    },
+    {
+      "journey": "alignment pipeline",
+      "route": "library pipeline, consumed by enterprise/alignment tests and product paths",
+      "controller": "lib/alignment/enterprise-pipeline.ts",
+      "orchestrator": "enterprise pipeline stage composition",
+      "kernelOrEvaluator": "evaluateDecision() from lib/decision/kernel.ts",
+      "judgementComposer": "none in pipeline file",
+      "persistence": "caller-owned; pipeline returns derived output",
+      "response": "pipeline return object for consuming route/product layer",
+      "runtimeProof": "Pipeline source contains direct evaluateDecision call."
+    },
+    {
+      "journey": "enterprise diagnostic",
+      "route": "pages/api/diagnostics/enterprise.ts",
+      "controller": "handleDiagnosticSubmit afterCreate hook",
+      "orchestrator": "runDecisionIntelligence({ surface: 'enterprise_assessment' })",
+      "kernelOrEvaluator": "runDecisionIntelligence internal engines; main evaluateDecision not imported by this route",
+      "judgementComposer": "enterprise-assessment gold composer may compose derived judgement outside the submit route",
+      "persistence": "handleDiagnosticSubmit/saveDiagnosticRecord plus diagnostic journey persistence in runDecisionIntelligence when enabled",
+      "response": "diagnostic submit response with enterprise result surface summary",
+      "runtimeProof": "Route source contains afterCreate dynamic import and call to runDecisionIntelligence."
+    },
+    {
+      "journey": "outcome verification",
+      "route": "pages/api/outcomes/verify.ts and app/api/diagnostics/outcomes/verify/route.ts",
+      "controller": "submitOutcomeVerification() or verifyAndPersistOutcome()",
+      "orchestrator": "outcome-verification-service / outcomes verification module",
+      "kernelOrEvaluator": "no decision evaluation kernel invoked in the verified route path",
+      "judgementComposer": "none",
+      "persistence": "Prisma DiagnosticRecord/OutcomeVerificationRecord style records through outcome services",
+      "response": "Outcome verification result / provenance normalized record",
+      "runtimeProof": "Route source contains submitOutcomeVerification or verifyAndPersistOutcome calls and no evaluateDecision call."
+    }
+  ],
+  "selectedArchitecture": "LAYERED_CANONICAL_ARCHITECTURE",
+  "selectedArchitectureStatus": "TARGET_SELECTED_NOT_IMPLEMENTED",
+  "reconciliationRequiredBeforePublicKernelAdapter": true
+}

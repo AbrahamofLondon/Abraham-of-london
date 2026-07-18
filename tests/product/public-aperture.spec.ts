@@ -6,6 +6,7 @@
  * Low-stakes case does not upsell. Danger scenarios render protective first move.
  */
 
+import { readFileSync } from 'node:fs'
 import { describe, it, expect, beforeEach } from 'vitest'
 import { DecisionIntelligenceKernel } from '../../lib/intelligence/decision-intelligence-kernel'
 import { LivingCasePersistence } from '../../lib/intelligence/living-case-persistence'
@@ -242,6 +243,49 @@ describe('Public Aperture — Free Signal Only', () => {
           expect(sectionIds).not.toContain(field)
         }
       }
+    }
+  })
+  // ─── Test 11: API route contract remains public-safe ──────────────────────
+
+  it('should keep the public API route behind the public intelligence aperture', () => {
+    const source = readFileSync('pages/api/public/kernel-signal.ts', 'utf8')
+
+    expect(source).toContain('DecisionIntelligenceKernel')
+    expect(source).not.toContain("@/lib/decision/kernel")
+    expect(source).not.toContain('evaluateDecision(')
+    expect(source).not.toContain('stripe.checkout')
+    expect(source).not.toContain('checkout.sessions')
+    expect(source).not.toContain('prisma.')
+    expect(source).not.toContain('@upstash/redis')
+    expect(source).not.toContain('from \'redis\'')
+  })
+
+  it('should not expose paid dossier or internal graph fields in KernelSignalResponse', () => {
+    const source = readFileSync('pages/api/public/kernel-signal.ts', 'utf8')
+    const typeStart = source.indexOf('export type KernelSignalResponse')
+    const typeEnd = source.indexOf('export default async function handler')
+    expect(typeStart).toBeGreaterThanOrEqual(0)
+    expect(typeEnd).toBeGreaterThan(typeStart)
+
+    const responseType = source.slice(typeStart, typeEnd)
+    const forbiddenFields = [
+      'authorityMap',
+      'obligationMap',
+      'constraintGraph',
+      'evidenceGraph',
+      'selfAdversarialChallenge',
+      'minimumViablePath',
+      'forbiddenActions',
+      'fallbackPath',
+      'recordReference',
+      'checkoutUrl',
+      'stripePriceId',
+      'contradictionGraph',
+      'prediction',
+    ]
+
+    for (const field of forbiddenFields) {
+      expect(responseType).not.toContain(field)
     }
   })
 })

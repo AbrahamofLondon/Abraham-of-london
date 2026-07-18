@@ -1,0 +1,24 @@
+{
+  "generatedAt": "2026-07-18T00:00:00+01:00",
+  "status": "PHASE_1_5_ROUTER_CONSISTENCY_AUDIT_NO_MIGRATION",
+  "allowedClassifications": ["CONSISTENT", "JUSTIFIED_DIFFERENCE", "SECURITY_GAP", "BEHAVIOURAL_GAP", "UNKNOWN"],
+  "unknownCount": 0,
+  "dimensions": [
+    { "dimension": "authentication", "pagesRouter": "tokenStore.postgres, readAccessCookie, route-local checks where required", "appRouter": "server guards such as assertStrategyRoomAccess/enforceExecutiveReportingAccess", "classification": "JUSTIFIED_DIFFERENCE", "repairRequired": false },
+    { "dimension": "session resolution", "pagesRouter": "NextApiRequest cookies/headers through auth helpers", "appRouter": "NextRequest plus server-only guard helpers", "classification": "JUSTIFIED_DIFFERENCE", "repairRequired": false },
+    { "dimension": "CSRF", "pagesRouter": "not uniformly visible on public POST routes; public route relies on aperture/rate controls rather than CSRF", "appRouter": "not uniformly visible; sensitive routes rely on auth/token guards", "classification": "BEHAVIOURAL_GAP", "repairRequired": false, "closureCondition": "Add explicit CSRF policy per public anonymous POST versus authenticated state-changing route." },
+    { "dimension": "rate limiting", "pagesRouter": "unified rate limit appears in diagnostics submit; public kernel-signal lacks visible rate-limit call", "appRouter": "route-specific guards; not uniform", "classification": "BEHAVIOURAL_GAP", "repairRequired": true, "closureCondition": "Public kernel-signal receives explicit anonymous rate limit before feature expansion." },
+    { "dimension": "caching", "pagesRouter": "API responses default dynamic; no uniform no-store helper", "appRouter": "some routes export force-dynamic or use noStoreJson", "classification": "BEHAVIOURAL_GAP", "repairRequired": true, "closureCondition": "Public signal response explicitly sets no-store headers." },
+    { "dimension": "revalidation", "pagesRouter": "not applicable to API routes", "appRouter": "dynamic/no-store on runtime API routes", "classification": "JUSTIFIED_DIFFERENCE", "repairRequired": false },
+    { "dimension": "error responses", "pagesRouter": "manual JSON shape", "appRouter": "NextResponse/noStoreJson helpers", "classification": "JUSTIFIED_DIFFERENCE", "repairRequired": false },
+    { "dimension": "request-size limits", "pagesRouter": "implicit Next.js body parser unless config overrides", "appRouter": "manual request parsing where used", "classification": "BEHAVIOURAL_GAP", "repairRequired": true, "closureCondition": "Public signal route enforces explicit maximum situation length." },
+    { "dimension": "logging", "pagesRouter": "route-local console.error", "appRouter": "route-local console/error helpers", "classification": "BEHAVIOURAL_GAP", "repairRequired": false, "closureCondition": "Structured redacted telemetry added later." },
+    { "dimension": "privacy redaction", "pagesRouter": "public aperture tests and persistence adapter prevent raw text storage in public-safe events", "appRouter": "varies by route; governed routes may persist evidence intentionally", "classification": "JUSTIFIED_DIFFERENCE", "repairRequired": false },
+    { "dimension": "database client usage", "pagesRouter": "pages-safe prisma barrel and dynamic imports", "appRouter": "prisma.server/server-only imports", "classification": "JUSTIFIED_DIFFERENCE", "repairRequired": false },
+    { "dimension": "runtime environment", "pagesRouter": "Node API route", "appRouter": "Node/server route handlers with dynamic flags as needed", "classification": "CONSISTENT", "repairRequired": false },
+    { "dimension": "entitlement checks", "pagesRouter": "diagnostic submit and billing paths use tier/access helpers where needed; public free route has no entitlement", "appRouter": "strategy/executive routes enforce access", "classification": "JUSTIFIED_DIFFERENCE", "repairRequired": false }
+  ],
+  "securityGapCount": 0,
+  "customerCriticalBehaviouralGaps": ["rate limiting for public kernel-signal", "no-store headers for public kernel-signal", "explicit request-size limit for public kernel-signal"],
+  "migrationAllowed": false
+}

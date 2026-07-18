@@ -1,0 +1,12 @@
+{
+  "generatedAt": "2026-07-18T00:00:00+01:00",
+  "rule": "Do not automate based on price alone. Automate only when inputs are machine-verifiable, fulfilment deterministic, entitlement idempotent, exceptions fail safely, refund/recovery exists, founder judgement is not required, evidence and delivery are durable, and customer access is E2E tested.",
+  "products": [
+    { "productCode": "decision_failure_brief_basic", "priceTier": "49", "eligible": false, "classification": "NOT_AUTOMATION_READY", "blockingReasons": ["founder judgement may be required", "paid report E2E fulfilment not proved", "refund/recovery not proved"] },
+    { "productCode": "decision_failure_brief_full", "priceTier": "149", "eligible": false, "classification": "NOT_AUTOMATION_READY", "blockingReasons": ["evidence/delivery records not proved durable end to end", "customer access after fulfilment not proved", "founder judgement boundary unresolved"] },
+    { "productCode": "decision_failure_brief_urgent", "priceTier": "349", "eligible": false, "classification": "FOUNDER_REVIEW_REQUIRED", "blockingReasons": ["urgent escalation requires exception handling", "human review required", "recovery/refund path not proved"] },
+    { "productCode": "executive_decision_review", "priceTier": "2500_plus", "eligible": false, "classification": "FOUNDER_REVIEW_REQUIRED", "blockingReasons": ["high consequence judgement", "human/founder delivery", "not deterministic"] },
+    { "productCode": "retainer_continuity", "priceTier": "retainer", "eligible": false, "classification": "FOUNDER_REVIEW_REQUIRED", "blockingReasons": ["ongoing governed service", "outcome verification and cadence require human oversight", "not deterministic"] },
+    { "productCode": "gmi_gmi_q2_2026", "priceTier": "catalogue", "eligible": false, "classification": "CHECKOUT_ONLY_AUTOMATION_POSSIBLE", "blockingReasons": ["content entitlement may be automatable, but decision-authority fulfilment path is separate", "subscription/access lifecycle must be E2E proved"] }
+  ]
+}

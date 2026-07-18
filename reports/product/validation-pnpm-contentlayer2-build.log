@@ -1,0 +1,43 @@
+Warning: Contentlayer might not work as expected on Windows
+successCallback C:/aol-check-visual/.contentlayer
+
+============================================================
+📊 CONTENTLAYER BUILD REPORT
+============================================================
+Environment: development
+Platform: win32 (Windows)
+Total documents: 838
+
+📑 By type:
+  Short          : 236
+  XOutbound      : 106
+  LinkedInOutbound: 91
+  Brief          : 83
+  Lexicon        : 63
+  Post           : 58
+  VaultBrief     : 38
+  Download       : 33
+  Resource       : 27
+  FacebookOutbound: 26
+  EditorialSeriesPart: 22
+  Canon          : 15
+  Intelligence   : 15
+  Playbook       : 8
+  Print          : 6
+  Book           : 5
+  Event          : 2
+  Strategy       : 2
+  Editorial      : 1
+  Vault          : 1
+
+🔒 By access tier:
+  public      : 779
+  member      : 30
+  restricted  : 29
+
+✅ Valid: 838
+❌ Invalid: 0
+
+============================================================
+
+Generated 838 documents in .contentlayer
