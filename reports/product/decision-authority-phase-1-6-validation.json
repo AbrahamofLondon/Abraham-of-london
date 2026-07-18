@@ -1,0 +1,110 @@
+{
+  "publicSignalTransport": {
+    "cacheControl": "no-store, private",
+    "bodyParserSizeLimit": "8kb",
+    "netlifyPreviewBlocker": "Programme PR remains draft and remote preview verification not yet performed.",
+    "responseBranchesTested": [
+      "success",
+      "clarification_required",
+      "validation_error",
+      "rate_limited",
+      "oversized_body",
+      "internal_error"
+    ],
+    "netlifyPreviewVerified": false,
+    "parsedSituationLimitChars": 6000
+  },
+  "rateLimit": {
+    "globalConsistency": false,
+    "durableSecurityControl": false,
+    "rawSituationInLimiterStore": false,
+    "authorityLevel": "BEST_EFFORT_PROCESS_LOCAL",
+    "store": "IN_MEMORY_PROCESS",
+    "limitations": [
+      "state resets on process restart or cold start",
+      "multi-instance enforcement is not globally consistent",
+      "production edge forwarding must preserve a trustworthy client identity"
+    ]
+  },
+  "releaseReady": false,
+  "baselineRepairPr": {
+    "blocker": "Token cannot mark PR ready; Vercel account deployment context is blocked.",
+    "url": "https://github.com/AbrahamofLondon/Abraham-of-london/pull/102",
+    "draft": true,
+    "number": 102
+  },
+  "programmePr": {
+    "url": "https://github.com/AbrahamofLondon/Abraham-of-london/pull/101",
+    "draft": true,
+    "number": 101
+  },
+  "playwright": {
+    "readinessUrl": "http://127.0.0.1:3000/api/system/health",
+    "webServerCommand": "pnpm exec next dev --webpack",
+    "currentFailures": [
+      "tests/e2e/a11y-blog-crawl.spec.ts: scan all posts linked from /blog timed out",
+      "tests/e2e/a11y.spec.ts: axe / timed out",
+      "tests/e2e/a11y.spec.ts: axe /downloads timed out",
+      "tests/e2e/downloads-assets.spec.ts: downloads links count was 0",
+      "tests/e2e/editorial-series-reader.spec.ts: light preference paragraph locator missing",
+      "tests/e2e/editorial-series-reader.spec.ts: dark preference paragraph locator missing",
+      "tests/e2e/visual.spec.ts: home snapshot dimensions/diff mismatch"
+    ],
+    "expectedPort": 3000,
+    "manualHealth": {
+      "ready": true,
+      "timeToReadySeconds": 80.72,
+      "response": "ok:true service:abraham-of-london env:development",
+      "status": 200
+    },
+    "priorFailure": "webServer timeout waiting for http://localhost:3000/",
+    "currentClosure": "STARTUP_CLOSED_SUITE_EXECUTES"
+  },
+  "focusedValidation": [
+    {
+      "exitCode": 0,
+      "duration": "1.96s",
+      "totals": "3 files passed; 24 tests passed",
+      "command": "pnpm exec vitest run tests\\product\\decision-authority-runtime-contract.test.ts tests\\product\\public-signal-transport-controls.test.ts tests\\product\\public-signal-rate-limit-contract.test.ts",
+      "status": "PASS"
+    },
+    {
+      "totals": "45 tests discovered; 6 passed; 7 failed; 32 skipped",
+      "status": "FAIL_EXECUTED",
+      "blockedInfrastructure": null,
+      "command": "pnpm test:e2e",
+      "duration": "3.9m",
+      "exitCode": 1
+    }
+  ],
+  "requestSize": {
+    "handlerParsedSituationLimitChars": 6000,
+    "malformedJsonStatus": "Next.js parser bounded 400 before handler; full live transport proof still required.",
+    "contentLengthOnly": false,
+    "nextBodyParserLimit": "8kb",
+    "oversizeStatus": 413
+  },
+  "recordedAt": "2026-07-18T15:30:00+01:00",
+  "phaseExitConditions": {
+    "fullReleaseGateRecorded": "FAIL_NOT_RERUN_AFTER_PHASE_1_6_CHANGES",
+    "twoUnitFailuresFixedOrBaselinePrMerged": "FAIL_BASELINE_PR_OPEN_NOT_MERGED",
+    "noVaultUnknown": "PASS_ZERO_UNKNOWN",
+    "noGraphAccumulation": "PASS",
+    "phase15HistoryTruthful": "PASS_LOCAL",
+    "playwrightStartsAndExecutes": "PASS_EXECUTES_WITH_FAILURES",
+    "requestSizeActualPayloadTested": "PARTIAL_UNIT_AND_CONFIG_PROOF_LIVE_TRANSPORT_PENDING",
+    "vaultFindingsClassified": "PASS_LEDGER_CREATED_56_FINDINGS",
+    "rateLimitAuthorityExplicit": "PASS",
+    "architectureTargetVsRuntimeAccurate": "PASS",
+    "branchPushedAndDraftPrOpened": "PASS",
+    "noStoreAllResponses": "PASS_LOCAL_HANDLER_TESTS_PREVIEW_PENDING"
+  },
+  "branch": "fix/decision-authority-gap-closure-2026",
+  "phase15SplitCommits": {
+    "publicTransportControls": "d178ae23130bf271cfa74b8ea7d18aec1ce19c8c",
+    "authorityRouterTests": "bcd11ebc8e375c49caa2a3a40b8bab1c6d479e87",
+    "splitShaRecord": "4da58b09049dce6cb3ac267b5aa44de466ff854a",
+    "runtimeContract": "de8b5294ee4cf475f123d29ba59cd4cb37a9ce51",
+    "architectureDecision": "d758e94091b206077a37e6fe87921af8555e392d"
+  }
+}

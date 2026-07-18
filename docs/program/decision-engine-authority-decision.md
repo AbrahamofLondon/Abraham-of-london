@@ -3,6 +3,16 @@
 Status: PHASE 1.5 TARGET SELECTED, NOT IMPLEMENTED
 Date: 2026-07-18
 
+## Runtime Status
+
+CURRENT_RUNTIME: Multiple decision-processing engines still execute in existing workflows. Public Free Signal currently calls `DecisionIntelligenceKernel.process()`, `runDecisionIntelligence()` and `composeCaseDerivedJudgement()` inside the Pages Router API route.
+
+TARGET_RUNTIME: `LAYERED_CANONICAL_ARCHITECTURE`.
+
+ENFORCEMENT_STATUS: `CONTRACT_DEFINED_NOT_FULLY_ENFORCED`. The contract and static/runtime proof tests exist, but runtime unification, canonical state-version enforcement and graph accumulation have not begun.
+
+Architecture decision state: `DECIDED_TARGET_NOT_IMPLEMENTED`.
+
 ## Selected Option
 
 `LAYERED_CANONICAL_ARCHITECTURE`

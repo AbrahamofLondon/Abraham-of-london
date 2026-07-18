@@ -359,3 +359,36 @@ Evidence added:
 Selected target architecture: `LAYERED_CANONICAL_ARCHITECTURE`.
 
 This is a target decision, not an implementation claim. Current public Free Signal runtime still invokes multiple decision-processing engines and requires an explicit reconciliation contract before public kernel adapter work proceeds.
+
+2026-07-18 — Phase 1.6 release-gate and transport-control slice in progress.
+
+Changed files:
+- `playwright.config.ts`
+- `pages/api/public/kernel-signal.ts`
+- `tests/product/public-signal-transport-controls.test.ts`
+- `tests/product/public-signal-rate-limit-contract.test.ts`
+- `tests/product/decision-authority-runtime-contract.test.ts`
+- `docs/program/decision-engine-authority-decision.md`
+- `reports/product/decision-authority-phase-1-6-validation.md`
+- `reports/product/decision-authority-phase-1-6-validation.json`
+- `reports/product/vault-link-regression-ledger.md`
+- `reports/product/vault-link-regression-ledger.json`
+
+Completed:
+- Phase 1.5 split commits were pushed and recorded; programme Draft PR #101 is open.
+- The two unit failures were reproduced on `origin/main` and classified as stale baseline defects; baseline repair PR #102 is pushed but blocked from ready/merge by token permissions and a Vercel account-level deployment block.
+- Playwright webServer startup is no longer the blocking failure. Readiness now uses `/api/system/health`; `pnpm test:e2e` executes 45 tests and currently reports 6 passed, 7 failed, 32 skipped.
+- Public signal responses now emit `Cache-Control: no-store, private` for success, clarification required, validation error, rate limited, oversized body and internal error responses.
+- Public signal request size now has a Next body-parser `8kb` limit plus the existing parsed `situation` character limit.
+- Public signal rate limiting is classified as `IN_MEMORY_PROCESS` / `BEST_EFFORT_PROCESS_LOCAL`, not durable or globally consistent.
+- Vault findings are expanded into a 56-entry ledger with zero `UNKNOWN` classifications.
+
+Verification run:
+- `pnpm exec vitest run tests/product/decision-authority-runtime-contract.test.ts tests/product/public-signal-transport-controls.test.ts tests/product/public-signal-rate-limit-contract.test.ts` — PASS, 3 files, 24 tests.
+- `pnpm test:e2e` — FAIL, but suite executes; 45 discovered, 6 passed, 7 failed, 32 skipped.
+
+Current blockers:
+- Baseline repair PR #102 is not merged.
+- Vault audit still fails until allowlist governance or source-route repairs are implemented.
+- Full release gate has not been rerun after Phase 1.6 changes.
+- Netlify/CDN no-store preview verification is pending.

@@ -29,10 +29,22 @@ const kernel = new DecisionIntelligenceKernel()
 const PUBLIC_SIGNAL_MAX_SITUATION_CHARS = 6000
 const PUBLIC_SIGNAL_RATE_LIMIT = { limit: 20, windowSeconds: 60 }
 
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '8kb',
+    },
+  },
+}
+
 function applyNoStoreHeaders(res: NextApiResponse) {
-  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
-  res.setHeader('Pragma', 'no-cache')
-  res.setHeader('Expires', '0')
+  res.setHeader('Cache-Control', 'no-store, private')
+}
+
+function getPublicSignalClientIdentity(req: NextApiRequest): string {
+  const socketIp = (req.socket as { remoteAddress?: string } | undefined)?.remoteAddress?.trim()
+  if (socketIp) return socketIp
+  return getClientIp(req)
 }
 
 function emptyKernelSignalResponse(error: string): KernelSignalResponse {
@@ -100,7 +112,7 @@ export default async function handler(
 ) {
   applyNoStoreHeaders(res)
 
-  const rateLimitResult = rateLimit(`public-kernel-signal:${getClientIp(req)}`, PUBLIC_SIGNAL_RATE_LIMIT)
+  const rateLimitResult = rateLimit(`public-kernel-signal:${getPublicSignalClientIdentity(req)}`, PUBLIC_SIGNAL_RATE_LIMIT)
   for (const [header, value] of Object.entries(createRateLimitHeaders(rateLimitResult))) {
     res.setHeader(header, value)
   }

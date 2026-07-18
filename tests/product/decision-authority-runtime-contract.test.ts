@@ -89,10 +89,11 @@ describe('Phase 1.5 single-record and public boundary contract', () => {
   it('keeps public signal route no-store, rate-limited and size-bounded without importing internal decision kernel', () => {
     const source = read('pages/api/public/kernel-signal.ts')
     expect(source).toContain('applyNoStoreHeaders(res)')
-    expect(source).toContain('Cache-Control')
+    expect(source).toContain("'Cache-Control', 'no-store, private'")
     expect(source).toContain('PUBLIC_SIGNAL_RATE_LIMIT')
-    expect(source).toContain('rateLimit(`public-kernel-signal:${getClientIp(req)}`')
+    expect(source).toContain('getPublicSignalClientIdentity(req)')
     expect(source).toContain('PUBLIC_SIGNAL_MAX_SITUATION_CHARS')
+    expect(source).toContain("sizeLimit: '8kb'")
     expect(source).toContain('res.status(413)')
     expect(source).not.toContain("from '@/lib/decision/kernel'")
   })
