@@ -21,6 +21,7 @@ import { runDecisionIntelligence } from '@/lib/intelligence/decision-intelligenc
 import type { DecisionIntelligenceResult } from '@/lib/intelligence/decision-intelligence-orchestrator'
 import { composeCaseDerivedJudgement } from '@/lib/judgement/compose-case-derived-judgement'
 import type { DecisionPattern } from '@/lib/judgement/decision-pattern-model'
+import { persistPublicSignalFromDecisionIntelligence } from '@/lib/product/public-signal-persistence'
 
 const kernel = new DecisionIntelligenceKernel()
 
@@ -147,6 +148,20 @@ export default async function handler(
 
     // If clarification is required, return the questions
     if (result.status === 'CLARIFICATION_REQUIRED') {
+      const decisionIntelligence = await runDecisionIntelligence({
+        surface: 'fast_diagnostic',
+        rawUserInput: situation.trim(),
+        persistJourney: false,
+        caseId,
+        ...(progressiveEvidence ? { progressiveEvidence } : {}),
+        ...(previousDecisionIntelligence ? { previousDecisionIntelligence } : {}),
+      })
+      await persistPublicSignalFromDecisionIntelligence({
+        caseId,
+        rawInput: situation.trim(),
+        result: decisionIntelligence,
+      })
+
       res.status(200).json({
         caseId,
         situationClass: result.translation?.decisionClass || null,
@@ -168,14 +183,7 @@ export default async function handler(
           question: q.question,
         })) || null,
         userLanguageEvidence: extractSafeUserLanguageQuotes([situation.trim()]),
-        decisionIntelligence: await runDecisionIntelligence({
-          surface: 'fast_diagnostic',
-          rawUserInput: situation.trim(),
-          persistJourney: true,
-          caseId,
-          ...(progressiveEvidence ? { progressiveEvidence } : {}),
-          ...(previousDecisionIntelligence ? { previousDecisionIntelligence } : {}),
-        }),
+        decisionIntelligence,
         caseDerivedJudgement: buildPublicCaseDerivedJudgement(situation.trim()),
       })
       return
@@ -217,10 +225,15 @@ export default async function handler(
     const decisionIntelligence = await runDecisionIntelligence({
       surface: 'fast_diagnostic',
       rawUserInput: situation.trim(),
-      persistJourney: true,
+      persistJourney: false,
       caseId,
       ...(progressiveEvidence ? { progressiveEvidence } : {}),
       ...(previousDecisionIntelligence ? { previousDecisionIntelligence } : {}),
+    })
+    await persistPublicSignalFromDecisionIntelligence({
+      caseId,
+      rawInput: situation.trim(),
+      result: decisionIntelligence,
     })
 
     res.status(200).json({
