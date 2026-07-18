@@ -20,7 +20,7 @@
 import Stripe from "stripe";
 import { prisma } from "@/lib/prisma.server";
 import { getProductByStripePriceId, resolveProductCode, resolveEntitlementSlugs } from "@/lib/commercial/catalog";
-import { grantEntitlement, PRODUCT_CODES, type ProductCode } from "@/lib/server/billing/entitlements";
+import { grantEntitlement, type ProductCode } from "@/lib/server/billing/entitlements";
 import { ensureEntitlementAfterPayment } from "@/lib/commercial/payment-verification";
 import { revokeCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
 import { generatePaidExecutiveReport } from "@/lib/commercial/paid-er-generation";
@@ -62,11 +62,6 @@ export type CommercialPaymentIdentity = {
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
-const VALID_PRODUCT_CODES = new Set<string>(Object.values(PRODUCT_CODES));
-
-function isProductCode(value: string): value is ProductCode {
-  return VALID_PRODUCT_CODES.has(value);
-}
 
 // ── Event state management ─────────────────────────────────────────────────
 
@@ -148,12 +143,11 @@ export async function resolvePaymentIdentity(
 ): Promise<{ identity: CommercialPaymentIdentity | null; quarantinedReason: string | null }> {
   const metadata = session.metadata ?? {};
 
-  // Step 1: Resolve by Stripe Price ID (most authoritative)
-  // metadata.priceCode is the Stripe Price ID set during checkout creation
-  const priceId = String(metadata.priceCode || "").trim() || null;
-
-  // metadata.productCode is the canonical product code / entitlement slug
-  const metadataProductCode = String(metadata.productCode || "").trim();
+  const rawPriceCode = String(metadata.priceCode || "").trim();
+  const rawStripePriceId = String(metadata.stripePriceId || "").trim();
+  const priceId = rawStripePriceId || (rawPriceCode.startsWith("price_") ? rawPriceCode : "");
+  const metadataProductCode = String(metadata.productCode || metadata.catalogCode || "").trim();
+  const metadataEntitlementSlug = String(metadata.entitlementSlug || "").trim();
 
   let catalogProduct = null;
   let stripeProductId = "";
@@ -165,12 +159,18 @@ export async function resolvePaymentIdentity(
     }
   }
 
-  // Step 2: If Price ID didn't resolve, try metadata product code
   if (!catalogProduct && metadataProductCode) {
     catalogProduct = resolveProductCode(metadataProductCode);
   }
 
-  // Step 3: Quarantine if unresolvable
+  if (!catalogProduct && metadataEntitlementSlug) {
+    catalogProduct = resolveProductCode(metadataEntitlementSlug);
+  }
+
+  if (!catalogProduct && rawPriceCode && !rawPriceCode.startsWith("price_")) {
+    catalogProduct = resolveProductCode(rawPriceCode);
+  }
+
   if (!catalogProduct) {
     return {
       identity: null,
@@ -180,15 +180,22 @@ export async function resolvePaymentIdentity(
     };
   }
 
-  // Step 4: Cross-check metadata against resolved identity
-  if (metadataProductCode && metadataProductCode !== catalogProduct.code) {
+  const claimedProduct = metadataProductCode ? resolveProductCode(metadataProductCode) : null;
+  if (metadataProductCode && (!claimedProduct || claimedProduct.code !== catalogProduct.code)) {
     return {
       identity: null,
-      quarantinedReason: `CONTRADICTORY_METADATA: Metadata claims productCode="${metadataProductCode}" but Stripe Price ${priceId} resolves to "${catalogProduct.code}"`,
+      quarantinedReason: `CONTRADICTORY_METADATA: Metadata claims productCode="${metadataProductCode}" but resolved payment identity is "${catalogProduct.code}"`,
     };
   }
 
-  // Step 5: Determine billing mode
+  const claimedEntitlement = metadataEntitlementSlug ? resolveProductCode(metadataEntitlementSlug) : null;
+  if (metadataEntitlementSlug && (!claimedEntitlement || claimedEntitlement.code !== catalogProduct.code)) {
+    return {
+      identity: null,
+      quarantinedReason: `CONTRADICTORY_METADATA: Metadata claims entitlementSlug="${metadataEntitlementSlug}" but resolved payment identity is "${catalogProduct.entitlementSlug}"`,
+    };
+  }
+
   const billingMode: "one_time" | "subscription" =
     session.mode === "subscription" ? "subscription" : "one_time";
 
@@ -209,7 +216,7 @@ export async function resolvePaymentIdentity(
       fulfilmentKey: catalogProduct.entitlementSlug,
       orderReference: session.id,
       stripeProductId: catalogProduct.stripeProductId || stripeProductId,
-      stripePriceId: priceId || "",
+      stripePriceId: priceId || catalogProduct.stripePriceId || "",
       checkoutSessionId: session.id,
       paymentIntentId: paymentIntentId ?? undefined,
       subscriptionId: subscriptionId ?? undefined,
@@ -219,7 +226,6 @@ export async function resolvePaymentIdentity(
     quarantinedReason: null,
   };
 }
-
 // ── Business idempotency keys ──────────────────────────────────────────────
 
 /**
@@ -286,52 +292,51 @@ export async function processCheckoutCompleted(
     }
 
     // ── Grant entitlement ────────────────────────────────────────────────
-    if (isProductCode(identity.productCode)) {
-      const tier = String(session.metadata?.tier || identity.productCode);
-      await grantEntitlement({
-        email,
-        productCode: identity.productCode as ProductCode,
-        tier,
-        source: "stripe",
-        externalRef: session.id,
-      });
+    const primaryEntitlementSlug = identity.entitlementKey || identity.productCode;
+    const tier = String(session.metadata?.tier || identity.productCode);
+    await grantEntitlement({
+      email,
+      productCode: primaryEntitlementSlug as ProductCode,
+      tier,
+      source: "stripe",
+      externalRef: session.id,
+    });
 
-      // Bundle entitlements
-      const bundleMeta = session.metadata?.bundleEntitlements;
-      const catalogProduct = resolveProductCode(identity.productCode);
-      const allSlugs = bundleMeta
-        ? String(bundleMeta).split(",").filter(Boolean)
-        : catalogProduct
-          ? resolveEntitlementSlugs(catalogProduct.code)
-          : [identity.productCode];
+    // Bundle entitlements
+    const bundleMeta = session.metadata?.bundleEntitlements;
+    const catalogProduct = resolveProductCode(identity.productCode);
+    const allSlugs = bundleMeta
+      ? String(bundleMeta).split(",").filter(Boolean)
+      : catalogProduct
+        ? resolveEntitlementSlugs(catalogProduct.code)
+        : [primaryEntitlementSlug];
 
-      for (const slug of allSlugs) {
-        if (slug !== identity.productCode) {
-          try {
-            await grantEntitlement({
-              email,
-              productCode: slug as ProductCode,
-              tier,
-              source: "stripe",
-              externalRef: session.id,
-            });
-          } catch {
-            console.error("[PAYMENT_PROCESSOR_BUNDLE_GRANT_FAILED]", { slug, email });
-          }
+    for (const slug of allSlugs) {
+      if (slug !== primaryEntitlementSlug) {
+        try {
+          await grantEntitlement({
+            email,
+            productCode: slug as ProductCode,
+            tier,
+            source: "stripe",
+            externalRef: session.id,
+          });
+        } catch {
+          console.error("[PAYMENT_PROCESSOR_BUNDLE_GRANT_FAILED]", { slug, email });
         }
       }
+    }
 
-      // Verify entitlement
-      const verified = await ensureEntitlementAfterPayment({
-        checkoutSessionId: session.id,
-        slug: identity.productCode,
-        email,
-      });
+    // Verify entitlement
+    const verified = await ensureEntitlementAfterPayment({
+      checkoutSessionId: session.id,
+      slug: primaryEntitlementSlug,
+      email,
+    });
 
-      if (!verified.ok || !verified.entitlement?.granted) {
-        await recordPaymentEventState(stripeEventId, event.type, session.id, "FAILED_RETRYABLE", "ENTITLEMENT_SYNC_FAILED");
-        return { ok: false, error: "ENTITLEMENT_SYNC_FAILED" };
-      }
+    if (!verified.ok || !verified.entitlement?.granted) {
+      await recordPaymentEventState(stripeEventId, event.type, session.id, "FAILED_RETRYABLE", "ENTITLEMENT_SYNC_FAILED");
+      return { ok: false, error: "ENTITLEMENT_SYNC_FAILED" };
     }
 
     // ── Boardroom Brief order creation ───────────────────────────────────

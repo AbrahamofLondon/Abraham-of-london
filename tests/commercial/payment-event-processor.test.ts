@@ -164,6 +164,44 @@ describe("payment identity resolution", () => {
   });
 });
 
+
+describe("checkout/webhook identity contract", () => {
+  it("resolves canonical checkout metadata without contradiction", async () => {
+    const session = createMockSession({
+      metadata: {
+        productCode: "boardroom_brief",
+        catalogCode: "boardroom_brief",
+        entitlementSlug: "boardroom-brief",
+        priceCode: "price_1TddfeQFpelVFMXJWuTH7bB2",
+        stripePriceId: "price_1TddfeQFpelVFMXJWuTH7bB2",
+      },
+    });
+
+    const { identity, quarantinedReason } = await resolvePaymentIdentity(session);
+
+    expect(quarantinedReason).toBeNull();
+    expect(identity).toBeDefined();
+    expect(identity!.productCode).toBe("boardroom_brief");
+    expect(identity!.entitlementKey).toBe("boardroom-brief");
+    expect(identity!.stripePriceId).toBe("price_1TddfeQFpelVFMXJWuTH7bB2");
+  });
+
+  it("keeps legacy checkout metadata resolvable while sessions age out", async () => {
+    const session = createMockSession({
+      metadata: {
+        productCode: "boardroom-brief",
+        priceCode: "boardroom_brief",
+      },
+    });
+
+    const { identity, quarantinedReason } = await resolvePaymentIdentity(session);
+
+    expect(quarantinedReason).toBeNull();
+    expect(identity).toBeDefined();
+    expect(identity!.productCode).toBe("boardroom_brief");
+    expect(identity!.entitlementKey).toBe("boardroom-brief");
+  });
+});
 // ── Business idempotency key tests ─────────────────────────────────────────
 
 describe("business idempotency keys", () => {
