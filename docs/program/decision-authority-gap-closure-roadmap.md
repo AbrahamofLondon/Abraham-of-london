@@ -337,3 +337,25 @@ Continue Phase 1 / prepare Phase 2:
 3. Keep direct `@/lib/decision/kernel` imports out of public route files.
 
 Router migration remains deferred.
+
+## Phase 1.5 Runtime Authority And Architecture Proof
+
+Status: ACTIVE / NOT RELEASE READY
+
+Constraints:
+- Do not begin graph accumulation.
+- Do not introduce Redis.
+- Do not merge or retire kernels.
+- Do not begin router migration.
+
+Evidence added:
+- `reports/product/decision-engine-authority-matrix.json`
+- `docs/program/decision-engine-authority-decision.md`
+- `reports/product/router-consistency-matrix.json`
+- `reports/product/shared-memory-bridge-authority.json`
+- `reports/product/product-automation-eligibility-ledger.json`
+- `reports/product/release-gate-failure-classification.json`
+
+Selected target architecture: `LAYERED_CANONICAL_ARCHITECTURE`.
+
+This is a target decision, not an implementation claim. Current public Free Signal runtime still invokes multiple decision-processing engines and requires an explicit reconciliation contract before public kernel adapter work proceeds.

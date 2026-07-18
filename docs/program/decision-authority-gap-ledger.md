@@ -58,3 +58,14 @@ A gap cannot move directly from IMPLEMENTING to CLOSED. Phase 0 and Phase 1 work
 ## Review Rule
 
 The JSON ledger is authoritative for field-level details: business consequence, affected customer journey, source, consumers, failure modes, tests, telemetry, rollback, owner and final evidence. This Markdown file is the human review index.
+## Phase 1.5 Architecture Delta
+
+- ARCH-01 — decision-engine authority ambiguity: CONFIRMED_GAP.
+- ARCH-02 — possible parallel decision records: CONFIRMED_GAP.
+- ARCH-03 — one-off versus accumulated kernel operation: CONFIRMED_GAP.
+- ARCH-04 — router security/cache consistency: CONFIRMED_GAP.
+- ARCH-05 — SharedMemoryBridge authority unknown: CONFIRMED_GAP; classified UNUSED until proven otherwise.
+- ARCH-06 — hot-state storage need unproven: CONFIRMED_GAP; Redis remains not introduced and not justified by current evidence.
+- ARCH-07 — abstraction duplication risk: CONFIRMED_GAP.
+
+None of these entries may move to CLOSED from static inspection alone. Runtime route proof, single-record contract enforcement, preview/production evidence and release-gate governance are required.

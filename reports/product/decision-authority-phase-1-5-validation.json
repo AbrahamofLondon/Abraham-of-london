@@ -1,0 +1,91 @@
+{
+  "recordedAt": "2026-07-18T00:00:00+01:00",
+  "branch": "fix/decision-authority-gap-closure-2026",
+  "baselineHeadAtPhaseStart": "da2b4c212bd06f0846ee823f7d25be40ffd00c85",
+  "releaseReady": false,
+  "commands": [
+    {
+      "command": "pnpm install --frozen-lockfile",
+      "exitCode": 0,
+      "status": "PASS",
+      "log": "reports/product/phase-1-5-pnpm-install.log"
+    },
+    {
+      "command": "pnpm contentlayer2 build",
+      "exitCode": 0,
+      "status": "PASS",
+      "totals": "838 valid, 0 invalid",
+      "log": "reports/product/phase-1-5-pnpm-contentlayer2-build.log"
+    },
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 0,
+      "status": "PASS",
+      "log": "reports/product/phase-1-5-pnpm-typecheck.log"
+    },
+    {
+      "command": "pnpm build",
+      "exitCode": 0,
+      "status": "PASS",
+      "log": "reports/product/phase-1-5-pnpm-build.log"
+    },
+    {
+      "command": "pnpm test",
+      "exitCode": 1,
+      "status": "FAIL",
+      "totals": "511 files: 509 passed, 2 failed; 7644 tests: 7642 passed, 2 failed",
+      "log": "reports/product/phase-1-5-pnpm-test.log"
+    },
+    {
+      "command": "pnpm test:e2e",
+      "exitCode": 1,
+      "status": "FAIL",
+      "blockedInfrastructure": "Playwright timed out waiting 120000ms for config.webServer",
+      "log": "reports/product/phase-1-5-pnpm-test-e2e.log"
+    },
+    {
+      "command": "pnpm vault:audit",
+      "exitCode": 1,
+      "status": "FAIL",
+      "totals": "1027 files scanned; 1445 links validated; 26 briefs verified; 56 link regressions",
+      "log": "reports/product/phase-1-5-pnpm-vault-audit.log"
+    },
+    {
+      "command": "node scripts/check-public-route-integrity.mjs",
+      "exitCode": 0,
+      "status": "PASS",
+      "log": "reports/product/phase-1-5-public-route-integrity.log"
+    },
+    {
+      "command": "pnpm exec vitest run tests/product/decision-authority-runtime-contract.test.ts tests/product/public-aperture.spec.ts tests/product/public-signal-persistence.test.ts",
+      "exitCode": 0,
+      "status": "PASS",
+      "totals": "3 files passed; 26 tests passed"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "status": "PASS"
+    }
+  ],
+  "phaseExitConditions": {
+    "everyEngineExportNamedRole": "PASS",
+    "namedRouteCallChainsProved": "PASS",
+    "oneEvaluationAuthoritySelected": "PASS_TARGET_NOT_FULLY_IMPLEMENTED",
+    "canonicalRecordContractExists": "PASS",
+    "duplicateDecisionCreationPrevented": "PARTIAL_CONTRACT_ONLY",
+    "sharedMemoryBridgeClassified": "PASS_UNUSED",
+    "redisNeedDecidedFromEvidence": "PASS_NOT_PROVEN",
+    "routerConsistencyZeroUnknown": "PASS",
+    "securityDivergencesRepaired": "PASS_ZERO_SECURITY_GAP",
+    "releaseGateFailuresClassified": "PASS",
+    "roadmapAndLedgersUpdated": "PASS",
+    "noPrematureGraphAccumulation": "PASS"
+  },
+  "phase15SplitCommits": {
+    "runtimeContract": "de8b5294ee4cf475f123d29ba59cd4cb37a9ce51",
+    "publicTransportControls": "d178ae23130bf271cfa74b8ea7d18aec1ce19c8c",
+    "authorityRouterTests": "bcd11ebc8e375c49caa2a3a40b8bab1c6d479e87",
+    "architectureDecision": "SELF_REFERENTIAL_SHA_RECORDED_IN_GIT_LOG_AFTER_COMMIT"
+  }
+}

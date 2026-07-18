@@ -1,0 +1,12 @@
+{
+  "generatedAt": "2026-07-18T00:00:00+01:00",
+  "status": "NOT_RELEASE_READY",
+  "failures": [
+    { "gate": "pnpm test", "item": "tests/pages/intelligence/intelligence-index.test.tsx", "classification": "STALE_TEST", "owner": "Intelligence surface owner", "closureCondition": "Update test to current intelligence landing contract or restore the public delay-governance brief if product requires it." },
+    { "gate": "pnpm test", "item": "tests/pages/intelligence/market-briefs.test.tsx", "classification": "STALE_TEST", "owner": "Market intelligence owner", "closureCondition": "Update test to current current/reference/upcoming GMI props shape or restore legacy briefs props contract." },
+    { "gate": "pnpm test:e2e", "item": "Playwright config.webServer timeout after 120000ms", "classification": "ENVIRONMENT_BLOCKER", "owner": "Platform/test infrastructure", "closureCondition": "Playwright webServer starts reliably or config points at a managed already-running server; record executed/passed/failed/skipped test totals." },
+    { "gate": "pnpm vault:audit", "item": "56 unauthorized link regressions", "classification": "REAL_PRODUCT_DEFECT", "owner": "Content/platform routing owner", "closureCondition": "Each unauthorized route is either authorized in the audit script with route proof, corrected to a valid route, or removed from content." }
+  ],
+  "vaultFindingCount": 56,
+  "nonBlockingApproval": false
+}
