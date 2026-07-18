@@ -4,7 +4,7 @@
  * The ONLY public API endpoint for the Decision Intelligence Kernel.
  * Accepts raw situation text, returns FREE_SIGNAL disclosure only.
  *
- * No persistence. No admin data. No paid entitlement.
+ * Public-safe derived persistence only. No admin data. No paid entitlement.
  * No Full Dossier. No self-adversarial challenge. No record reference.
  * No checkout. No Strategy Room escalation as primary CTA.
  *
@@ -12,6 +12,7 @@
  */
 
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { createRateLimitHeaders, getClientIp, isRateLimited, rateLimit } from '@/lib/server/rateLimit'
 import { DecisionIntelligenceKernel } from '@/lib/intelligence/decision-intelligence-kernel'
 import { createLivingDecisionCase } from '@/lib/intelligence/living-decision-case-contract'
 import { selectAdversarialPreview } from '@/lib/kernel/adversarial-preview'
@@ -25,6 +26,39 @@ import { persistPublicSignalFromDecisionIntelligence } from '@/lib/product/publi
 
 const kernel = new DecisionIntelligenceKernel()
 
+const PUBLIC_SIGNAL_MAX_SITUATION_CHARS = 6000
+const PUBLIC_SIGNAL_RATE_LIMIT = { limit: 20, windowSeconds: 60 }
+
+function applyNoStoreHeaders(res: NextApiResponse) {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+  res.setHeader('Pragma', 'no-cache')
+  res.setHeader('Expires', '0')
+}
+
+function emptyKernelSignalResponse(error: string): KernelSignalResponse {
+  return {
+    caseId: '',
+    situationClass: null,
+    whatTheSystemSaw: null,
+    primaryFailurePoint: null,
+    governingTension: null,
+    consequenceClass: null,
+    whatFullAnalysisWouldMap: [],
+    directionOfMinimumViableMove: null,
+    boundaryNote: null,
+    reviewNote: null,
+    adversarialPreview: null,
+    alternativeClasses: null,
+    surfacedDimensions: [],
+    preservedAmbiguities: [],
+    clarificationRequired: false,
+    clarificationQuestions: null,
+    userLanguageEvidence: [],
+    decisionIntelligence: undefined,
+    caseDerivedJudgement: null,
+    error,
+  }
+}
 export type KernelSignalResponse = {
   caseId: string
   situationClass: string | null
@@ -64,29 +98,19 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<KernelSignalResponse>,
 ) {
+  applyNoStoreHeaders(res)
+
+  const rateLimitResult = rateLimit(`public-kernel-signal:${getClientIp(req)}`, PUBLIC_SIGNAL_RATE_LIMIT)
+  for (const [header, value] of Object.entries(createRateLimitHeaders(rateLimitResult))) {
+    res.setHeader(header, value)
+  }
+  if (isRateLimited(rateLimitResult)) {
+    res.status(429).json(emptyKernelSignalResponse('Rate limit exceeded. Please retry later.'))
+    return
+  }
+
   if (req.method !== 'POST') {
-    res.status(405).json({
-      caseId: '',
-      situationClass: null,
-      whatTheSystemSaw: null,
-      primaryFailurePoint: null,
-      governingTension: null,
-      consequenceClass: null,
-      whatFullAnalysisWouldMap: [],
-      directionOfMinimumViableMove: null,
-      boundaryNote: null,
-      reviewNote: null,
-      adversarialPreview: null,
-      alternativeClasses: null,
-      surfacedDimensions: [],
-      preservedAmbiguities: [],
-      clarificationRequired: false,
-      clarificationQuestions: null,
-      userLanguageEvidence: [],
-      decisionIntelligence: undefined,
-      caseDerivedJudgement: null,
-      error: 'Method not allowed. Use POST.',
-    })
+    res.status(405).json(emptyKernelSignalResponse('Method not allowed. Use POST.'))
     return
   }
 
@@ -108,28 +132,12 @@ export default async function handler(
   }
 
   if (!situation || typeof situation !== 'string' || situation.trim().length === 0) {
-    res.status(400).json({
-      caseId: '',
-      situationClass: null,
-      whatTheSystemSaw: null,
-      primaryFailurePoint: null,
-      governingTension: null,
-      consequenceClass: null,
-      whatFullAnalysisWouldMap: [],
-      directionOfMinimumViableMove: null,
-      boundaryNote: null,
-      reviewNote: null,
-      adversarialPreview: null,
-      alternativeClasses: null,
-      surfacedDimensions: [],
-      preservedAmbiguities: [],
-      clarificationRequired: false,
-      clarificationQuestions: null,
-      userLanguageEvidence: [],
-      decisionIntelligence: undefined,
-      caseDerivedJudgement: null,
-      error: 'Situation text is required.',
-    })
+    res.status(400).json(emptyKernelSignalResponse('Situation text is required.'))
+    return
+  }
+
+  if (situation.length > PUBLIC_SIGNAL_MAX_SITUATION_CHARS) {
+    res.status(413).json(emptyKernelSignalResponse('Situation text exceeds the public signal request limit.'))
     return
   }
 
