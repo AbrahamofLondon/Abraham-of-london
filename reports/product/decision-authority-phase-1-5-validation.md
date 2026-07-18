@@ -52,7 +52,5 @@ This phase is not release-ready. It proves and records runtime authority boundar
 | Runtime authority contract | `de8b5294ee4cf475f123d29ba59cd4cb37a9ce51` |
 | Public signal transport controls | `d178ae23130bf271cfa74b8ea7d18aec1ce19c8c` |
 | Authority/router consistency tests | `bcd11ebc8e375c49caa2a3a40b8bab1c6d479e87` |
-| Architecture decision docs/reports | SELF_REFERENTIAL_SHA_RECORDED_IN_GIT_LOG_AFTER_COMMIT |
-
-A commit cannot contain its own final SHA because amending the report would change that SHA. The docs/report slice SHA is recorded by the repository log after the commit.
+| Architecture decision docs/reports | `d758e94091b206077a37e6fe87921af8555e392d` |
 

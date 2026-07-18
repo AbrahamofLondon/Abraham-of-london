@@ -86,6 +86,6 @@
     "runtimeContract": "de8b5294ee4cf475f123d29ba59cd4cb37a9ce51",
     "publicTransportControls": "d178ae23130bf271cfa74b8ea7d18aec1ce19c8c",
     "authorityRouterTests": "bcd11ebc8e375c49caa2a3a40b8bab1c6d479e87",
-    "architectureDecision": "SELF_REFERENTIAL_SHA_RECORDED_IN_GIT_LOG_AFTER_COMMIT"
+    "architectureDecision": "d758e94091b206077a37e6fe87921af8555e392d"
   }
 }
