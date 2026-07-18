@@ -1,0 +1,7 @@
+
+> abraham-of-london@1.0.0 test:e2e C:\aol-check-visual
+> playwright test
+
+Error: Timed out waiting 120000ms from config.webServer.
+
+ ELIFECYCLE  Command failed with exit code 1.

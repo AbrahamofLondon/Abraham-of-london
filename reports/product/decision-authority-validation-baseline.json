@@ -1,0 +1,102 @@
+{
+  "recordedAt": "2026-07-18T00:00:00+01:00",
+  "branch": "fix/decision-authority-gap-closure-2026",
+  "baselineHead": "92ce83ddc2d6261f5cd5e8c8632d1afa235fea3a",
+  "currentWorkHeadAtRecord": "3b8e52c99cb1ddb73d9c204be6cc7ae664417ab0",
+  "commands": [
+    {
+      "command": "pnpm install --frozen-lockfile",
+      "exitCode": 0,
+      "status": "PASS",
+      "totals": "Lockfile up to date; Prisma Client v6.6.0 generated; pnpm v10.33.0; Done in 47.5s",
+      "log": "reports/product/validation-pnpm-install.log"
+    },
+    {
+      "command": "pnpm contentlayer2 build",
+      "exitCode": 0,
+      "status": "PASS",
+      "totals": "838 documents generated; 838 valid; 0 invalid",
+      "log": "reports/product/validation-pnpm-contentlayer2-build.log"
+    },
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 0,
+      "status": "PASS",
+      "totals": "tsc --noEmit completed",
+      "log": "reports/product/validation-pnpm-typecheck.log"
+    },
+    {
+      "command": "pnpm build",
+      "exitCode": 0,
+      "status": "PASS",
+      "totals": "Next build completed; static pages generated 786/786; public link integrity checks passed during build",
+      "log": "reports/product/validation-pnpm-build.log"
+    },
+    {
+      "command": "pnpm test",
+      "exitCode": 1,
+      "status": "FAIL",
+      "totals": "510 test files: 508 passed, 2 failed. 7633 tests: 7631 passed, 2 failed",
+      "failures": [
+        "tests/pages/intelligence/intelligence-index.test.tsx: expected page HTML to contain \"When Delay Becomes a Governance Cost\"",
+        "tests/pages/intelligence/market-briefs.test.tsx: expected legacy briefs props shape but received current/reference/upcoming GMI shape"
+      ],
+      "log": "reports/product/validation-pnpm-test.log"
+    },
+    {
+      "command": "pnpm test:e2e",
+      "exitCode": 1,
+      "status": "FAIL",
+      "totals": "0 tests executed; Playwright timed out waiting 120000ms for config.webServer",
+      "log": "reports/product/validation-pnpm-test-e2e.log"
+    },
+    {
+      "command": "pnpm vault:audit",
+      "exitCode": 1,
+      "status": "FAIL",
+      "totals": "1027 files scanned; 1445 links validated; 26 briefs verified; 56 link regressions",
+      "log": "reports/product/validation-pnpm-vault-audit.log"
+    },
+    {
+      "command": "node scripts/check-public-route-integrity.mjs",
+      "exitCode": 0,
+      "status": "PASS",
+      "totals": "All public aperture integrity checks passed",
+      "log": "reports/product/validation-public-route-integrity.log"
+    },
+    {
+      "command": "pnpm exec vitest run tests/product/public-signal-persistence.test.ts",
+      "exitCode": 0,
+      "status": "PASS",
+      "totals": "1 test file passed; 3 tests passed",
+      "log": "reports/product/validation-focused-public-signal-persistence.log"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "status": "PASS",
+      "totals": "No whitespace errors",
+      "log": null
+    }
+  ],
+  "requiredButNotYetImplemented": [
+    "E2E golden path A free diagnostic across route boundaries",
+    "E2E golden path B paid report checkout-to-access",
+    "E2E golden path C fulfilment failure recovery",
+    "E2E golden path D outcome loop",
+    "database restart durability test for public-safe events",
+    "database unavailable/write-timeout adversarial persistence tests",
+    "case isolation and retention/deletion adversarial tests",
+    "runtime observability alert tests"
+  ],
+  "stopConditions": {
+    "roadmapTracked": "PASS_AFTER_PROGRAMME_COMMIT",
+    "phase0AndPhase1ChangesCommitted": "PASS",
+    "gapLedgerExists": "PASS",
+    "consumerInventoryComplete": "PASS_STATIC_SCAN_1199_CONSUMERS_0_UNKNOWN",
+    "baselineFullSuiteResultsRecorded": "PASS_WITH_FAILURES_RECORDED",
+    "noCurrentConsumerUnknown": "PASS",
+    "memoryFallbackSemanticsExplicit": "PASS_DOCUMENTED_IMPLEMENTATION_STILL_IMPLEMENTING",
+    "paymentCompatibilityPolicyExplicit": "PASS"
+  }
+}
